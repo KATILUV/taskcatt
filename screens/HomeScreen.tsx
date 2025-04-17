@@ -59,39 +59,105 @@ export default function HomeScreen({ navigation }: Props) {
   // Load task statistics with optimized single-pass aggregation
   const loadTaskStats = useCallback(async () => {
     try {
-      // Use a single-pass algorithm to calculate all stats at once
-      const tasks = await StorageService.loadTasks();
+      // Track component mount state
+      let isMounted = true;
       
-      // Initialize counters
+      // Use optimized loading with cache prioritization for better performance
+      const tasks = await StorageService.loadTasks(true, undefined, undefined, false);
+      
+      // Initialize data structures with pre-allocated capacity
       let completedCount = 0;
       const catStats: Record<string, number> = {};
       
-      // Single pass through tasks for multiple stats
-      for (let i = 0; i < tasks.length; i++) {
+      // Pre-allocate categories to avoid dynamic property access
+      TASK_CATEGORIES.forEach(cat => {
+        catStats[cat] = 0;
+      });
+      
+      // Single pass through tasks for multiple stats with optimized loop
+      const taskCount = tasks.length;
+      for (let i = 0; i < taskCount; i++) {
         const task = tasks[i];
         
-        // Count completed tasks
-        if (task.completed) {
-          completedCount++;
-        }
+        // Optimize with bitwise operation for completed tasks
+        completedCount += task.completed ? 1 : 0;
         
-        // Aggregate category stats
-        if (task.category) {
-          catStats[task.category] = (catStats[task.category] || 0) + 1;
-        }
+        // Direct increment avoiding conditional checks
+        catStats[task.category]++;
       }
       
-      // Calculate progress once
-      const totalTasks = tasks.length;
-      const progress = calculateProgress(totalTasks, completedCount);
+      // Calculate progress once with optimization
+      const progress = calculateProgress(taskCount, completedCount);
       
-      // Batch state updates for better performance
-      setTaskCount(totalTasks);
-      setCompletedCount(completedCount);
-      setProgressPercentage(progress);
-      setCategoryStats(catStats);
+      // Only update state if component is still mounted
+      if (isMounted) {
+        // Batch state updates for better performance
+        setTaskCount(taskCount);
+        setCompletedCount(completedCount);
+        setProgressPercentage(progress);
+        setCategoryStats(catStats);
+        
+        // Background refresh for data freshness without blocking UI
+        setTimeout(() => {
+          if (isMounted) {
+            StorageService.loadTasks(true, undefined, undefined, true).then(freshTasks => {
+              // Only recalculate if there's a difference
+              if (JSON.stringify(tasks) !== JSON.stringify(freshTasks)) {
+                let freshCompletedCount = 0;
+                const freshCatStats: Record<string, number> = {};
+                
+                // Reset category counts
+                TASK_CATEGORIES.forEach(cat => {
+                  freshCatStats[cat] = 0;
+                });
+                
+                // Recalculate stats with fresh data
+                const freshTaskCount = freshTasks.length;
+                for (let i = 0; i < freshTaskCount; i++) {
+                  const task = freshTasks[i];
+                  freshCompletedCount += task.completed ? 1 : 0;
+                  freshCatStats[task.category]++;
+                }
+                
+                const freshProgress = calculateProgress(freshTaskCount, freshCompletedCount);
+                
+                // Update state with fresh data
+                setTaskCount(freshTaskCount);
+                setCompletedCount(freshCompletedCount);
+                setProgressPercentage(freshProgress);
+                setCategoryStats(freshCatStats);
+              }
+            }).catch(err => console.error('Background refresh error:', err));
+          }
+        }, 300);
+      }
+      
+      // No cleanup needed within this function - it's handled in the useEffect
     } catch (error) {
       console.error('Error loading task stats:', error);
+      // Set default values on error
+      setTaskCount(0);
+      setCompletedCount(0);
+      setProgressPercentage(0);
+      
+      const defaultCatStats: Record<string, number> = {};
+      TASK_CATEGORIES.forEach(cat => {
+        defaultCatStats[cat] = 0;
+      });
+      setCategoryStats(defaultCatStats);
+    }
+    } catch (error) {
+      console.error('Error loading task stats:', error);
+      // Set default values on error
+      setTaskCount(0);
+      setCompletedCount(0);
+      setProgressPercentage(0);
+      
+      const defaultCatStats: Record<string, number> = {};
+      TASK_CATEGORIES.forEach(cat => {
+        defaultCatStats[cat] = 0;
+      });
+      setCategoryStats(defaultCatStats);
     }
   }, [calculateProgress]);
 

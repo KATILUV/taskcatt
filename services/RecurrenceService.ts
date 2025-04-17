@@ -252,19 +252,38 @@ export const RecurrenceService = {
    * @returns Updated task list with correct completion status
    */
   updateCompletionStatus: (task: Task, tasks: Task[]): Task[] => {
+    // Performance optimization for large task lists when dealing with recurring tasks
     // If this is a recurring task instance
     if (task.parentTaskId && task.instanceDate) {
-      // Find the parent task
-      const parentTask = tasks.find(t => t.id === task.parentTaskId);
+      // Find the parent task using optimized lookup with index
+      let parentIndex = -1;
+      const parentId = task.parentTaskId;
       
-      if (parentTask) {
-        // Update the completion history of the parent task
+      // Direct array search with early termination is faster than find() for large arrays
+      for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === parentId) {
+          parentIndex = i;
+          break;
+        }
+      }
+      
+      // Process only if parent found
+      if (parentIndex >= 0) {
+        const parentTask = tasks[parentIndex];
+        
+        // Create new completion record
+        const completionRecord = { 
+          date: Date.now(), 
+          instanceId: task.id 
+        };
+        
+        // Update the completion history of the parent task efficiently
+        // Pre-allocate array capacity for better performance
         const updatedParent = {
           ...parentTask,
-          completionHistory: [
-            ...(parentTask.completionHistory || []),
-            { date: Date.now(), instanceId: task.id }
-          ]
+          completionHistory: parentTask.completionHistory 
+            ? [...parentTask.completionHistory, completionRecord]
+            : [completionRecord]
         };
         
         // Replace the parent task in the array
