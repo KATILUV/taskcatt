@@ -159,30 +159,36 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <View style={styles.cardFooter}>
         {dueDate && (
           <View style={styles.dueDateContainer}>
-            <Text style={styles.dueDateText}>📅 Due: {dueDate}</Text>
+            <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} style={{marginRight: 4}} />
+            <Text style={styles.dueDateText}>Due: {dueDate}</Text>
           </View>
         )}
         
         <View style={styles.metaContainer}>
           {RecurrenceService.isRecurring(task) && (
             <View style={styles.recurrenceContainer}>
+              <Ionicons name="refresh" size={14} color={theme.colors.primary} style={{marginRight: 4}} />
               <Text style={styles.recurrenceText}>
-                {task.recurrence?.pattern === 'Daily' ? '🔄 Daily' : 
-                 task.recurrence?.pattern === 'Weekly' ? '🔄 Weekly' : 
-                 task.recurrence?.pattern === 'Monthly' ? '🔄 Monthly' : 
-                 '🔄 Recurring'}
+                {task.recurrence?.pattern === 'Daily' ? 'Daily' : 
+                 task.recurrence?.pattern === 'Weekly' ? 'Weekly' : 
+                 task.recurrence?.pattern === 'Monthly' ? 'Monthly' : 
+                 'Recurring'}
               </Text>
             </View>
           )}
           
           {task.reminder?.enabled && !dueDate && (
             <View style={styles.reminderContainer}>
-              <Text style={styles.reminderText}>🔔 Reminder set</Text>
+              <Ionicons name="notifications-outline" size={14} color={theme.colors.warning} style={{marginRight: 4}} />
+              <Text style={styles.reminderText}>Reminder set</Text>
             </View>
           )}
           
           {task.completed && (
-            <Text style={styles.completedLabel}>✅ Completed</Text>
+            <View style={styles.completedContainer}>
+              <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} style={{marginRight: 4}} />
+              <Text style={styles.completedLabel}>Completed</Text>
+            </View>
           )}
         </View>
       </View>
@@ -335,10 +341,14 @@ const styles = createStyles((theme) => {
       ...theme.typography.caption,
       color: theme.colors.warning,
     },
+    completedContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginLeft: theme.spacing.sm,
+    },
     completedLabel: {
       ...theme.typography.caption,
       color: theme.colors.success,
-      marginLeft: theme.spacing.sm,
     },
   });
 });

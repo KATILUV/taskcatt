@@ -105,25 +105,30 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
             onSubmitEditing={handleAddTask}
             returnKeyType="done"
           />
-          <TouchableOpacity 
-            style={[
-              styles.addButton,
-              !taskTitle.trim() && styles.disabledButton
-            ]}
+          <IconButton
+            name="add"
+            variant={taskTitle.trim() ? 'primary' : 'secondary'}
             onPress={handleAddTask}
             disabled={!taskTitle.trim()}
-          >
-            <Text style={styles.addButtonText}>+</Text>
-          </TouchableOpacity>
+            size="medium"
+          />
         </View>
         
         <Pressable 
           style={styles.advancedToggle}
           onPress={() => setShowAdvanced(!showAdvanced)}
         >
-          <Text style={styles.advancedToggleText}>
-            {showAdvanced ? 'Hide advanced options' : 'Show advanced options'}
-          </Text>
+          <View style={styles.advancedToggleContent}>
+            <Ionicons 
+              name={showAdvanced ? "chevron-up" : "chevron-down"} 
+              size={16} 
+              color={theme.colors.primary} 
+              style={styles.advancedToggleIcon}
+            />
+            <Text style={styles.advancedToggleText}>
+              {showAdvanced ? 'Hide advanced options' : 'Show advanced options'}
+            </Text>
+          </View>
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -198,6 +203,14 @@ const styles = createStyles((theme) => StyleSheet.create({
     color: theme.colors.primary,
     fontSize: scaleFont(14),
     fontWeight: '500',
+  },
+  advancedToggleContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  advancedToggleIcon: {
+    marginRight: 4
   }
 }));
 
