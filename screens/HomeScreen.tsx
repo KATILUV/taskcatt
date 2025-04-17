@@ -327,16 +327,16 @@ export default function HomeScreen({ navigation }: Props) {
 
           {/* Category Breakdown Section */}
           {taskCount > 0 && (
-            <View style={styles.categorySection}>
+            <Surface style={styles.categorySection} elevation={1}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Category Breakdown</Text>
+                <Title style={styles.sectionTitle}>Category Breakdown</Title>
               </View>
               
               {Object.keys(categoryStats).length > 0 ? (
                 <View style={styles.categoryList}>
                   {TASK_CATEGORIES.map(category => (
                     categoryStats[category] ? (
-                      <View key={category} style={styles.categoryItem}>
+                      <Surface key={category} style={styles.categoryItem} elevation={0}>
                         <View style={styles.categoryHeader}>
                           <View 
                             style={[
@@ -365,7 +365,7 @@ export default function HomeScreen({ navigation }: Props) {
                             />
                           </View>
                         </View>
-                      </View>
+                      </Surface>
                     ) : null
                   ))}
                 </View>
@@ -374,7 +374,7 @@ export default function HomeScreen({ navigation }: Props) {
                   No categorized tasks yet
                 </Text>
               )}
-            </View>
+            </Surface>
           )}
           
           <View style={styles.cardContainer}>
@@ -386,36 +386,39 @@ export default function HomeScreen({ navigation }: Props) {
             >
               <Animated.View 
                 style={[
-                  styles.taskCard,
                   {
                     opacity: taskCardOpacity,
                     transform: [{ scale: taskCardScale }]
                   }
                 ]}
               >
-                <View style={styles.cardContent}>
-                  <Text style={styles.cardTitle}>My Tasks</Text>
-                  <Text style={styles.cardDescription}>
-                    Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
-                  </Text>
-                  
-                  <View style={styles.cardActions}>
-                    <TouchableOpacity 
-                      style={styles.actionButton}
-                      onPress={navigateToRoutine}
-                    >
-                      <Text style={styles.actionButtonText}>View Tasks</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
+                <Card style={styles.taskCard}>
+                  <Card.Content style={styles.cardContent}>
+                    <Title style={styles.cardTitle}>My Tasks</Title>
+                    <Paragraph style={styles.cardDescription}>
+                      Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
+                    </Paragraph>
+                    
+                    <View style={styles.cardActions}>
+                      <Button 
+                        mode="contained"
+                        onPress={navigateToRoutine}
+                        style={styles.actionButton}
+                        labelStyle={styles.actionButtonText}
+                      >
+                        View Tasks
+                      </Button>
+                    </View>
+                  </Card.Content>
+                </Card>
               </Animated.View>
             </TouchableOpacity>
           </View>
         </ScrollView>
         
-        <View style={styles.footer}>
+        <Surface style={styles.footer} elevation={1}>
           <Text style={styles.footerText}>Task Cat - Stay Organized</Text>
-        </View>
+        </Surface>
         
         {/* Floating Action Button */}
         <FloatingActionButton
