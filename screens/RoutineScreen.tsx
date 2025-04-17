@@ -50,26 +50,49 @@ export default function RoutineScreen({ navigation }: Props) {
       createdAt: Date.now(),
     };
 
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+    setTasks((prevTasks) => {
+      const updatedTasks = [...prevTasks, newTask];
+      // Immediately save to AsyncStorage
+      StorageService.saveTasks(updatedTasks).catch(err => 
+        console.error('Error saving after adding task:', err)
+      );
+      return updatedTasks;
+    });
   };
 
   // Delete a task
   const handleDeleteTask = (id: string) => {
-    setTasks((prevTasks) => prevTasks.filter(task => task.id !== id));
+    setTasks((prevTasks) => {
+      const updatedTasks = prevTasks.filter(task => task.id !== id);
+      // Immediately save to AsyncStorage
+      StorageService.saveTasks(updatedTasks).catch(err => 
+        console.error('Error saving after deleting task:', err)
+      );
+      return updatedTasks;
+    });
   };
 
   // Toggle task completion status
   const handleToggleComplete = (id: string) => {
-    setTasks((prevTasks) => 
-      prevTasks.map(task => 
+    setTasks((prevTasks) => {
+      const updatedTasks = prevTasks.map(task => 
         task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+      );
+      // Immediately save to AsyncStorage
+      StorageService.saveTasks(updatedTasks).catch(err => 
+        console.error('Error saving after toggling completion:', err)
+      );
+      return updatedTasks;
+    });
   };
 
   // Update tasks order after drag ends
   const handleDragEnd = useCallback(({ data }: { data: Task[] }) => {
     setTasks(data);
+    // Immediately save the updated order to AsyncStorage
+    StorageService.saveTasks(data).catch(err => 
+      console.error('Error saving after reordering tasks:', err)
+    );
   }, []);
 
   // Render individual task item

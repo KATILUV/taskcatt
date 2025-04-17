@@ -4,14 +4,12 @@ import { View, StyleSheet, Text } from 'react-native';
 interface ProgressBarProps {
   progress: number; // 0 to 100
   height?: number;
-  width?: number | string;
   showPercentage?: boolean;
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
   height = 12,
-  width = '100%',
   showPercentage = true,
 }) => {
   // Ensure progress is between 0 and 100
@@ -25,25 +23,18 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   };
 
   const progressColor = getProgressColor();
+  
+  const progressFillStyle = {
+    width: `${normalizedProgress}%`,
+    height: '100%',
+    backgroundColor: progressColor,
+    borderRadius: 10,
+  };
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.progressBackground,
-          { height, width },
-        ]}
-      >
-        <View
-          style={[
-            styles.progressFill,
-            {
-              width: `${normalizedProgress}%`,
-              height: '100%',
-              backgroundColor: progressColor,
-            },
-          ]}
-        />
+      <View style={[styles.progressBackground, { height }]}>
+        <View style={progressFillStyle} />
       </View>
       
       {showPercentage && (
