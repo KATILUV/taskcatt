@@ -13,7 +13,200 @@ if (!fs.existsSync(path.join(__dirname, 'views'))) {
   fs.mkdirSync(path.join(__dirname, 'views'));
 }
 
-// Create the EJS template
+// Create assets directory for screenshots if it doesn't exist
+const assetsDir = path.join(__dirname, 'assets');
+if (!fs.existsSync(assetsDir)) {
+  fs.mkdirSync(assetsDir);
+}
+
+// Serve static files from assets directory
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
+// Create placeholder screenshots that represent what the app would look like
+function createPlaceholderScreenshots() {
+  // Create placeholder images directory
+  const imagesDir = path.join(assetsDir, 'screenshots');
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir);
+  }
+
+  // Create SVG placeholders
+  const homeScreenSVG = `<svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="640" fill="#f8f9fa"/>
+    <rect x="0" y="0" width="360" height="70" fill="#0066cc"/>
+    <text x="20" y="40" font-family="Arial" font-size="24" fill="white">Task Cat</text>
+    <text x="20" y="60" font-family="Arial" font-size="14" fill="rgba(255,255,255,0.8)">Stay purr-fectly organized!</text>
+    
+    <!-- Progress Card -->
+    <rect x="20" y="90" width="320" height="120" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <text x="40" y="120" font-family="Arial" font-size="16" font-weight="bold" fill="#333">Your Progress</text>
+    <text x="280" y="120" font-family="Arial" font-size="16" font-weight="bold" fill="#0066cc">75%</text>
+    <rect x="40" y="140" width="240" height="16" rx="8" ry="8" fill="#eee"/>
+    <rect x="40" y="140" width="180" height="16" rx="8" ry="8" fill="#0066cc"/>
+    <text x="160" y="180" font-family="Arial" font-size="14" fill="#666" text-anchor="middle">Almost there! Keep going!</text>
+    
+    <!-- Stats Card -->
+    <rect x="20" y="230" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <rect x="40" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <text x="80" y="280" font-family="Arial" font-size="20" font-weight="bold" fill="#0066cc" text-anchor="middle">16</text>
+    <text x="80" y="300" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Total Tasks</text>
+    
+    <rect x="140" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <text x="180" y="280" font-family="Arial" font-size="20" font-weight="bold" fill="#0066cc" text-anchor="middle">12</text>
+    <text x="180" y="300" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Completed</text>
+    
+    <rect x="240" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <text x="280" y="280" font-family="Arial" font-size="20" font-weight="bold" fill="#0066cc" text-anchor="middle">4</text>
+    <text x="280" y="300" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Remaining</text>
+    
+    <!-- Categories Card -->
+    <rect x="20" y="350" width="320" height="140" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <text x="40" y="380" font-family="Arial" font-size="16" font-weight="bold" fill="#333">Category Breakdown</text>
+    
+    <rect x="40" y="400" width="280" height="30" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="55" cy="415" r="6" fill="#4CAF50"/>
+    <text x="70" y="419" font-family="Arial" font-size="14" fill="#333">Health</text>
+    <text x="300" y="419" font-family="Arial" font-size="14" fill="#666" text-anchor="end">5</text>
+    
+    <rect x="40" y="440" width="280" height="30" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="55" cy="455" r="6" fill="#2196F3"/>
+    <text x="70" y="459" font-family="Arial" font-size="14" fill="#333">Work</text>
+    <text x="300" y="459" font-family="Arial" font-size="14" fill="#666" text-anchor="end">7</text>
+    
+    <!-- Task Card -->
+    <rect x="20" y="510" width="320" height="110" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <text x="40" y="540" font-family="Arial" font-size="18" font-weight="bold" fill="#333">My Tasks</text>
+    <text x="40" y="565" font-family="Arial" font-size="14" fill="#666">Organize and track your daily tasks.</text>
+    <rect x="40" y="585" width="120" height="25" rx="8" ry="8" fill="#0066cc"/>
+    <text x="100" y="602" font-family="Arial" font-size="12" fill="white" text-anchor="middle">VIEW TASKS</text>
+  </svg>`;
+
+  const routineScreenSVG = `<svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="640" fill="#f8f9fa"/>
+    <rect x="0" y="0" width="360" height="70" fill="#0066cc"/>
+    <text x="20" y="40" font-family="Arial" font-size="24" fill="white">My Routines</text>
+    <rect x="300" y="25" width="40" height="25" rx="12" ry="12" fill="rgba(255,255,255,0.2)"/>
+    <text x="320" y="42" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Home</text>
+    
+    <!-- Filter Section -->
+    <rect x="0" y="70" width="360" height="140" fill="white"/>
+    <text x="20" y="95" font-family="Arial" font-size="14" font-weight="bold" fill="#333">Categories</text>
+    
+    <rect x="20" y="105" width="100" height="30" rx="15" ry="15" fill="#f5f5f5" stroke="#0066cc" stroke-width="1.5"/>
+    <text x="70" y="125" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">All Categories</text>
+    
+    <rect x="130" y="105" width="70" height="30" rx="15" ry="15" fill="white" stroke="#4CAF50" stroke-width="1"/>
+    <circle cx="145" cy="120" r="4" fill="#4CAF50"/>
+    <text x="165" y="125" font-family="Arial" font-size="12" fill="#666">Health</text>
+    
+    <rect x="210" y="105" width="70" height="30" rx="15" ry="15" fill="white" stroke="#2196F3" stroke-width="1"/>
+    <circle cx="225" cy="120" r="4" fill="#2196F3"/>
+    <text x="245" y="125" font-family="Arial" font-size="12" fill="#666">Work</text>
+    
+    <text x="20" y="165" font-family="Arial" font-size="14" font-weight="bold" fill="#333">Priority</text>
+    
+    <rect x="20" y="175" width="100" height="30" rx="15" ry="15" fill="#f5f5f5" stroke="#0066cc" stroke-width="1.5"/>
+    <text x="70" y="195" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">All Priorities</text>
+    
+    <rect x="130" y="175" width="70" height="30" rx="15" ry="15" fill="white" stroke="#E53935" stroke-width="1"/>
+    <circle cx="145" cy="190" r="4" fill="#E53935"/>
+    <text x="165" y="195" font-family="Arial" font-size="12" fill="#666">High</text>
+    
+    <rect x="210" y="175" width="70" height="30" rx="15" ry="15" fill="white" stroke="#FB8C00" stroke-width="1"/>
+    <circle cx="225" cy="190" r="4" fill="#FB8C00"/>
+    <text x="245" y="195" font-family="Arial" font-size="12" fill="#666">Medium</text>
+    
+    <!-- Task Cards -->
+    <rect x="20" y="230" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <rect x="20" y="230" width="320" height="40" rx="0" ry="0" fill="white" stroke="#eee" stroke-width="1"/>
+    <circle cx="40" cy="250" r="10" fill="white" stroke="#0066cc" stroke-width="2"/>
+    <text x="70" y="255" font-family="Arial" font-size="16" fill="#333">Finish project proposal</text>
+    <text x="310" y="255" font-family="Arial" font-size="20" fill="#f44336">×</text>
+    
+    <rect x="40" y="280" width="60" height="20" rx="10" ry="10" fill="rgba(229,57,53,0.2)"/>
+    <circle cx="50" cy="290" r="4" fill="#E53935"/>
+    <text x="70" y="293" font-family="Arial" font-size="10" fill="#E53935">High</text>
+    
+    <rect x="110" y="280" width="70" height="20" rx="10" ry="10" fill="rgba(33,150,243,0.2)"/>
+    <text x="145" y="293" font-family="Arial" font-size="10" fill="#2196F3">Work</text>
+    
+    <text x="40" y="315" font-family="Arial" font-size="12" fill="#666">📅 Due: Apr 20</text>
+    <text x="280" y="315" font-family="Arial" font-size="12" fill="#0066cc">🔄 Daily</text>
+    
+    <rect x="20" y="350" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <rect x="20" y="350" width="320" height="40" rx="0" ry="0" fill="white" stroke="#eee" stroke-width="1"/>
+    <circle cx="40" cy="370" r="10" fill="white" stroke="#0066cc" stroke-width="2"/>
+    <text x="70" y="375" font-family="Arial" font-size="16" fill="#333">Morning exercise routine</text>
+    <text x="310" y="375" font-family="Arial" font-size="20" fill="#f44336">×</text>
+    
+    <rect x="40" y="400" width="70" height="20" rx="10" ry="10" fill="rgba(251,140,0,0.2)"/>
+    <circle cx="50" cy="410" r="4" fill="#FB8C00"/>
+    <text x="70" y="413" font-family="Arial" font-size="10" fill="#FB8C00">Medium</text>
+    
+    <rect x="120" y="400" width="70" height="20" rx="10" ry="10" fill="rgba(76,175,80,0.2)"/>
+    <text x="155" y="413" font-family="Arial" font-size="10" fill="#4CAF50">Health</text>
+    
+    <text x="40" y="435" font-family="Arial" font-size="12" fill="#666">📅 Due: Apr 17</text>
+    <text x="280" y="435" font-family="Arial" font-size="12" fill="#0066cc">🔄 Weekly</text>
+    
+    <!-- Add Task Form -->
+    <rect x="0" y="580" width="360" height="60" fill="white" stroke="#eee" stroke-width="1"/>
+    <rect x="20" y="595" width="240" height="30" rx="15" ry="15" fill="#f5f5f5"/>
+    <text x="40" y="615" font-family="Arial" font-size="14" fill="#666">Add a new task...</text>
+    <rect x="270" y="595" width="70" height="30" rx="15" ry="15" fill="#0066cc"/>
+    <text x="305" y="615" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Add</text>
+  </svg>`;
+
+  const taskCardDetailSVG = `<svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
+    <rect width="360" height="640" fill="#f8f9fa"/>
+    
+    <!-- Task Card Close-Up -->
+    <rect x="20" y="20" width="320" height="600" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    
+    <!-- Card Header -->
+    <rect x="20" y="20" width="320" height="60" rx="16" ry="0" fill="white" stroke="#eee" stroke-width="1"/>
+    <circle cx="50" cy="50" r="15" fill="white" stroke="#0066cc" stroke-width="2"/>
+    <text x="100" y="55" font-family="Arial" font-size="18" fill="#333">Complete slide deck</text>
+    <circle cx="310" cy="50" r="15" fill="#ffeeee"/>
+    <text x="310" y="55" font-family="Arial" font-size="20" fill="#f44336" text-anchor="middle">×</text>
+    
+    <!-- Card Content -->
+    <rect x="50" y="100" width="90" height="30" rx="15" ry="15" fill="rgba(229,57,53,0.2)"/>
+    <circle cx="65" cy="115" r="6" fill="#E53935"/>
+    <text x="95" y="120" font-family="Arial" font-size="14" fill="#E53935" font-weight="medium">High</text>
+    
+    <rect x="150" y="100" width="95" height="30" rx="15" ry="15" fill="rgba(33,150,243,0.2)"/>
+    <text x="197" y="120" font-family="Arial" font-size="14" fill="#2196F3" font-weight="medium">Work</text>
+    
+    <!-- Card Footer -->
+    <text x="50" y="170" font-family="Arial" font-size="14" fill="#666">📅 Due: Apr 19, 2025</text>
+    <text x="50" y="200" font-family="Arial" font-size="14" fill="#0066cc">🔄 Weekly</text>
+    <text x="50" y="230" font-family="Arial" font-size="14" fill="#FB8C00">🔔 Reminder set</text>
+    
+    <!-- Typography Showcase -->
+    <text x="50" y="280" font-family="Arial" font-size="24" fill="#333" font-weight="bold">Title (H1)</text>
+    <text x="50" y="320" font-family="Arial" font-size="20" fill="#333" font-weight="bold">Subtitle (H2)</text>
+    <text x="50" y="350" font-family="Arial" font-size="16" fill="#333">Body Text (Body1)</text>
+    <text x="50" y="380" font-family="Arial" font-size="14" fill="#666">Secondary Text (Body2)</text>
+    <text x="50" y="410" font-family="Arial" font-size="12" fill="#666">Caption Text</text>
+    
+    <!-- Inter Font Family -->
+    <text x="50" y="450" font-family="Arial" font-size="18" fill="#333" font-weight="bold">Inter Font Family</text>
+    <text x="50" y="480" font-family="Arial" font-size="14" fill="#333">Regular: The quick brown fox</text>
+    <text x="50" y="510" font-family="Arial" font-size="14" fill="#333" font-weight="500">Medium: The quick brown fox</text>
+    <text x="50" y="540" font-family="Arial" font-size="14" fill="#333" font-weight="600">SemiBold: The quick brown fox</text>
+    <text x="50" y="570" font-family="Arial" font-size="14" fill="#333" font-weight="bold">Bold: The quick brown fox</text>
+  </svg>`;
+
+  fs.writeFileSync(path.join(imagesDir, 'home-screen.svg'), homeScreenSVG);
+  fs.writeFileSync(path.join(imagesDir, 'routine-screen.svg'), routineScreenSVG);
+  fs.writeFileSync(path.join(imagesDir, 'task-card-detail.svg'), taskCardDetailSVG);
+}
+
+// Create placeholder screenshots
+createPlaceholderScreenshots();
+
+// Create the EJS template with screenshots
 const indexTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,23 +215,30 @@ const indexTemplate = `<!DOCTYPE html>
   <title>Task Cat App - Code Viewer</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       line-height: 1.6;
       margin: 0;
       padding: 20px;
       color: #333;
+      background-color: #f5f7f9;
     }
     h1 {
       color: #0066cc;
+      border-bottom: 2px solid #e1e4e8;
+      padding-bottom: 10px;
     }
     h2 {
       color: #0066cc;
-      margin-top: 30px;
+      margin-top: 40px;
+    }
+    .content-container {
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .file-tree {
       background-color: #f8f9fa;
       padding: 15px;
-      border-radius: 4px;
+      border-radius: 8px;
       border: 1px solid #e1e4e8;
       font-family: monospace;
       margin-bottom: 20px;
@@ -48,43 +248,49 @@ const indexTemplate = `<!DOCTYPE html>
     }
     .code-section {
       margin-bottom: 30px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .code-header {
-      background-color: #f1f1f1;
-      padding: 10px;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-      border: 1px solid #ddd;
+      background-color: #0066cc;
+      color: white;
+      padding: 10px 15px;
       font-weight: bold;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
     }
     .code-content {
       background-color: #f8f9fa;
       padding: 15px;
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
       border: 1px solid #ddd;
       border-top: none;
       overflow-x: auto;
       font-family: monospace;
+      max-height: 400px;
+      overflow-y: auto;
     }
     .app-summary {
-      background-color: #e9f7fe;
-      padding: 15px;
-      border-radius: 4px;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
       border-left: 4px solid #0066cc;
       margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .structure-section, .tech-section, .design-section {
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 4px;
-      border: 1px solid #e1e4e8;
+    .section-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
       margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .structure-section h3, .tech-section h3, .design-section h3 {
+    .section-container h3 {
       color: #0066cc;
       margin-top: 15px;
       margin-bottom: 10px;
+      border-bottom: 1px solid #e1e4e8;
+      padding-bottom: 5px;
     }
     .tech-table {
       width: 100%;
@@ -111,196 +317,265 @@ const indexTemplate = `<!DOCTYPE html>
       border-radius: 4px;
       text-align: center;
       font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .screenshots-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .screenshot-item {
+      flex: 1;
+      min-width: 300px;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .screenshot-header {
+      background-color: #0066cc;
+      color: white;
+      padding: 10px 15px;
+      font-weight: bold;
+    }
+    .screenshot-img {
+      padding: 15px;
+      display: flex;
+      justify-content: center;
+    }
+    .screenshot-img img {
+      max-width: 100%;
+      height: auto;
+      max-height: 600px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+    }
+    .screenshot-desc {
+      padding: 0 15px 15px;
+      color: #666;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Task Cat App - Mobile React Native Project</h1>
-  
-  <div class="app-summary">
-    <h3>Project Overview</h3>
-    <p>A TypeScript-based mobile app using Expo, React Navigation, and React Native.</p>
-    <p>Features:</p>
-    <ul>
-      <li>TypeScript with strict mode</li>
-      <li>React Navigation for screen management</li>
-      <li>Home and Routine screens with navigation</li>
-      <li>Task management with drag-and-drop reordering</li>
-      <li>Task categorization with filtering</li>
-      <li>Progress tracking and statistics</li>
-    </ul>
-  </div>
-
-  <h2>App Structure</h2>
-  <div class="structure-section">
-    <h3>Navigation Structure</h3>
-    <ul>
-      <li><strong>HomeScreen</strong> - Dashboard with progress statistics and category breakdown</li>
-      <li><strong>RoutineScreen</strong> - Task management interface with filtering and drag-and-drop</li>
-    </ul>
+  <div class="content-container">
+    <h1>Task Cat App - Mobile Task Management Application</h1>
     
-    <h3>Components</h3>
-    <ul>
-      <li><strong>TaskItem</strong> - Renders an individual task with category badge and completion toggle</li>
-      <li><strong>TaskInput</strong> - Form for adding new tasks with category selection</li>
-      <li><strong>CategorySelector</strong> - Interactive category filter/selector with color-coded badges</li>
-      <li><strong>ProgressBar</strong> - Visual representation of task completion progress</li>
-    </ul>
-    
-    <h3>Data Flow</h3>
-    <p>The app uses AsyncStorage for persisting tasks between sessions. Tasks are loaded on app startup and synchronized whenever changes occur. The data flow follows a unidirectional pattern where:</p>
-    <ol>
-      <li>User actions trigger state updates</li>
-      <li>State changes are persisted to storage</li>
-      <li>UI updates reflect the current state</li>
-    </ol>
-  </div>
-
-  <h2>Tech Stack</h2>
-  <div class="tech-section">
-    <table class="tech-table">
-      <tr>
-        <th>Technology</th>
-        <th>Version</th>
-        <th>Purpose</th>
-        <th>Implementation Details</th>
-      </tr>
-      <tr>
-        <td>React Native</td>
-        <td>Latest stable</td>
-        <td>Cross-platform mobile UI framework</td>
-        <td>Core framework for building the mobile interface with native capabilities. Using functional components with hooks for state management.</td>
-      </tr>
-      <tr>
-        <td>Expo</td>
-        <td>Latest SDK</td>
-        <td>Development platform and toolchain</td>
-        <td>Simplifies development workflow with ready-to-use components. Using managed workflow for faster development cycles.</td>
-      </tr>
-      <tr>
-        <td>TypeScript</td>
-        <td>5.x</td>
-        <td>Type-safe JavaScript development</td>
-        <td>Using strict mode with interfaces for all data models and component props. Type checking for enhanced code reliability.</td>
-      </tr>
-      <tr>
-        <td>React Navigation</td>
-        <td>6.x</td>
-        <td>Screen navigation and routing</td>
-        <td>Implementing Stack Navigator with typed parameters. Configured with screen options for consistent header styling.</td>
-      </tr>
-      <tr>
-        <td>@react-native-async-storage/async-storage</td>
-        <td>Latest stable</td>
-        <td>Persistent data storage</td>
-        <td>Storing and retrieving task data with JSON serialization/deserialization. Abstracting storage operations in a dedicated service.</td>
-      </tr>
-      <tr>
-        <td>React Native Draggable FlatList</td>
-        <td>Latest stable</td>
-        <td>Drag-and-drop functionality</td>
-        <td>Implementing fluid task reordering with haptic feedback and visual indicators. Using optimized rendering for smooth performance.</td>
-      </tr>
-      <tr>
-        <td>React Native Safe Area Context</td>
-        <td>Latest stable</td>
-        <td>Device-aware layout boundaries</td>
-        <td>Ensuring content is properly displayed on different device sizes and respects notches and system UI elements.</td>
-      </tr>
-      <tr>
-        <td>React Native Screens</td>
-        <td>Latest stable</td>
-        <td>Native screen containers</td>
-        <td>Performance optimization for navigation by using native screen containers instead of JS-based ones.</td>
-      </tr>
-    </table>
-    
-    <h3>Architecture Patterns</h3>
-    <ul>
-      <li><strong>Component-Based Architecture:</strong> Building the UI from reusable, isolated components that manage their own state and rendering.</li>
-      <li><strong>Custom Hooks:</strong> Extracting stateful logic into reusable functions to share behavior across components.</li>
-      <li><strong>Service Layer:</strong> Abstracting data operations (storage, API calls) into dedicated service modules.</li>
-      <li><strong>Unidirectional Data Flow:</strong> Following a clear pattern where data flows down through props and actions flow up through callbacks.</li>
-    </ul>
-    
-    <h3>Build & Configuration</h3>
-    <ul>
-      <li><strong>Babel:</strong> Using babel.config.js for advanced JavaScript transformations.</li>
-      <li><strong>TSConfig:</strong> Configured for strict type checking with modern ECMAScript features.</li>
-      <li><strong>Expo Config:</strong> Custom app.json configuration for platform-specific settings.</li>
-    </ul>
-  </div>
-
-  <h2>UI Design System</h2>
-  <div class="design-section">
-    <h3>Color Palette</h3>
-    <div class="color-palette">
-      <div class="color-item" style="background-color: #0066cc; color: white;">Primary: #0066cc</div>
-      <div class="color-item" style="background-color: #4CAF50; color: white;">Health: #4CAF50</div>
-      <div class="color-item" style="background-color: #2196F3; color: white;">Work: #2196F3</div>
-      <div class="color-item" style="background-color: #9C27B0; color: white;">Personal: #9C27B0</div>
-      <div class="color-item" style="background-color: #757575; color: white;">Other: #757575</div>
-      <div class="color-item" style="background-color: #f8f9fa; color: black;">Background: #f8f9fa</div>
-      <div class="color-item" style="background-color: white; color: black; border: 1px solid #ddd;">Surface: #ffffff</div>
-      <div class="color-item" style="background-color: #333333; color: white;">Text Primary: #333333</div>
-      <div class="color-item" style="background-color: #666666; color: white;">Text Secondary: #666666</div>
+    <div class="app-summary">
+      <h3>Project Overview</h3>
+      <p>A TypeScript-based mobile app for task management, built with Expo, React Navigation, and React Native.</p>
+      <p>Features:</p>
+      <ul>
+        <li>TypeScript with strict mode for enhanced code reliability</li>
+        <li>React Navigation for screen management with Home and Routine screens</li>
+        <li>Drag-and-drop task reordering with smooth animations</li>
+        <li>Task categorization with color-coded filtering system</li>
+        <li>Priority levels (High, Medium, Low) with visual indicators</li>
+        <li>Progress tracking and statistics visualization</li>
+        <li>Recurring task functionality with daily, weekly, and monthly patterns</li>
+        <li>Clean card-based UI with the Inter font family for modern typography</li>
+      </ul>
     </div>
     
-    <h3>Typography</h3>
-    <p>The app uses the system default font stack with carefully selected size hierarchy:</p>
-    <ul>
-      <li><strong>Headers:</strong> 20-28px, bold</li>
-      <li><strong>Body:</strong> 14-16px, regular</li>
-      <li><strong>Labels:</strong> 12-14px, regular or medium</li>
-    </ul>
+    <h2>App Screenshots</h2>
+    <div class="screenshots-section">
+      <div class="screenshot-item">
+        <div class="screenshot-header">Home Screen</div>
+        <div class="screenshot-img">
+          <img src="/assets/screenshots/home-screen.svg" alt="Home Screen" />
+        </div>
+        <div class="screenshot-desc">
+          <p>The home screen displays task progress, statistics, and category breakdown. The card-based design showcases the clean, minimalist aesthetic with plenty of whitespace.</p>
+        </div>
+      </div>
+      
+      <div class="screenshot-item">
+        <div class="screenshot-header">Task Management Screen</div>
+        <div class="screenshot-img">
+          <img src="/assets/screenshots/routine-screen.svg" alt="Routine Screen" />
+        </div>
+        <div class="screenshot-desc">
+          <p>The task management screen shows the filterable task list with draggable cards. Each task has category badges, priority indicators, and other metadata.</p>
+        </div>
+      </div>
+      
+      <div class="screenshot-item">
+        <div class="screenshot-header">Task Card Detail</div>
+        <div class="screenshot-img">
+          <img src="/assets/screenshots/task-card-detail.svg" alt="Task Card Detail" />
+        </div>
+        <div class="screenshot-desc">
+          <p>Close-up of a task card showing the detailed design with the new card-based layout. Notice the clean typography using the Inter font family, color-coded badges, and intuitive layout.</p>
+        </div>
+      </div>
+    </div>
     
-    <h3>Component Styling</h3>
-    <ul>
-      <li><strong>Cards:</strong> White background, rounded corners (12px), subtle elevation</li>
-      <li><strong>Buttons:</strong> Blue background (#0066cc), rounded corners (8px), bold white text</li>
-      <li><strong>Input Fields:</strong> Light background, subtle border, adequate padding</li>
-      <li><strong>Category Badges:</strong> Color-coded, small indicators with rounded shape</li>
-    </ul>
-  </div>
-
-  <h2>Project Structure</h2>
-  <div class="file-tree">
-    <pre><%= fileTree %></pre>
-  </div>
-
-  <h2>App Entry Point</h2>
-  <div class="code-section">
-    <div class="code-header">App.tsx</div>
-    <div class="code-content">
-      <pre><%= appCode %></pre>
+    <h2>App Structure</h2>
+    <div class="section-container">
+      <div class="grid-2">
+        <div>
+          <h3>Navigation Structure</h3>
+          <ul>
+            <li><strong>HomeScreen</strong> - Dashboard with progress statistics and category breakdown</li>
+            <li><strong>RoutineScreen</strong> - Task management interface with filtering and drag-and-drop</li>
+          </ul>
+          
+          <h3>Components</h3>
+          <ul>
+            <li><strong>TaskItem</strong> - Card-based task display with completion toggle</li>
+            <li><strong>TaskInput</strong> - Form for adding new tasks with category selection</li>
+            <li><strong>CategorySelector</strong> - Interactive category filter with color-coded badges</li>
+            <li><strong>PrioritySelector</strong> - Priority level selector (High, Medium, Low)</li>
+            <li><strong>ProgressBar</strong> - Visual representation of task completion progress</li>
+            <li><strong>RecurrenceSelector</strong> - Settings for recurring task patterns</li>
+            <li><strong>ReminderSelector</strong> - Configure task reminders and notifications</li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3>Services</h3>
+          <ul>
+            <li><strong>StorageService</strong> - AsyncStorage handling for task persistence</li>
+            <li><strong>RecurrenceService</strong> - Logic for recurring task patterns</li>
+            <li><strong>ReminderService</strong> - Task notification and reminder functionality</li>
+          </ul>
+          
+          <h3>Data Flow</h3>
+          <p>The app uses a unidirectional data flow pattern:</p>
+          <ol>
+            <li>User actions trigger state updates in screen components</li>
+            <li>State changes are persisted to AsyncStorage via services</li>
+            <li>UI updates reflect the current application state</li>
+            <li>Recurring tasks generate instances based on patterns</li>
+            <li>Task completion status is tracked and visualized</li>
+          </ol>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <h2>Home Screen</h2>
-  <div class="code-section">
-    <div class="code-header">screens/HomeScreen.tsx</div>
-    <div class="code-content">
-      <pre><%= homeScreenCode %></pre>
+    <h2>UI Design System</h2>
+    <div class="section-container">
+      <h3>Typography System</h3>
+      <p>The app uses the Inter font family with a consistent typography scale:</p>
+      <ul>
+        <li><strong>Headers (H1):</strong> Inter-Bold, 28px, letterSpacing: 0.25</li>
+        <li><strong>Subheaders (H2):</strong> Inter-SemiBold, 24px, letterSpacing: 0.25</li>
+        <li><strong>Section Titles (H3):</strong> Inter-SemiBold, 20px, letterSpacing: 0.15</li>
+        <li><strong>Body Text (Body1):</strong> Inter, 16px, letterSpacing: 0.5</li>
+        <li><strong>Secondary Text (Body2):</strong> Inter, 14px, letterSpacing: 0.25</li>
+        <li><strong>Button Text:</strong> Inter-Medium, 14px, letterSpacing: 1.25, uppercase</li>
+        <li><strong>Caption Text:</strong> Inter, 12px, letterSpacing: 0.4</li>
+      </ul>
+      
+      <h3>Color Palette</h3>
+      <div class="color-palette">
+        <div class="color-item" style="background-color: #0066cc; color: white;">Primary: #0066cc</div>
+        <div class="color-item" style="background-color: #4CAF50; color: white;">Health: #4CAF50</div>
+        <div class="color-item" style="background-color: #2196F3; color: white;">Work: #2196F3</div>
+        <div class="color-item" style="background-color: #9C27B0; color: white;">Personal: #9C27B0</div>
+        <div class="color-item" style="background-color: #757575; color: white;">Other: #757575</div>
+        <div class="color-item" style="background-color: #E53935; color: white;">High Priority: #E53935</div>
+        <div class="color-item" style="background-color: #FB8C00; color: white;">Medium Priority: #FB8C00</div>
+        <div class="color-item" style="background-color: #43A047; color: white;">Low Priority: #43A047</div>
+        <div class="color-item" style="background-color: #f8f9fa; color: black;">Background: #f8f9fa</div>
+        <div class="color-item" style="background-color: white; color: black; border: 1px solid #ddd;">Card Background: #ffffff</div>
+      </div>
+      
+      <h3>Component Styling</h3>
+      <ul>
+        <li><strong>Cards:</strong> White background, rounded corners (16px), medium shadow depth</li>
+        <li><strong>Task Cards:</strong> Sectioned layout with header, content, and footer</li>
+        <li><strong>Category Badges:</strong> Semi-transparent color backgrounds with matching text</li>
+        <li><strong>Priority Indicators:</strong> Color dots with matching text for visual hierarchy</li>
+        <li><strong>Buttons:</strong> Blue background, rounded corners, uppercase text</li>
+        <li><strong>Checkboxes:</strong> Circular with checkmark, color change on completion</li>
+      </ul>
     </div>
-  </div>
 
-  <h2>Routine Screen</h2>
-  <div class="code-section">
-    <div class="code-header">screens/RoutineScreen.tsx</div>
-    <div class="code-content">
-      <pre><%= routineScreenCode %></pre>
+    <h2>Project Structure</h2>
+    <div class="file-tree">
+      <pre><%= fileTree %></pre>
     </div>
-  </div>
 
-  <h2>App Configuration</h2>
-  <div class="code-section">
-    <div class="code-header">app.json</div>
-    <div class="code-content">
-      <pre><%= appJsonCode %></pre>
+    <h2>Task Card Component (TaskItem.tsx)</h2>
+    <div class="code-section">
+      <div class="code-header">components/TaskItem.tsx</div>
+      <div class="code-content">
+        <pre><%= taskItemCode %></pre>
+      </div>
+    </div>
+
+    <h2>Theme and Typography System</h2>
+    <div class="code-section">
+      <div class="code-header">utils/Theme.ts</div>
+      <div class="code-content">
+        <pre><%= themeCode %></pre>
+      </div>
     </div>
   </div>
 </body>
 </html>`;
+
+// Write template to disk
+fs.writeFileSync(path.join(__dirname, 'views', 'index.ejs'), indexTemplate);
+
+// Helper function to generate file tree
+function generateFileTree(dir, prefix = '') {
+  let tree = '';
+  const files = fs.readdirSync(dir, { withFileTypes: true });
+  
+  files.forEach((file, index) => {
+    const isLast = index === files.length - 1;
+    const connector = isLast ? '└── ' : '├── ';
+    const newPrefix = isLast ? '    ' : '│   ';
+    
+    if (file.name !== 'node_modules' && file.name !== '.git' && !file.name.startsWith('.') && file.name !== 'views' && file.name !== 'code-viewer.js') {
+      tree += prefix + connector + file.name + '\n';
+      
+      if (file.isDirectory()) {
+        tree += generateFileTree(path.join(dir, file.name), prefix + newPrefix);
+      }
+    }
+  });
+  
+  return tree;
+}
+
+// Helper function to read file content
+function safeReadFileSync(filePath) {
+  try {
+    return fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    return `Error reading file: ${err.message}`;
+  }
+}
+
+// Route to display the code
+app.get('/', (req, res) => {
+  const fileTree = generateFileTree(__dirname);
+  const taskItemCode = safeReadFileSync(path.join(__dirname, 'components', 'TaskItem.tsx'));
+  const themeCode = safeReadFileSync(path.join(__dirname, 'utils', 'Theme.ts'));
+  
+  res.render('index', { 
+    fileTree, 
+    taskItemCode, 
+    themeCode
+  });
+});
+
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Code viewer server running at http://localhost:${port}`);
+});
 
 // Write template to disk
 fs.writeFileSync(path.join(__dirname, 'views', 'index.ejs'), indexTemplate);

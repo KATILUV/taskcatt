@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, ReactNode } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text } from 'react-native';
+import { View, Text, Animated, Platform, ViewStyle } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { 
@@ -10,7 +10,6 @@ import {
   Inter_600SemiBold,
   Inter_700Bold 
 } from '@expo-google-fonts/inter';
-import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import HomeScreen from './screens/HomeScreen';
 import RoutineScreen from './screens/RoutineScreen';
@@ -22,6 +21,44 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// Custom transitions
+const customTransitionConfig = {
+  animation: 'spring',
+  config: {
+    stiffness: 1000,
+    damping: 50,
+    mass: 3,
+    overshootClamping: false,
+    restDisplacementThreshold: 0.01,
+    restSpeedThreshold: 0.01,
+  },
+};
+
+// Fade-in animation for the app startup
+interface FadeInViewProps {
+  children: ReactNode;
+  style?: ViewStyle;
+  duration?: number;
+}
+
+const FadeInView: React.FC<FadeInViewProps> = ({ children, style, duration = 500 }) => {
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: duration,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim, duration]);
+
+  return (
+    <Animated.View style={{ ...(style as any), opacity: fadeAnim }}>
+      {children}
+    </Animated.View>
+  );
+};
 
 export default function App() {
   const [appIsReady, setAppIsReady] = useState(false);
@@ -39,9 +76,6 @@ export default function App() {
       try {
         // Keep the splash screen visible while loading resources
         await SplashScreen.preventAutoHideAsync();
-        
-        // Pre-load other resources or make API calls here
-        // Note: We don't need to load fonts again here since we're using useFonts hook
       } catch (e) {
         console.warn(e);
       } finally {
@@ -63,39 +97,68 @@ export default function App() {
   if (!fontsLoaded || !appIsReady) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.backgroundPrimary }}>
-        <Text>Loading Task Cat...</Text>
+        <Text style={{ fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto', fontSize: 16 }}>
+          Loading Task Cat...
+        </Text>
       </View>
     );
   }
   
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <NavigationContainer>
-        <Stack.Navigator 
-          initialRouteName="Home"
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: theme.colors.primary,
-            },
-            headerTintColor: theme.colors.white,
-            headerTitleStyle: {
-              fontFamily: 'Inter-SemiBold',
-            },
-          }}
-        >
-          <Stack.Screen 
-            name="Home" 
-            component={HomeScreen} 
-            options={{ title: 'Task Cat' }}
-          />
-          <Stack.Screen 
-            name="Routine" 
-            component={RoutineScreen} 
-            options={{ title: 'My Routines' }}
-          />
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
-    </View>
+    <FadeInView style={{ flex: 1 }} duration={800}>
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <NavigationContainer>
+          <Stack.Navigator 
+            initialRouteName="Home"
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: theme.colors.primary,
+              },
+              headerTintColor: theme.colors.white,
+              headerTitleStyle: {
+                fontFamily: 'Inter-SemiBold',
+              },
+              // Apply smooth animations to all screens by default
+              animation: 'fade',
+              gestureEnabled: true,
+              // Custom UI settings
+              contentStyle: {
+                backgroundColor: theme.colors.backgroundPrimary,
+              },
+            }}
+          >
+            <Stack.Screen 
+              name="Home" 
+              component={HomeScreen} 
+              options={{ 
+                title: 'Task Cat',
+                // Custom animation for home screen
+                animation: 'fade',
+                headerShown: true,
+                headerTransparent: false,
+                // Add subtle animation
+                contentStyle: {
+                  backgroundColor: theme.colors.backgroundPrimary,
+                },
+              }}
+            />
+            <Stack.Screen 
+              name="Routine" 
+              component={RoutineScreen} 
+              options={{ 
+                title: 'My Routines',
+                // Custom animation
+                animation: 'slide_from_right',
+                // Subtle styling for better contrast
+                contentStyle: {
+                  backgroundColor: theme.colors.backgroundPrimary,
+                }
+              }}
+            />
+          </Stack.Navigator>
+          <StatusBar style="auto" />
+        </NavigationContainer>
+      </View>
+    </FadeInView>
   );
 }
