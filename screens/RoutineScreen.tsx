@@ -12,7 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import type { RootStackParamList } from '../App';
-import { Task, TaskCategory, TASK_CATEGORIES } from '../models/Task';
+import { Task, TaskCategory, TASK_CATEGORIES, TaskPriority, TASK_PRIORITIES } from '../models/Task';
 import { StorageService } from '../services/StorageService';
 import TaskItem from '../components/TaskItem';
 import TaskInput from '../components/TaskInput';
@@ -22,7 +22,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Routine'>;
 export default function RoutineScreen({ navigation }: Props) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedFilter, setSelectedFilter] = useState<TaskCategory | 'All'>('All');
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<TaskCategory | 'All'>('All');
+  const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<TaskPriority | 'All'>('All');
 
   // Load tasks from AsyncStorage on component mount
   useEffect(() => {
@@ -52,13 +53,14 @@ export default function RoutineScreen({ navigation }: Props) {
   }, [tasks, loading]);
 
   // Add a new task
-  const handleAddTask = (title: string, category: TaskCategory) => {
+  const handleAddTask = (title: string, category: TaskCategory, priority: TaskPriority) => {
     const newTask: Task = {
       id: Date.now().toString(),
       title,
       completed: false,
       createdAt: Date.now(),
-      category
+      category,
+      priority
     };
 
     setTasks((prevTasks) => {
@@ -129,13 +131,29 @@ export default function RoutineScreen({ navigation }: Props) {
     );
   }
 
-  // Filter tasks based on selected category
-  const getFilteredTasks = useCallback(() => {
-    if (selectedFilter === 'All') {
-      return tasks;
+  // Get priority color for filter buttons
+  const getPriorityColor = (priority: TaskPriority): string => {
+    switch (priority) {
+      case 'High':
+        return '#E53935'; // Red
+      case 'Medium':
+        return '#FB8C00'; // Orange
+      case 'Low':
+        return '#43A047'; // Green
+      default:
+        return '#757575'; // Gray
     }
-    return tasks.filter(task => task.category === selectedFilter);
-  }, [tasks, selectedFilter]);
+  };
+
+  // Filter tasks based on selected category and priority
+  const getFilteredTasks = useCallback(() => {
+    return tasks.filter(task => {
+      const matchesCategory = selectedCategoryFilter === 'All' || task.category === selectedCategoryFilter;
+      const matchesPriority = selectedPriorityFilter === 'All' || task.priority === selectedPriorityFilter;
+      
+      return matchesCategory && matchesPriority;
+    });
+  }, [tasks, selectedCategoryFilter, selectedPriorityFilter]);
 
   const filteredTasks = getFilteredTasks();
 
@@ -164,39 +182,78 @@ export default function RoutineScreen({ navigation }: Props) {
         />
       </View>
       
-      <View style={styles.filterContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              selectedFilter === 'All' && styles.filterButtonActive
-            ]}
-            onPress={() => setSelectedFilter('All')}
-          >
-            <Text style={[
-              styles.filterButtonText,
-              selectedFilter === 'All' && styles.filterButtonTextActive
-            ]}>All</Text>
-          </TouchableOpacity>
-          
-          {TASK_CATEGORIES.map(category => (
+      <View style={styles.filtersSection}>
+        <Text style={styles.filterSectionTitle}>Categories</Text>
+        <View style={styles.filterContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
             <TouchableOpacity
-              key={category}
               style={[
                 styles.filterButton,
-                selectedFilter === category && styles.filterButtonActive,
-                { borderColor: getCategoryColor(category) }
+                selectedCategoryFilter === 'All' && styles.filterButtonActive
               ]}
-              onPress={() => setSelectedFilter(category)}
+              onPress={() => setSelectedCategoryFilter('All')}
             >
-              <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(category) }]} />
               <Text style={[
                 styles.filterButtonText,
-                selectedFilter === category && styles.filterButtonTextActive
-              ]}>{category}</Text>
+                selectedCategoryFilter === 'All' && styles.filterButtonTextActive
+              ]}>All Categories</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+            
+            {TASK_CATEGORIES.map(category => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.filterButton,
+                  selectedCategoryFilter === category && styles.filterButtonActive,
+                  { borderColor: getCategoryColor(category) }
+                ]}
+                onPress={() => setSelectedCategoryFilter(category)}
+              >
+                <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(category) }]} />
+                <Text style={[
+                  styles.filterButtonText,
+                  selectedCategoryFilter === category && styles.filterButtonTextActive
+                ]}>{category}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        <Text style={styles.filterSectionTitle}>Priority</Text>
+        <View style={styles.filterContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                selectedPriorityFilter === 'All' && styles.filterButtonActive
+              ]}
+              onPress={() => setSelectedPriorityFilter('All')}
+            >
+              <Text style={[
+                styles.filterButtonText,
+                selectedPriorityFilter === 'All' && styles.filterButtonTextActive
+              ]}>All Priorities</Text>
+            </TouchableOpacity>
+            
+            {TASK_PRIORITIES.map(priority => (
+              <TouchableOpacity
+                key={priority}
+                style={[
+                  styles.filterButton,
+                  selectedPriorityFilter === priority && styles.filterButtonActive,
+                  { borderColor: getPriorityColor(priority) }
+                ]}
+                onPress={() => setSelectedPriorityFilter(priority)}
+              >
+                <View style={[styles.priorityDot, { backgroundColor: getPriorityColor(priority) }]} />
+                <Text style={[
+                  styles.filterButtonText,
+                  selectedPriorityFilter === priority && styles.filterButtonTextActive
+                ]}>{priority}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       </View>
       
       {filteredTasks.length === 0 ? (
@@ -281,7 +338,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  filtersSection: {
+    backgroundColor: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee',
+  },
+  filterSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginLeft: 16,
+    marginTop: 12,
+    marginBottom: 4,
+  },
   categoryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  priorityDot: {
     width: 8,
     height: 8,
     borderRadius: 4,

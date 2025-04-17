@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { Task, TaskCategory } from '../models/Task';
+import { Task, TaskCategory, TaskPriority } from '../models/Task';
 
 interface TaskItemProps {
   task: Task;
@@ -26,6 +26,19 @@ const TaskItem: React.FC<TaskItemProps> = ({
       case 'Personal':
         return '#9C27B080'; // Purple with opacity
       case 'Other':
+      default:
+        return '#75757580'; // Gray with opacity
+    }
+  };
+  
+  const getPriorityColor = (priority: TaskPriority): string => {
+    switch (priority) {
+      case 'High':
+        return '#E5393580'; // Red with opacity
+      case 'Medium':
+        return '#FB8C0080'; // Orange with opacity
+      case 'Low':
+        return '#43A04780'; // Green with opacity
       default:
         return '#75757580'; // Gray with opacity
     }
@@ -66,6 +79,14 @@ const TaskItem: React.FC<TaskItemProps> = ({
               { backgroundColor: getCategoryColor(task.category) }
             ]}>
               <Text style={styles.categoryText}>{task.category}</Text>
+            </View>
+          )}
+          {task.priority && (
+            <View style={[
+              styles.priorityBadge, 
+              { backgroundColor: getPriorityColor(task.priority) }
+            ]}>
+              <Text style={styles.priorityText}>{task.priority}</Text>
             </View>
           )}
           {task.completed && (
@@ -134,6 +155,17 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   categoryText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#333',
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  priorityText: {
     fontSize: 11,
     fontWeight: '500',
     color: '#333',

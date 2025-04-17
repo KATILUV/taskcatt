@@ -7,13 +7,16 @@ import {
   SafeAreaView, 
   Image,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  Dimensions
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { StorageService } from '../services/StorageService';
 import { TASK_CATEGORIES, TaskCategory } from '../models/Task';
 import ProgressBar from '../components/ProgressBar';
+import { isTablet, scale, scaleFont, getResponsiveStyles } from '../utils/ResponsiveUtils';
+import { createStyles, theme, colors } from '../utils/Theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -86,14 +89,14 @@ export default function HomeScreen({ navigation }: Props) {
   const getCategoryColor = (category: TaskCategory): string => {
     switch (category) {
       case 'Health':
-        return '#4CAF50'; // Green
+        return theme.colors.categoryHealth;
       case 'Work':
-        return '#2196F3'; // Blue
+        return theme.colors.categoryWork;
       case 'Personal':
-        return '#9C27B0'; // Purple
+        return theme.colors.categoryPersonal;
       case 'Other':
       default:
-        return '#757575'; // Gray
+        return theme.colors.categoryOther;
     }
   };
 
@@ -231,229 +234,213 @@ export default function HomeScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: '#0066cc',
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 4,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  progressSection: {
-    backgroundColor: 'white',
-    padding: 16,
-    marginTop: 16,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#444',
-  },
-  progressPercentage: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0066cc',
-  },
-  progressMessage: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: 'white',
-    marginTop: 16,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 10,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#0066cc',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  categorySection: {
-    backgroundColor: 'white',
-    padding: 16,
-    marginTop: 16,
-    marginHorizontal: 16,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  sectionHeader: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#444',
-  },
-  categoryList: {
-    marginTop: 8,
-  },
-  categoryItem: {
-    marginBottom: 12,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  categoryDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 8,
-  },
-  categoryName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    flex: 1,
-  },
-  categoryCount: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#666',
-    marginLeft: 8,
-  },
-  categoryBarContainer: {
-    height: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginLeft: 18,
-  },
-  categoryBar: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  categoryBarFill: {
-    width: '40%',
-    height: '100%',
-    borderRadius: 4,
-  },
-  noCategoriesText: {
-    fontSize: 14,
-    color: '#888',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginVertical: 12,
-  },
-  cardContainer: {
-    padding: 16,
-  },
-  taskCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardContent: {
-    padding: 20,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  cardDescription: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
-    lineHeight: 22,
-  },
-  cardActions: {
-    marginTop: 10,
-  },
-  actionButton: {
-    backgroundColor: '#0066cc',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardAction: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0066cc',
-  },
-  cardActionArrow: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0066cc',
-    marginLeft: 8,
-  },
-  footer: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#999',
-  },
+// Use createStyles from Theme utils to create responsive styles
+const styles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.backgroundPrimary,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      padding: theme.spacing.md,
+      backgroundColor: theme.colors.primary,
+      height: theme.layout.headerHeight,
+      justifyContent: 'center',
+    },
+    headerTitle: {
+      fontSize: scaleFont(isTab ? 32 : 28),
+      fontWeight: 'bold',
+      color: theme.colors.white,
+      marginBottom: theme.spacing.xs,
+    },
+    headerSubtitle: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      color: 'rgba(255, 255, 255, 0.8)',
+    },
+    progressSection: {
+      ...theme.cardStyle,
+      marginTop: theme.spacing.md,
+      marginHorizontal: theme.spacing.md,
+    },
+    progressHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.sm,
+    },
+    progressTitle: {
+      fontSize: scaleFont(isTab ? 20 : 18),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    progressPercentage: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+    },
+    progressMessage: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      color: theme.colors.textSecondary,
+      marginTop: theme.spacing.sm,
+      textAlign: 'center',
+      fontStyle: 'italic',
+    },
+    statsContainer: {
+      ...theme.cardStyle,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.md,
+      marginTop: theme.spacing.md,
+      marginHorizontal: theme.spacing.md,
+    },
+    statCard: {
+      flex: 1,
+      alignItems: 'center',
+      padding: theme.spacing.sm,
+    },
+    statNumber: {
+      fontSize: scaleFont(isTab ? 28 : 24),
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+      marginBottom: theme.spacing.xs,
+    },
+    statLabel: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      color: theme.colors.textSecondary,
+    },
+    categorySection: {
+      ...theme.cardStyle,
+      marginTop: theme.spacing.md,
+      marginHorizontal: theme.spacing.md,
+      padding: theme.spacing.md,
+    },
+    sectionHeader: {
+      marginBottom: theme.spacing.md,
+    },
+    sectionTitle: {
+      fontSize: scaleFont(isTab ? 20 : 18),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    categoryList: {
+      marginTop: theme.spacing.sm,
+    },
+    categoryItem: {
+      marginBottom: theme.spacing.sm,
+    },
+    categoryHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: theme.spacing.xs,
+    },
+    categoryDot: {
+      width: scale(isTab ? 12 : 10),
+      height: scale(isTab ? 12 : 10),
+      borderRadius: scale(isTab ? 6 : 5),
+      marginRight: theme.spacing.sm,
+    },
+    categoryName: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      fontWeight: '500',
+      color: theme.colors.textPrimary,
+      flex: 1,
+    },
+    categoryCount: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      fontWeight: 'bold',
+      color: theme.colors.textSecondary,
+      marginLeft: theme.spacing.sm,
+    },
+    categoryBarContainer: {
+      height: scale(isTab ? 10 : 8),
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderRadius: scale(isTab ? 5 : 4),
+      overflow: 'hidden',
+      marginLeft: scale(isTab ? 20 : 18),
+    },
+    categoryBar: {
+      height: '100%',
+      borderRadius: scale(isTab ? 5 : 4),
+    },
+    categoryBarFill: {
+      width: '40%',
+      height: '100%',
+      borderRadius: scale(isTab ? 5 : 4),
+    },
+    noCategoriesText: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      color: theme.colors.textDisabled,
+      fontStyle: 'italic',
+      textAlign: 'center',
+      marginVertical: theme.spacing.md,
+    },
+    cardContainer: {
+      padding: theme.spacing.md,
+    },
+    taskCard: {
+      ...theme.cardStyle,
+      overflow: 'hidden',
+    },
+    cardContent: {
+      padding: theme.spacing.lg,
+    },
+    cardTitle: {
+      fontSize: scaleFont(isTab ? 24 : 20),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginBottom: theme.spacing.sm,
+    },
+    cardDescription: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      color: theme.colors.textSecondary,
+      marginBottom: theme.spacing.lg,
+      lineHeight: scaleFont(isTab ? 26 : 22),
+    },
+    cardActions: {
+      marginTop: theme.spacing.sm,
+    },
+    actionButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.components.buttonRadius,
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.md,
+      height: theme.components.buttonHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actionButtonText: {
+      color: theme.colors.white,
+      fontWeight: 'bold',
+      fontSize: scaleFont(isTab ? 18 : 16),
+    },
+    cardFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    cardAction: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+    },
+    cardActionArrow: {
+      fontSize: scaleFont(isTab ? 20 : 18),
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+      marginLeft: theme.spacing.sm,
+    },
+    footer: {
+      padding: theme.spacing.md,
+      alignItems: 'center',
+    },
+    footerText: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      color: theme.colors.textDisabled,
+    },
+  });
 });

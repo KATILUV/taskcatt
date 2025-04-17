@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
+import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
+import { createStyles, theme } from '../utils/Theme';
 
 interface ProgressBarProps {
   progress: number; // 0 to 100
