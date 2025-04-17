@@ -15,7 +15,14 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { StorageService } from '../services/StorageService';
-import { TASK_CATEGORIES, TaskCategory, Task } from '../models/Task';
+import { 
+  TASK_CATEGORIES, 
+  TaskCategory, 
+  Task, 
+  TaskPriority, 
+  RecurrenceSettings, 
+  ReminderSettings 
+} from '../models/Task';
 import ProgressBar from '../components/ProgressBar';
 import { isTablet, scale, scaleFont, getResponsiveStyles } from '../utils/ResponsiveUtils';
 import { createStyles, useTheme } from '../utils/Theme';
@@ -405,7 +412,13 @@ export default function HomeScreen({ navigation }: Props) {
           title="Add New Task"
         >
           <TaskInput
-            onAddTask={async (title, category, priority, recurrence, reminder) => {
+            onAddTask={async (
+              title: string, 
+              category: TaskCategory, 
+              priority: TaskPriority, 
+              recurrence?: RecurrenceSettings, 
+              reminder?: ReminderSettings
+            ) => {
               // Create a new task
               const newTask: Task = {
                 id: `task-${Date.now()}`,
