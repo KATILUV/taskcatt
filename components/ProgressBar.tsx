@@ -26,6 +26,11 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
     if (normalizedProgress < 70) return theme.colors.warning; // Amber for medium progress
     return theme.colors.success; // Green for high progress
   };
+  
+  // Get the text for the percentage label
+  const getPercentageText = () => {
+    return `${Math.round(normalizedProgress)}%`;
+  };
 
   const progressColor = getProgressColor();
 
@@ -45,7 +50,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       
       {showPercentage && (
         <Text style={[styles.percentageText, { color: progressColor }]}>
-          {normalizedProgress}%
+          {getPercentageText()}
         </Text>
       )}
     </View>
@@ -60,24 +65,27 @@ const useStyles = createStyles((theme) => {
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginVertical: theme.spacing.sm,
+      marginVertical: theme.spacing.md,
     },
     progressBackground: {
       backgroundColor: theme.colors.backgroundSecondary,
-      borderRadius: scale(isTab ? 12 : 10),
+      borderRadius: scale(isTab ? 16 : 12),
       overflow: 'hidden',
       flex: 1,
+      ...theme.shadows.small,
     },
     progressFill: {
-      borderRadius: scale(isTab ? 12 : 10),
+      borderRadius: scale(isTab ? 16 : 12),
       height: '100%',
     },
     percentageText: {
-      marginLeft: theme.spacing.sm,
-      fontWeight: 'bold',
+      marginLeft: theme.spacing.md,
+      fontWeight: '600',
+      fontFamily: theme.fonts.semiBold,
       fontSize: scaleFont(isTab ? 16 : 14),
-      width: scale(isTab ? 50 : 40), // Fixed width to avoid layout shifts
+      width: scale(isTab ? 54 : 44), // Fixed width to avoid layout shifts
       textAlign: 'right',
+      letterSpacing: 0.3,
     } as TextStyle,
   });
 });
