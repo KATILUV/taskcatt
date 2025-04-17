@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Cat App - Code Viewer</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      color: #0066cc;
+    }
+    h2 {
+      color: #0066cc;
+      margin-top: 30px;
+    }
+    .file-tree {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e1e4e8;
+      font-family: monospace;
+      margin-bottom: 20px;
+    }
+    .file-tree pre {
+      margin: 0;
+    }
+    .code-section {
+      margin-bottom: 30px;
+    }
+    .code-header {
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      border: 1px solid #ddd;
+      font-weight: bold;
+    }
+    .code-content {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+      border: 1px solid #ddd;
+      border-top: none;
+      overflow-x: auto;
+      font-family: monospace;
+    }
+    .app-summary {
+      background-color: #e9f7fe;
+      padding: 15px;
+      border-radius: 4px;
+      border-left: 4px solid #0066cc;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Task Cat App - Mobile React Native Project</h1>
+  
+  <div class="app-summary">
+    <h3>Project Overview</h3>
+    <p>A TypeScript-based mobile app using Expo, React Navigation, and React Native.</p>
+    <p>Features:</p>
+    <ul>
+      <li>TypeScript with strict mode</li>
+      <li>React Navigation for screen management</li>
+      <li>Home and Routine screens with navigation</li>
+      <li>Minimal, clean project structure</li>
+    </ul>
+  </div>
+
+  <h2>Project Structure</h2>
+  <div class="file-tree">
+    <pre><%= fileTree %></pre>
+  </div>
+
+  <h2>App Entry Point</h2>
+  <div class="code-section">
+    <div class="code-header">App.tsx</div>
+    <div class="code-content">
+      <pre><%= appCode %></pre>
+    </div>
+  </div>
+
+  <h2>Home Screen</h2>
+  <div class="code-section">
+    <div class="code-header">screens/HomeScreen.tsx</div>
+    <div class="code-content">
+      <pre><%= homeScreenCode %></pre>
+    </div>
+  </div>
+
+  <h2>Routine Screen</h2>
+  <div class="code-section">
+    <div class="code-header">screens/RoutineScreen.tsx</div>
+    <div class="code-content">
+      <pre><%= routineScreenCode %></pre>
+    </div>
+  </div>
+
+  <h2>App Configuration</h2>
+  <div class="code-section">
+    <div class="code-header">app.json</div>
+    <div class="code-content">
+      <pre><%= appJsonCode %></pre>
+    </div>
+  </div>
+</body>
+</html>
