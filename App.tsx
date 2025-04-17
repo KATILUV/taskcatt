@@ -3,7 +3,6 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text, Animated, Platform, ViewStyle, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StackNavigationOptions } from '@react-navigation/stack';
 import { 
   useFonts, 
   Inter_400Regular,
@@ -131,18 +130,8 @@ const AppNavigator = () => {
             contentStyle: {
               backgroundColor: theme.colors.backgroundPrimary,
             },
-            // Use type assertion to allow for our custom animation properties
-            ...(({
-              // Apply our custom cat animation to screens by default
-              cardStyleInterpolator: catTransition.cardStyleInterpolator,
-              gestureEnabled: true,
-              // Configure gestures based on our custom transitions
-              gestureDirection: 'horizontal',
-              transitionSpec: {
-                open: catTransition.transitionSpec.open,
-                close: catTransition.transitionSpec.close,
-              },
-            } as unknown) as StackNavigationOptions)
+            gestureEnabled: true,
+            animation: 'slide_from_right',
           }}
         >
           <Stack.Screen 
@@ -156,11 +145,7 @@ const AppNavigator = () => {
               contentStyle: {
                 backgroundColor: theme.colors.backgroundPrimary,
               },
-              // Use type assertion for custom animation properties
-              ...(({
-                // Custom fade animation for home screen
-                cardStyleInterpolator: fadeTransition.cardStyleInterpolator,
-              } as unknown) as StackNavigationOptions)
+              animation: 'fade'
             }}
           />
           <Stack.Screen 
@@ -172,15 +157,7 @@ const AppNavigator = () => {
               contentStyle: {
                 backgroundColor: theme.colors.backgroundPrimary,
               },
-              // Use type assertion for custom animation properties
-              ...(({
-                // Use material design animation for routine screen
-                cardStyleInterpolator: materialNavigationTransition.cardStyleInterpolator,
-                transitionSpec: {
-                  open: materialNavigationTransition.transitionSpec.open,
-                  close: materialNavigationTransition.transitionSpec.close,
-                },
-              } as unknown) as StackNavigationOptions)
+              animation: 'slide_from_right'
             }}
           />
         </Stack.Navigator>
