@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../utils/Theme';
-import { scale } from '../utils/ResponsiveUtils';
+import { scale, scaleFont } from '../utils/ResponsiveUtils';
 
 interface BottomSheetProps {
   visible: boolean;
@@ -116,10 +116,11 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
           {
             height: bottomSheetHeight,
             paddingBottom: insets.bottom,
-            backgroundColor: theme.colors.white,
+            backgroundColor: theme.colors.backgroundCard,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             transform: [{ translateY }],
+            ...theme.shadows.large,
           },
         ]}
       >
@@ -127,7 +128,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
           style={styles.header} 
           {...panResponder.panHandlers}
         >
-          <View style={[styles.handle, { backgroundColor: theme.colors.lightGray }]} />
+          <View style={[styles.handle, { backgroundColor: theme.colors.gray }]} />
           
           {title && (
             <View style={styles.titleContainer}>
@@ -162,45 +163,44 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -3,
-    },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
-    elevation: 6,
+    // Shadow is now applied in the component above using theme.shadows.large
   },
   header: {
-    height: 60,
-    paddingHorizontal: 20,
+    height: 64,
+    paddingHorizontal: 24,
     alignItems: 'center',
     position: 'relative',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   handle: {
     position: 'absolute',
-    top: 10,
-    width: 40,
-    height: 4,
-    borderRadius: 2,
+    top: 12,
+    width: 48,
+    height: 5,
+    borderRadius: 3,
+    opacity: 0.6,
   },
   closeButton: {
     position: 'absolute',
     right: 16,
     top: 16,
-    padding: 5,
+    padding: 8,
+    borderRadius: 20,
   },
   titleContainer: {
-    marginTop: 25,
+    marginTop: 28,
     alignItems: 'center',
   },
   title: {
-    fontSize: scale(18),
+    fontSize: scaleFont(18),
     fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    letterSpacing: 0.2,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: 24,
   },
 });
 

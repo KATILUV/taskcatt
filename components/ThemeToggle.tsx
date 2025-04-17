@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../utils/Theme';
 import { Ionicons } from '@expo/vector-icons';
-import { scale } from '../utils/ResponsiveUtils';
+import { scale, scaleFont } from '../utils/ResponsiveUtils';
 
 interface ThemeToggleProps {
   style?: ViewStyle;
@@ -31,17 +31,17 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   // Determine sizes based on the size prop
   const getIconSize = () => {
     switch (size) {
-      case 'small': return 16;
-      case 'large': return 24;
-      default: return 20;
+      case 'small': return 18;
+      case 'large': return 26;
+      default: return 22;
     }
   };
   
   const getContainerSize = () => {
     switch (size) {
-      case 'small': return 28;
-      case 'large': return 44;
-      default: return 36;
+      case 'small': return 32;
+      case 'large': return 48;
+      default: return 40;
     }
   };
   
@@ -93,11 +93,14 @@ const styles = StyleSheet.create({
   button: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: scale(18),
-    borderWidth: 1,
+    borderRadius: scale(20),
+    borderWidth: 1.5,
   } as ViewStyle,
   label: {
-    marginRight: 8,
-    fontSize: 12,
+    marginRight: 12,
+    fontSize: scaleFont(14),
+    fontFamily: 'Inter-Medium',
+    fontWeight: '500',
+    letterSpacing: 0.1,
   } as TextStyle
 });
