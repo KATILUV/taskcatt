@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="512" cy="512" r="512" fill="#6200EE"/>
+  
+  <!-- Cat Head -->
+  <path d="M512 220C370 220 256 350 256 510C256 670 370 800 512 800C654 800 768 670 768 510C768 350 654 220 512 220Z" fill="#FFE0B2"/>
+  
+  <!-- Cat Ears -->
+  <path d="M340 320C300 260 220 280 220 280C220 280 250 380 290 420C330 460 340 320 340 320Z" fill="#FFD180"/>
+  <path d="M684 320C724 260 804 280 804 280C804 280 774 380 734 420C694 460 684 320 684 320Z" fill="#FFD180"/>
+  
+  <!-- Cat Eyes -->
+  <ellipse cx="400" cy="480" rx="40" ry="60" fill="#424242"/>
+  <ellipse cx="624" cy="480" rx="40" ry="60" fill="#424242"/>
+  
+  <!-- Eye Highlights -->
+  <circle cx="385" cy="460" r="15" fill="white"/>
+  <circle cx="609" cy="460" r="15" fill="white"/>
+  
+  <!-- Cat Nose -->
+  <path d="M512 540C502 540 494 548 494 560C494 572 502 580 512 580C522 580 530 572 530 560C530 548 522 540 512 540Z" fill="#FF5252"/>
+  
+  <!-- Cat Mouth -->
+  <path d="M460 600C460 600 470 640 512 640C554 640 564 600 564 600" stroke="#424242" stroke-width="8" fill="none"/>
+  
+  <!-- Cat Whiskers -->
+  <line x1="450" y1="560" x2="350" y2="540" stroke="#424242" stroke-width="4"/>
+  <line x1="450" y1="570" x2="350" y2="570" stroke="#424242" stroke-width="4"/>
+  <line x1="450" y1="580" x2="350" y2="600" stroke="#424242" stroke-width="4"/>
+  
+  <line x1="574" y1="560" x2="674" y2="540" stroke="#424242" stroke-width="4"/>
+  <line x1="574" y1="570" x2="674" y2="570" stroke="#424242" stroke-width="4"/>
+  <line x1="574" y1="580" x2="674" y2="600" stroke="#424242" stroke-width="4"/>
+  
+  <!-- Checkmark Task Icon -->
+  <circle cx="700" cy="700" r="100" fill="white"/>
+  <path d="M650 700L690 740L760 670" stroke="#00C853" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

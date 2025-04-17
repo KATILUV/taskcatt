@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1242" height="2436" viewBox="0 0 1242 2436" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1242" height="2436" fill="#6200EE"/>
+  
+  <!-- Cat Head -->
+  <g transform="translate(371, 1068) scale(1.2)">
+    <!-- Cat Face -->
+    <path d="M250 100C128 100 30 210 30 344C30 478 128 588 250 588C372 588 470 478 470 344C470 210 372 100 250 100Z" fill="#FFE0B2"/>
+    
+    <!-- Cat Ears -->
+    <path d="M120 184C85 130 15 148 15 148C15 148 40 238 75 273C110 308 120 184 120 184Z" fill="#FFD180"/>
+    <path d="M380 184C415 130 485 148 485 148C485 148 460 238 425 273C390 308 380 184 380 184Z" fill="#FFD180"/>
+    
+    <!-- Cat Eyes -->
+    <ellipse cx="170" cy="324" rx="30" ry="45" fill="#424242"/>
+    <ellipse cx="330" cy="324" rx="30" ry="45" fill="#424242"/>
+    
+    <!-- Eye Highlights -->
+    <circle cx="158" cy="308" r="12" fill="white"/>
+    <circle cx="318" cy="308" r="12" fill="white"/>
+    
+    <!-- Cat Nose -->
+    <path d="M250 374C242 374 236 380 236 390C236 400 242 406 250 406C258 406 264 400 264 390C264 380 258 374 250 374Z" fill="#FF5252"/>
+    
+    <!-- Cat Mouth -->
+    <path d="M210 426C210 426 230 456 250 456C270 456 290 426 290 426" stroke="#424242" stroke-width="6" fill="none"/>
+    
+    <!-- Cat Whiskers -->
+    <line x1="200" y1="390" x2="125" y2="375" stroke="#424242" stroke-width="3"/>
+    <line x1="200" y1="400" x2="125" y2="400" stroke="#424242" stroke-width="3"/>
+    <line x1="200" y1="410" x2="125" y2="425" stroke="#424242" stroke-width="3"/>
+    
+    <line x1="300" y1="390" x2="375" y2="375" stroke="#424242" stroke-width="3"/>
+    <line x1="300" y1="400" x2="375" y2="400" stroke="#424242" stroke-width="3"/>
+    <line x1="300" y1="410" x2="375" y2="425" stroke="#424242" stroke-width="3"/>
+  </g>
+  
+  <!-- App Name -->
+  <text x="621" y="1600" font-family="Arial" font-size="120" font-weight="bold" text-anchor="middle" fill="white">Task Cat</text>
+  
+  <!-- Task Icons -->
+  <g transform="translate(421, 800)">
+    <!-- Task 1 -->
+    <rect x="0" y="0" width="400" height="80" rx="15" fill="white" opacity="0.8"/>
+    <rect x="20" y="20" width="40" height="40" rx="5" stroke="#6200EE" stroke-width="4" fill="white"/>
+    <path d="M25 40L35 50L55 30" stroke="#6200EE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <line x1="80" y1="30" x2="360" y2="30" stroke="#6200EE" stroke-width="5" stroke-linecap="round"/>
+    <line x1="80" y1="50" x2="280" y2="50" stroke="#6200EE" stroke-width="5" stroke-linecap="round"/>
+    
+    <!-- Task 2 -->
+    <rect x="0" y="100" width="400" height="80" rx="15" fill="white" opacity="0.8"/>
+    <rect x="20" y="120" width="40" height="40" rx="5" stroke="#6200EE" stroke-width="4" fill="white"/>
+    <path d="M25 140L35 150L55 130" stroke="#6200EE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <line x1="80" y1="130" x2="360" y2="130" stroke="#6200EE" stroke-width="5" stroke-linecap="round"/>
+    <line x1="80" y1="150" x2="320" y2="150" stroke="#6200EE" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>
