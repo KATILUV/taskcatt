@@ -34,168 +34,169 @@ function createPlaceholderScreenshots() {
   const homeScreenSVG = `<svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
     <rect width="360" height="640" fill="#f8f9fa"/>
     <rect x="0" y="0" width="360" height="70" fill="#0066cc"/>
-    <text x="20" y="40" font-family="Arial" font-size="24" fill="white">Task Cat</text>
-    <text x="20" y="60" font-family="Arial" font-size="14" fill="rgba(255,255,255,0.8)">Stay purr-fectly organized!</text>
+    <text x="20" y="40" font-family="Inter, Arial" font-size="24" fill="white" font-weight="600">Task Cat</text>
+    <text x="20" y="60" font-family="Inter, Arial" font-size="14" fill="rgba(255,255,255,0.8)">Stay purr-fectly organized!</text>
     
     <!-- Progress Card -->
-    <rect x="20" y="90" width="320" height="120" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
-    <text x="40" y="120" font-family="Arial" font-size="16" font-weight="bold" fill="#333">Your Progress</text>
-    <text x="280" y="120" font-family="Arial" font-size="16" font-weight="bold" fill="#0066cc">75%</text>
-    <rect x="40" y="140" width="240" height="16" rx="8" ry="8" fill="#eee"/>
-    <rect x="40" y="140" width="180" height="16" rx="8" ry="8" fill="#0066cc"/>
-    <text x="160" y="180" font-family="Arial" font-size="14" fill="#666" text-anchor="middle">Almost there! Keep going!</text>
+    <rect x="20" y="90" width="320" height="120" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+    <text x="40" y="120" font-family="Inter, Arial" font-size="16" font-weight="600" fill="#333">Your Progress</text>
+    <text x="280" y="120" font-family="Inter, Arial" font-size="16" font-weight="600" fill="#0066cc">75%</text>
+    <rect x="40" y="140" width="260" height="16" rx="8" ry="8" fill="#eee"/>
+    <rect x="40" y="140" width="195" height="16" rx="8" ry="8" fill="#0066cc"/>
+    <text x="160" y="180" font-family="Inter, Arial" font-size="14" fill="#666" text-anchor="middle">Almost there! Keep going!</text>
     
     <!-- Stats Card -->
-    <rect x="20" y="230" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
-    <rect x="40" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
-    <text x="80" y="280" font-family="Arial" font-size="20" font-weight="bold" fill="#0066cc" text-anchor="middle">16</text>
-    <text x="80" y="300" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Total Tasks</text>
+    <rect x="20" y="230" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+    <rect x="40" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(0,102,204,0.1)"/>
+    <text x="80" y="280" font-family="Inter, Arial" font-size="20" font-weight="600" fill="#0066cc" text-anchor="middle">16</text>
+    <text x="80" y="300" font-family="Inter, Arial" font-size="12" fill="#666" text-anchor="middle">Total Tasks</text>
     
-    <rect x="140" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
-    <text x="180" y="280" font-family="Arial" font-size="20" font-weight="bold" fill="#0066cc" text-anchor="middle">12</text>
-    <text x="180" y="300" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Completed</text>
+    <rect x="140" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(76,175,80,0.1)"/>
+    <text x="180" y="280" font-family="Inter, Arial" font-size="20" font-weight="600" fill="#4CAF50" text-anchor="middle">12</text>
+    <text x="180" y="300" font-family="Inter, Arial" font-size="12" fill="#666" text-anchor="middle">Completed</text>
     
-    <rect x="240" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
-    <text x="280" y="280" font-family="Arial" font-size="20" font-weight="bold" fill="#0066cc" text-anchor="middle">4</text>
-    <text x="280" y="300" font-family="Arial" font-size="12" fill="#666" text-anchor="middle">Remaining</text>
+    <rect x="240" y="250" width="80" height="60" rx="8" ry="8" fill="rgba(229,57,53,0.1)"/>
+    <text x="280" y="280" font-family="Inter, Arial" font-size="20" font-weight="600" fill="#E53935" text-anchor="middle">4</text>
+    <text x="280" y="300" font-family="Inter, Arial" font-size="12" fill="#666" text-anchor="middle">Remaining</text>
     
     <!-- Categories Card -->
-    <rect x="20" y="350" width="320" height="140" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
-    <text x="40" y="380" font-family="Arial" font-size="16" font-weight="bold" fill="#333">Category Breakdown</text>
+    <rect x="20" y="350" width="320" height="140" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+    <text x="40" y="380" font-family="Inter, Arial" font-size="16" font-weight="600" fill="#333">Category Breakdown</text>
     
-    <rect x="40" y="400" width="280" height="30" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <rect x="40" y="400" width="280" height="30" rx="8" ry="8" fill="rgba(76,175,80,0.1)"/>
     <circle cx="55" cy="415" r="6" fill="#4CAF50"/>
-    <text x="70" y="419" font-family="Arial" font-size="14" fill="#333">Health</text>
-    <text x="300" y="419" font-family="Arial" font-size="14" fill="#666" text-anchor="end">5</text>
+    <text x="70" y="419" font-family="Inter, Arial" font-size="14" fill="#333" font-weight="500">Health</text>
+    <text x="300" y="419" font-family="Inter, Arial" font-size="14" fill="#666" text-anchor="end">5</text>
     
-    <rect x="40" y="440" width="280" height="30" rx="8" ry="8" fill="rgba(255,255,255,0.5)"/>
+    <rect x="40" y="440" width="280" height="30" rx="8" ry="8" fill="rgba(33,150,243,0.1)"/>
     <circle cx="55" cy="455" r="6" fill="#2196F3"/>
-    <text x="70" y="459" font-family="Arial" font-size="14" fill="#333">Work</text>
-    <text x="300" y="459" font-family="Arial" font-size="14" fill="#666" text-anchor="end">7</text>
+    <text x="70" y="459" font-family="Inter, Arial" font-size="14" fill="#333" font-weight="500">Work</text>
+    <text x="300" y="459" font-family="Inter, Arial" font-size="14" fill="#666" text-anchor="end">7</text>
     
-    <!-- Task Card -->
-    <rect x="20" y="510" width="320" height="110" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
-    <text x="40" y="540" font-family="Arial" font-size="18" font-weight="bold" fill="#333">My Tasks</text>
-    <text x="40" y="565" font-family="Arial" font-size="14" fill="#666">Organize and track your daily tasks.</text>
-    <rect x="40" y="585" width="120" height="25" rx="8" ry="8" fill="#0066cc"/>
-    <text x="100" y="602" font-family="Arial" font-size="12" fill="white" text-anchor="middle">VIEW TASKS</text>
+    <!-- Floating Action Button -->
+    <circle cx="320" cy="560" r="30" fill="#0066cc" filter="drop-shadow(0px 3px 5px rgba(0,0,0,0.2))"/>
+    <rect x="310" y="550" width="20" height="4" fill="white" rx="2" ry="2"/>
+    <rect x="310" y="557" width="20" height="4" fill="white" rx="2" ry="2"/>
+    <rect x="310" y="564" width="20" height="4" fill="white" rx="2" ry="2"/>
   </svg>`;
 
   const routineScreenSVG = `<svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
     <rect width="360" height="640" fill="#f8f9fa"/>
     <rect x="0" y="0" width="360" height="70" fill="#0066cc"/>
-    <text x="20" y="40" font-family="Arial" font-size="24" fill="white">My Routines</text>
+    <text x="20" y="40" font-family="Inter, Arial" font-size="24" font-weight="600" fill="white">My Routines</text>
     <rect x="300" y="25" width="40" height="25" rx="12" ry="12" fill="rgba(255,255,255,0.2)"/>
-    <text x="320" y="42" font-family="Arial" font-size="12" fill="white" text-anchor="middle">Home</text>
+    <text x="320" y="42" font-family="Inter, Arial" font-size="12" font-weight="500" fill="white" text-anchor="middle">Home</text>
     
     <!-- Filter Section -->
-    <rect x="0" y="70" width="360" height="140" fill="white"/>
-    <text x="20" y="95" font-family="Arial" font-size="14" font-weight="bold" fill="#333">Categories</text>
+    <rect x="0" y="70" width="360" height="140" fill="white" filter="drop-shadow(0px 1px 3px rgba(0,0,0,0.1))"/>
+    <text x="20" y="95" font-family="Inter, Arial" font-size="14" font-weight="600" fill="#333">Categories</text>
     
     <rect x="20" y="105" width="100" height="30" rx="15" ry="15" fill="#f5f5f5" stroke="#0066cc" stroke-width="1.5"/>
-    <text x="70" y="125" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">All Categories</text>
+    <text x="70" y="125" font-family="Inter, Arial" font-size="12" font-weight="500" fill="#333" text-anchor="middle">All Categories</text>
     
     <rect x="130" y="105" width="70" height="30" rx="15" ry="15" fill="white" stroke="#4CAF50" stroke-width="1"/>
     <circle cx="145" cy="120" r="4" fill="#4CAF50"/>
-    <text x="165" y="125" font-family="Arial" font-size="12" fill="#666">Health</text>
+    <text x="165" y="125" font-family="Inter, Arial" font-size="12" fill="#666">Health</text>
     
     <rect x="210" y="105" width="70" height="30" rx="15" ry="15" fill="white" stroke="#2196F3" stroke-width="1"/>
     <circle cx="225" cy="120" r="4" fill="#2196F3"/>
-    <text x="245" y="125" font-family="Arial" font-size="12" fill="#666">Work</text>
+    <text x="245" y="125" font-family="Inter, Arial" font-size="12" fill="#666">Work</text>
     
-    <text x="20" y="165" font-family="Arial" font-size="14" font-weight="bold" fill="#333">Priority</text>
+    <text x="20" y="165" font-family="Inter, Arial" font-size="14" font-weight="600" fill="#333">Priority</text>
     
     <rect x="20" y="175" width="100" height="30" rx="15" ry="15" fill="#f5f5f5" stroke="#0066cc" stroke-width="1.5"/>
-    <text x="70" y="195" font-family="Arial" font-size="12" fill="#333" text-anchor="middle">All Priorities</text>
+    <text x="70" y="195" font-family="Inter, Arial" font-size="12" font-weight="500" fill="#333" text-anchor="middle">All Priorities</text>
     
     <rect x="130" y="175" width="70" height="30" rx="15" ry="15" fill="white" stroke="#E53935" stroke-width="1"/>
     <circle cx="145" cy="190" r="4" fill="#E53935"/>
-    <text x="165" y="195" font-family="Arial" font-size="12" fill="#666">High</text>
+    <text x="165" y="195" font-family="Inter, Arial" font-size="12" fill="#666">High</text>
     
     <rect x="210" y="175" width="70" height="30" rx="15" ry="15" fill="white" stroke="#FB8C00" stroke-width="1"/>
     <circle cx="225" cy="190" r="4" fill="#FB8C00"/>
-    <text x="245" y="195" font-family="Arial" font-size="12" fill="#666">Medium</text>
+    <text x="245" y="195" font-family="Inter, Arial" font-size="12" fill="#666">Medium</text>
     
     <!-- Task Cards -->
-    <rect x="20" y="230" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
-    <rect x="20" y="230" width="320" height="40" rx="0" ry="0" fill="white" stroke="#eee" stroke-width="1"/>
+    <rect x="20" y="230" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1" filter="drop-shadow(0px 1px 3px rgba(0,0,0,0.1))"/>
     <circle cx="40" cy="250" r="10" fill="white" stroke="#0066cc" stroke-width="2"/>
-    <text x="70" y="255" font-family="Arial" font-size="16" fill="#333">Finish project proposal</text>
-    <text x="310" y="255" font-family="Arial" font-size="20" fill="#f44336">×</text>
+    <text x="70" y="255" font-family="Inter, Arial" font-size="16" font-weight="500" fill="#333">Finish project proposal</text>
+    <circle cx="310" cy="250" r="10" fill="#ffeeee"/>
+    <text x="310" y="254" font-family="Inter, Arial" font-size="14" fill="#f44336" text-anchor="middle">×</text>
     
     <rect x="40" y="280" width="60" height="20" rx="10" ry="10" fill="rgba(229,57,53,0.2)"/>
     <circle cx="50" cy="290" r="4" fill="#E53935"/>
-    <text x="70" y="293" font-family="Arial" font-size="10" fill="#E53935">High</text>
+    <text x="70" y="293" font-family="Inter, Arial" font-size="10" font-weight="500" fill="#E53935">High</text>
     
     <rect x="110" y="280" width="70" height="20" rx="10" ry="10" fill="rgba(33,150,243,0.2)"/>
-    <text x="145" y="293" font-family="Arial" font-size="10" fill="#2196F3">Work</text>
+    <text x="145" y="293" font-family="Inter, Arial" font-size="10" font-weight="500" fill="#2196F3">Work</text>
     
-    <text x="40" y="315" font-family="Arial" font-size="12" fill="#666">📅 Due: Apr 20</text>
-    <text x="280" y="315" font-family="Arial" font-size="12" fill="#0066cc">🔄 Daily</text>
+    <text x="40" y="315" font-family="Inter, Arial" font-size="12" fill="#666">📅 Due: Apr 20</text>
+    <text x="280" y="315" font-family="Inter, Arial" font-size="12" fill="#0066cc">🔄 Daily</text>
     
-    <rect x="20" y="350" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
-    <rect x="20" y="350" width="320" height="40" rx="0" ry="0" fill="white" stroke="#eee" stroke-width="1"/>
+    <rect x="20" y="350" width="320" height="100" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1" filter="drop-shadow(0px 1px 3px rgba(0,0,0,0.1))"/>
     <circle cx="40" cy="370" r="10" fill="white" stroke="#0066cc" stroke-width="2"/>
-    <text x="70" y="375" font-family="Arial" font-size="16" fill="#333">Morning exercise routine</text>
-    <text x="310" y="375" font-family="Arial" font-size="20" fill="#f44336">×</text>
+    <text x="70" y="375" font-family="Inter, Arial" font-size="16" font-weight="500" fill="#333">Morning exercise routine</text>
+    <circle cx="310" cy="370" r="10" fill="#ffeeee"/>
+    <text x="310" y="374" font-family="Inter, Arial" font-size="14" fill="#f44336" text-anchor="middle">×</text>
     
     <rect x="40" y="400" width="70" height="20" rx="10" ry="10" fill="rgba(251,140,0,0.2)"/>
     <circle cx="50" cy="410" r="4" fill="#FB8C00"/>
-    <text x="70" y="413" font-family="Arial" font-size="10" fill="#FB8C00">Medium</text>
+    <text x="70" y="413" font-family="Inter, Arial" font-size="10" font-weight="500" fill="#FB8C00">Medium</text>
     
     <rect x="120" y="400" width="70" height="20" rx="10" ry="10" fill="rgba(76,175,80,0.2)"/>
-    <text x="155" y="413" font-family="Arial" font-size="10" fill="#4CAF50">Health</text>
+    <text x="155" y="413" font-family="Inter, Arial" font-size="10" font-weight="500" fill="#4CAF50">Health</text>
     
-    <text x="40" y="435" font-family="Arial" font-size="12" fill="#666">📅 Due: Apr 17</text>
-    <text x="280" y="435" font-family="Arial" font-size="12" fill="#0066cc">🔄 Weekly</text>
+    <text x="40" y="435" font-family="Inter, Arial" font-size="12" fill="#666">📅 Due: Apr 17</text>
+    <text x="280" y="435" font-family="Inter, Arial" font-size="12" fill="#0066cc">🔄 Weekly</text>
     
-    <!-- Add Task Form -->
-    <rect x="0" y="580" width="360" height="60" fill="white" stroke="#eee" stroke-width="1"/>
-    <rect x="20" y="595" width="240" height="30" rx="15" ry="15" fill="#f5f5f5"/>
-    <text x="40" y="615" font-family="Arial" font-size="14" fill="#666">Add a new task...</text>
-    <rect x="270" y="595" width="70" height="30" rx="15" ry="15" fill="#0066cc"/>
-    <text x="305" y="615" font-family="Arial" font-size="14" fill="white" text-anchor="middle">Add</text>
+    <!-- Floating Action Button -->
+    <circle cx="320" cy="560" r="30" fill="#0066cc" filter="drop-shadow(0px 3px 5px rgba(0,0,0,0.2))"/>
+    <text x="320" y="568" font-family="Inter, Arial" font-size="24" font-weight="bold" fill="white" text-anchor="middle">+</text>
   </svg>`;
 
   const taskCardDetailSVG = `<svg width="360" height="640" xmlns="http://www.w3.org/2000/svg">
     <rect width="360" height="640" fill="#f8f9fa"/>
     
-    <!-- Task Card Close-Up -->
-    <rect x="20" y="20" width="320" height="600" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1"/>
+    <!-- Bottom Sheet Background -->
+    <rect x="0" y="0" width="360" height="640" fill="rgba(0,0,0,0.5)"/>
     
-    <!-- Card Header -->
-    <rect x="20" y="20" width="320" height="60" rx="16" ry="0" fill="white" stroke="#eee" stroke-width="1"/>
-    <circle cx="50" cy="50" r="15" fill="white" stroke="#0066cc" stroke-width="2"/>
-    <text x="100" y="55" font-family="Arial" font-size="18" fill="#333">Complete slide deck</text>
-    <circle cx="310" cy="50" r="15" fill="#ffeeee"/>
-    <text x="310" y="55" font-family="Arial" font-size="20" fill="#f44336" text-anchor="middle">×</text>
+    <!-- Task Card in Bottom Sheet -->
+    <rect x="0" y="180" width="360" height="460" rx="16" ry="16" fill="white" stroke="#eee" stroke-width="1" filter="drop-shadow(0px -2px 10px rgba(0,0,0,0.2))"/>
+    
+    <!-- Bottom Sheet Header -->
+    <rect x="0" y="180" width="360" height="50" rx="16" ry="16" fill="white"/>
+    <line x1="150" y1="195" x2="210" y2="195" stroke="#999" stroke-width="4" stroke-linecap="round"/>
+    <text x="50" y="215" font-family="Inter, Arial" font-size="16" font-weight="600" fill="#333">Task Details</text>
+    <circle cx="320" cy="205" r="15" fill="#ffeeee"/>
+    <text x="320" y="210" font-family="Inter, Arial" font-size="16" fill="#f44336" text-anchor="middle">×</text>
+    
+    <!-- Task Title -->
+    <circle cx="50" cy="255" r="15" fill="white" stroke="#0066cc" stroke-width="2"/>
+    <text x="80" y="260" font-family="Inter, Arial" font-size="18" font-weight="500" fill="#333">Complete slide deck</text>
     
     <!-- Card Content -->
-    <rect x="50" y="100" width="90" height="30" rx="15" ry="15" fill="rgba(229,57,53,0.2)"/>
-    <circle cx="65" cy="115" r="6" fill="#E53935"/>
-    <text x="95" y="120" font-family="Arial" font-size="14" fill="#E53935" font-weight="medium">High</text>
+    <rect x="50" y="285" width="90" height="30" rx="15" ry="15" fill="rgba(229,57,53,0.2)"/>
+    <circle cx="65" cy="300" r="6" fill="#E53935"/>
+    <text x="95" y="305" font-family="Inter, Arial" font-size="14" font-weight="500" fill="#E53935">High</text>
     
-    <rect x="150" y="100" width="95" height="30" rx="15" ry="15" fill="rgba(33,150,243,0.2)"/>
-    <text x="197" y="120" font-family="Arial" font-size="14" fill="#2196F3" font-weight="medium">Work</text>
+    <rect x="150" y="285" width="95" height="30" rx="15" ry="15" fill="rgba(33,150,243,0.2)"/>
+    <text x="197" y="305" font-family="Inter, Arial" font-size="14" font-weight="500" fill="#2196F3">Work</text>
     
     <!-- Card Footer -->
-    <text x="50" y="170" font-family="Arial" font-size="14" fill="#666">📅 Due: Apr 19, 2025</text>
-    <text x="50" y="200" font-family="Arial" font-size="14" fill="#0066cc">🔄 Weekly</text>
-    <text x="50" y="230" font-family="Arial" font-size="14" fill="#FB8C00">🔔 Reminder set</text>
+    <text x="50" y="345" font-family="Inter, Arial" font-size="14" fill="#666">📅 Due: Apr 19, 2025</text>
+    <text x="50" y="375" font-family="Inter, Arial" font-size="14" fill="#0066cc">🔄 Weekly</text>
+    <text x="50" y="405" font-family="Inter, Arial" font-size="14" fill="#FB8C00">🔔 Reminder set</text>
     
-    <!-- Typography Showcase -->
-    <text x="50" y="280" font-family="Arial" font-size="24" fill="#333" font-weight="bold">Title (H1)</text>
-    <text x="50" y="320" font-family="Arial" font-size="20" fill="#333" font-weight="bold">Subtitle (H2)</text>
-    <text x="50" y="350" font-family="Arial" font-size="16" fill="#333">Body Text (Body1)</text>
-    <text x="50" y="380" font-family="Arial" font-size="14" fill="#666">Secondary Text (Body2)</text>
-    <text x="50" y="410" font-family="Arial" font-size="12" fill="#666">Caption Text</text>
+    <!-- Recurrence Settings -->
+    <rect x="40" y="435" width="280" height="80" rx="8" ry="8" fill="rgba(0,102,204,0.05)" stroke="#e1e4e8" stroke-width="1"/>
+    <text x="60" y="455" font-family="Inter, Arial" font-size="14" font-weight="600" fill="#333">Recurrence Settings</text>
+    <text x="60" y="480" font-family="Inter, Arial" font-size="13" fill="#666">Pattern: Weekly (Mon, Wed, Fri)</text>
+    <text x="60" y="500" font-family="Inter, Arial" font-size="13" fill="#666">Until: June 30, 2025 (10 occurrences)</text>
     
-    <!-- Inter Font Family -->
-    <text x="50" y="450" font-family="Arial" font-size="18" fill="#333" font-weight="bold">Inter Font Family</text>
-    <text x="50" y="480" font-family="Arial" font-size="14" fill="#333">Regular: The quick brown fox</text>
-    <text x="50" y="510" font-family="Arial" font-size="14" fill="#333" font-weight="500">Medium: The quick brown fox</text>
-    <text x="50" y="540" font-family="Arial" font-size="14" fill="#333" font-weight="600">SemiBold: The quick brown fox</text>
-    <text x="50" y="570" font-family="Arial" font-size="14" fill="#333" font-weight="bold">Bold: The quick brown fox</text>
+    <!-- Reminder Settings -->
+    <rect x="40" y="530" width="280" height="80" rx="8" ry="8" fill="rgba(251,140,0,0.05)" stroke="#e1e4e8" stroke-width="1"/>
+    <text x="60" y="550" font-family="Inter, Arial" font-size="14" font-weight="600" fill="#333">Reminder Settings</text>
+    <text x="60" y="575" font-family="Inter, Arial" font-size="13" fill="#666">Time: 9:00 AM on due date</text>
+    <text x="60" y="595" font-family="Inter, Arial" font-size="13" fill="#666">Method: Push notification</text>
   </svg>`;
 
   fs.writeFileSync(path.join(imagesDir, 'home-screen.svg'), homeScreenSVG);
