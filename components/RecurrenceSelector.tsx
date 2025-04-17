@@ -8,7 +8,8 @@ import {
   ScrollView,
   Switch,
   TextInput,
-  Platform
+  Platform,
+  TextStyle
 } from 'react-native';
 import { 
   RecurrencePattern, 
@@ -17,7 +18,7 @@ import {
   WEEK_DAYS,
   WeekDay
 } from '../models/Task';
-import { theme } from '../utils/Theme';
+import { useTheme, createStyles } from '../utils/Theme';
 import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
 
 interface RecurrenceSelectorProps {
@@ -31,6 +32,8 @@ export default function RecurrenceSelector({
   onRecurrenceChange,
   showLabel = true
 }: RecurrenceSelectorProps) {
+  const { theme } = useTheme();
+  const styles = useStyles();
   const [modalVisible, setModalVisible] = useState(false);
   const [tempRecurrence, setTempRecurrence] = useState<RecurrenceSettings>(() => {
     return recurrence || { pattern: 'None' };
@@ -308,173 +311,177 @@ export default function RecurrenceSelector({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 10,
-  },
-  label: {
-    fontSize: scaleFont(16),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-    marginBottom: 8,
-  },
-  selectorButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.gray,
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: theme.colors.white,
-  },
-  selectorText: {
-    fontSize: scaleFont(16),
-    color: theme.colors.textPrimary,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: theme.colors.white,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.lightGray,
-  },
-  modalTitle: {
-    fontSize: scaleFont(18),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-  },
-  closeButton: {
-    fontSize: scaleFont(16),
-    color: theme.colors.primary,
-  },
-  modalBody: {
-    padding: 16,
-    maxHeight: '70%',
-  },
-  patternsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 8,
-  },
-  patternButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.gray,
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    margin: 4,
-    backgroundColor: theme.colors.white,
-  },
-  patternButtonSelected: {
-    backgroundColor: theme.colors.primaryLight,
-    borderColor: theme.colors.primary,
-  },
-  patternButtonText: {
-    fontSize: scaleFont(14),
-    color: theme.colors.textSecondary,
-  },
-  patternButtonTextSelected: {
-    color: theme.colors.primary,
-    fontWeight: 'bold',
-  },
-  sectionTitle: {
-    fontSize: scaleFont(16),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  settingSection: {
-    marginVertical: 8,
-  },
-  weekDaysContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 8,
-    justifyContent: 'space-between',
-  },
-  weekdayButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.gray,
-    borderRadius: 20,
-    padding: 8,
-    marginVertical: 4,
-    width: scale(50),
-    alignItems: 'center',
-  },
-  weekdayButtonSelected: {
-    backgroundColor: theme.colors.primaryLight,
-    borderColor: theme.colors.primary,
-  },
-  weekdayButtonText: {
-    fontSize: scaleFont(14),
-    color: theme.colors.textSecondary,
-  },
-  weekdayButtonTextSelected: {
-    color: theme.colors.primary,
-    fontWeight: 'bold',
-  },
-  intervalContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  intervalInput: {
-    borderWidth: 1,
-    borderColor: theme.colors.gray,
-    borderRadius: 8,
-    padding: 8,
-    width: scale(60),
-    marginRight: 8,
-    fontSize: scaleFont(16),
-  },
-  intervalLabel: {
-    fontSize: scaleFont(16),
-    color: theme.colors.textPrimary,
-  },
-  helperText: {
-    fontSize: scaleFont(14),
-    color: theme.colors.textSecondary,
-    marginVertical: 8,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.lightGray,
-  },
-  clearButton: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.lightGray,
-    minWidth: scale(100),
-    alignItems: 'center',
-  },
-  clearButtonText: {
-    fontSize: scaleFont(16),
-    color: theme.colors.textPrimary,
-  },
-  confirmButton: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.primary,
-    minWidth: scale(100),
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    fontSize: scaleFont(16),
-    color: theme.colors.white,
-    fontWeight: 'bold',
-  },
+const useStyles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      marginVertical: 10,
+    },
+    label: {
+      fontSize: scaleFont(16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+    } as TextStyle,
+    selectorButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.gray,
+      borderRadius: 8,
+      padding: 12,
+      backgroundColor: theme.colors.white,
+    },
+    selectorText: {
+      fontSize: scaleFont(16),
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: theme.colors.white,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      maxHeight: '80%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    modalTitle: {
+      fontSize: scaleFont(18),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    closeButton: {
+      fontSize: scaleFont(16),
+      color: theme.colors.primary,
+    } as TextStyle,
+    modalBody: {
+      padding: 16,
+      maxHeight: '70%',
+    },
+    patternsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginVertical: 8,
+    },
+    patternButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.gray,
+      borderRadius: 20,
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      margin: 4,
+      backgroundColor: theme.colors.white,
+    },
+    patternButtonSelected: {
+      backgroundColor: theme.colors.primaryLight,
+      borderColor: theme.colors.primary,
+    },
+    patternButtonText: {
+      fontSize: scaleFont(14),
+      color: theme.colors.textSecondary,
+    } as TextStyle,
+    patternButtonTextSelected: {
+      color: theme.colors.primary,
+      fontWeight: 'bold',
+    } as TextStyle,
+    sectionTitle: {
+      fontSize: scaleFont(16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginTop: 16,
+      marginBottom: 8,
+    } as TextStyle,
+    settingSection: {
+      marginVertical: 8,
+    },
+    weekDaysContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginVertical: 8,
+      justifyContent: 'space-between',
+    },
+    weekdayButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.gray,
+      borderRadius: 20,
+      padding: 8,
+      marginVertical: 4,
+      width: scale(50),
+      alignItems: 'center',
+    },
+    weekdayButtonSelected: {
+      backgroundColor: theme.colors.primaryLight,
+      borderColor: theme.colors.primary,
+    },
+    weekdayButtonText: {
+      fontSize: scaleFont(14),
+      color: theme.colors.textSecondary,
+    } as TextStyle,
+    weekdayButtonTextSelected: {
+      color: theme.colors.primary,
+      fontWeight: 'bold',
+    } as TextStyle,
+    intervalContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 8,
+    },
+    intervalInput: {
+      borderWidth: 1,
+      borderColor: theme.colors.gray,
+      borderRadius: 8,
+      padding: 8,
+      width: scale(60),
+      marginRight: 8,
+      fontSize: scaleFont(16),
+    } as TextStyle,
+    intervalLabel: {
+      fontSize: scaleFont(16),
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    helperText: {
+      fontSize: scaleFont(14),
+      color: theme.colors.textSecondary,
+      marginVertical: 8,
+    } as TextStyle,
+    modalFooter: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.lightGray,
+    },
+    clearButton: {
+      padding: 12,
+      borderRadius: 8,
+      backgroundColor: theme.colors.lightGray,
+      minWidth: scale(100),
+      alignItems: 'center',
+    },
+    clearButtonText: {
+      fontSize: scaleFont(16),
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    confirmButton: {
+      padding: 12,
+      borderRadius: 8,
+      backgroundColor: theme.colors.primary,
+      minWidth: scale(100),
+      alignItems: 'center',
+    },
+    confirmButtonText: {
+      fontSize: scaleFont(16),
+      color: theme.colors.white,
+      fontWeight: 'bold',
+    } as TextStyle,
+  });
 });
