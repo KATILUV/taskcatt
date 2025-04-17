@@ -17,7 +17,9 @@ import { StorageService } from '../services/StorageService';
 import { TASK_CATEGORIES, TaskCategory } from '../models/Task';
 import ProgressBar from '../components/ProgressBar';
 import { isTablet, scale, scaleFont, getResponsiveStyles } from '../utils/ResponsiveUtils';
-import { createStyles, theme, colors } from '../utils/Theme';
+import { createStyles, useTheme } from '../utils/Theme';
+import { IconButton } from '../components/IconButton';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -106,6 +108,9 @@ export default function HomeScreen({ navigation }: Props) {
     return "Just getting started. You can do it!";
   };
   
+  // Get theme from context
+  const { theme } = useTheme();
+  
   // Get color for a category
   const getCategoryColor = (category: TaskCategory): string => {
     switch (category) {
@@ -177,8 +182,13 @@ export default function HomeScreen({ navigation }: Props) {
     <Animated.View style={{ flex: 1, opacity: screenOpacity }}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Task Cat</Text>
-          <Text style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
+          <View style={styles.headerContent}>
+            <View>
+              <Text style={styles.headerTitle}>Task Cat</Text>
+              <Text style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
+            </View>
+            <ThemeToggle size="medium" />
+          </View>
         </View>
 
         <ScrollView 
@@ -337,8 +347,12 @@ const styles = createStyles((theme) => {
       padding: theme.spacing.md,
       backgroundColor: theme.colors.primary,
       height: theme.layout.headerHeight,
-      justifyContent: 'center',
       ...theme.shadows.medium,
+    },
+    headerContent: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
     headerTitle: {
       ...theme.typography.h1,

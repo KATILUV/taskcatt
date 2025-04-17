@@ -29,7 +29,9 @@ import { ReminderService } from '../services/ReminderService';
 import TaskItem from '../components/TaskItem';
 import TaskInput from '../components/TaskInput';
 import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
-import { createStyles, theme } from '../utils/Theme';
+import { createStyles, useTheme } from '../utils/Theme';
+import { IconButton } from '../components/IconButton';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Routine'>;
 
@@ -38,6 +40,9 @@ export default function RoutineScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<TaskCategory | 'All'>('All');
   const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<TaskPriority | 'All'>('All');
+  
+  // Get theme from context
+  const { theme } = useTheme();
   
   // Animation values for screen transitions and staggered item animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -341,19 +346,23 @@ export default function RoutineScreen({ navigation }: Props) {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>My Tasks</Text>
-          <Button
-            title="Home"
-            onPress={() => {
-              // Fade out animation when navigating away
-              Animated.timing(fadeAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-              }).start(() => {
-                navigation.navigate('Home');
-              });
-            }}
-          />
+          <View style={styles.headerActions}>
+            <ThemeToggle size="small" style={{ marginRight: 8 }} />
+            <IconButton 
+              name="home" 
+              variant="primary" 
+              onPress={() => {
+                // Fade out animation when navigating away
+                Animated.timing(fadeAnim, {
+                  toValue: 0,
+                  duration: 200,
+                  useNativeDriver: true,
+                }).start(() => {
+                  navigation.navigate('Home');
+                });
+              }}
+            />
+          </View>
         </View>
         
         <View style={styles.filtersSection}>
@@ -493,6 +502,10 @@ const styles = createStyles((theme) => {
       fontSize: scaleFont(isTab ? 26 : 22),
       fontWeight: 'bold',
       color: theme.colors.primary,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     filterContainer: {
       backgroundColor: theme.colors.white,
