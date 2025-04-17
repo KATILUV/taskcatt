@@ -58,6 +58,44 @@
       border-left: 4px solid #0066cc;
       margin-bottom: 20px;
     }
+    .structure-section, .tech-section, .design-section {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e1e4e8;
+      margin-bottom: 20px;
+    }
+    .structure-section h3, .tech-section h3, .design-section h3 {
+      color: #0066cc;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    .tech-table th, .tech-table td {
+      border: 1px solid #e1e4e8;
+      padding: 8px 12px;
+      text-align: left;
+    }
+    .tech-table th {
+      background-color: #f1f8ff;
+    }
+    .color-palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .color-item {
+      width: 150px;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -71,7 +109,100 @@
       <li>TypeScript with strict mode</li>
       <li>React Navigation for screen management</li>
       <li>Home and Routine screens with navigation</li>
-      <li>Minimal, clean project structure</li>
+      <li>Task management with drag-and-drop reordering</li>
+      <li>Task categorization with filtering</li>
+      <li>Progress tracking and statistics</li>
+    </ul>
+  </div>
+
+  <h2>App Structure</h2>
+  <div class="structure-section">
+    <h3>Navigation Structure</h3>
+    <ul>
+      <li><strong>HomeScreen</strong> - Dashboard with progress statistics and category breakdown</li>
+      <li><strong>RoutineScreen</strong> - Task management interface with filtering and drag-and-drop</li>
+    </ul>
+    
+    <h3>Components</h3>
+    <ul>
+      <li><strong>TaskItem</strong> - Renders an individual task with category badge and completion toggle</li>
+      <li><strong>TaskInput</strong> - Form for adding new tasks with category selection</li>
+      <li><strong>CategorySelector</strong> - Interactive category filter/selector with color-coded badges</li>
+      <li><strong>ProgressBar</strong> - Visual representation of task completion progress</li>
+    </ul>
+    
+    <h3>Data Flow</h3>
+    <p>The app uses AsyncStorage for persisting tasks between sessions. Tasks are loaded on app startup and synchronized whenever changes occur. The data flow follows a unidirectional pattern where:</p>
+    <ol>
+      <li>User actions trigger state updates</li>
+      <li>State changes are persisted to storage</li>
+      <li>UI updates reflect the current state</li>
+    </ol>
+  </div>
+
+  <h2>Tech Stack</h2>
+  <div class="tech-section">
+    <table class="tech-table">
+      <tr>
+        <th>Technology</th>
+        <th>Purpose</th>
+      </tr>
+      <tr>
+        <td>React Native</td>
+        <td>Cross-platform mobile UI framework</td>
+      </tr>
+      <tr>
+        <td>Expo</td>
+        <td>Development platform and toolchain</td>
+      </tr>
+      <tr>
+        <td>TypeScript</td>
+        <td>Type-safe JavaScript development</td>
+      </tr>
+      <tr>
+        <td>React Navigation</td>
+        <td>Screen navigation and routing</td>
+      </tr>
+      <tr>
+        <td>Async Storage</td>
+        <td>Persistent data storage</td>
+      </tr>
+      <tr>
+        <td>React Native Draggable FlatList</td>
+        <td>Drag-and-drop functionality for task reordering</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>UI Design System</h2>
+  <div class="design-section">
+    <h3>Color Palette</h3>
+    <div class="color-palette">
+      <div class="color-item" style="background-color: #0066cc; color: white;">Primary: #0066cc</div>
+      <div class="color-item" style="background-color: #4CAF50; color: white;">Health: #4CAF50</div>
+      <div class="color-item" style="background-color: #2196F3; color: white;">Work: #2196F3</div>
+      <div class="color-item" style="background-color: #9C27B0; color: white;">Personal: #9C27B0</div>
+      <div class="color-item" style="background-color: #757575; color: white;">Other: #757575</div>
+      <div class="color-item" style="background-color: #f8f9fa; color: black;">Background: #f8f9fa</div>
+      <div class="color-item" style="background-color: white; color: black; border: 1px solid #ddd;">Surface: #ffffff</div>
+      <div class="color-item" style="background-color: #333333; color: white;">Text Primary: #333333</div>
+      <div class="color-item" style="background-color: #666666; color: white;">Text Secondary: #666666</div>
+    </div>
+    
+    <h3>Typography</h3>
+    <p>The app uses the system default font stack with carefully selected size hierarchy:</p>
+    <ul>
+      <li><strong>Headers:</strong> 20-28px, bold</li>
+      <li><strong>Body:</strong> 14-16px, regular</li>
+      <li><strong>Labels:</strong> 12-14px, regular or medium</li>
+    </ul>
+    
+    <h3>Component Styling</h3>
+    <ul>
+      <li><strong>Cards:</strong> White background, rounded corners (12px), subtle elevation</li>
+      <li><strong>Buttons:</strong> Blue background (#0066cc), rounded corners (8px), bold white text</li>
+      <li><strong>Input Fields:</strong> Light background, subtle border, adequate padding</li>
+      <li><strong>Category Badges:</strong> Color-coded, small indicators with rounded shape</li>
     </ul>
   </div>
 
