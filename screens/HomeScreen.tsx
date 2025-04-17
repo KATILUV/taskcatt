@@ -176,147 +176,148 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <Animated.View style={{ flex: 1, opacity: screenOpacity }}>
       <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Task Cat</Text>
-        <Text style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
-      </View>
-
-      <ScrollView 
-        style={styles.scrollView}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={['#0066cc']}
-          />
-        }
-      >
-        <View style={styles.progressSection}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.progressTitle}>Your Progress</Text>
-            <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
-          </View>
-          
-          <ProgressBar 
-            progress={progressPercentage} 
-            height={16}
-            showPercentage={false}
-          />
-          
-          <Text style={styles.progressMessage}>
-            {getStatusMessage()}
-          </Text>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Task Cat</Text>
+          <Text style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
         </View>
 
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{taskCount}</Text>
-            <Text style={styles.statLabel}>Total Tasks</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{completedCount}</Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
-          
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{taskCount - completedCount}</Text>
-            <Text style={styles.statLabel}>Remaining</Text>
-          </View>
-        </View>
-
-        {/* Category Breakdown Section */}
-        {taskCount > 0 && (
-          <View style={styles.categorySection}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Category Breakdown</Text>
+        <ScrollView 
+          style={styles.scrollView}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#0066cc']}
+            />
+          }
+        >
+          <View style={styles.progressSection}>
+            <View style={styles.progressHeader}>
+              <Text style={styles.progressTitle}>Your Progress</Text>
+              <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
             </View>
             
-            {Object.keys(categoryStats).length > 0 ? (
-              <View style={styles.categoryList}>
-                {TASK_CATEGORIES.map(category => (
-                  categoryStats[category] ? (
-                    <View key={category} style={styles.categoryItem}>
-                      <View style={styles.categoryHeader}>
-                        <View 
-                          style={[
-                            styles.categoryDot, 
-                            {backgroundColor: getCategoryColor(category)}
-                          ]} 
-                        />
-                        <Text style={styles.categoryName}>{category}</Text>
-                        <Text style={styles.categoryCount}>{categoryStats[category]}</Text>
-                      </View>
-                      <View style={styles.categoryBarContainer}>
-                        <View 
-                          style={[
-                            styles.categoryBar,
-                            {
-                              backgroundColor: getCategoryColor(category) + '40',
-                              width: `${(categoryStats[category] / taskCount) * 100}%`
-                            }
-                          ]}
-                        >
+            <ProgressBar 
+              progress={progressPercentage} 
+              height={16}
+              showPercentage={false}
+            />
+            
+            <Text style={styles.progressMessage}>
+              {getStatusMessage()}
+            </Text>
+          </View>
+
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{taskCount}</Text>
+              <Text style={styles.statLabel}>Total Tasks</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{completedCount}</Text>
+              <Text style={styles.statLabel}>Completed</Text>
+            </View>
+            
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{taskCount - completedCount}</Text>
+              <Text style={styles.statLabel}>Remaining</Text>
+            </View>
+          </View>
+
+          {/* Category Breakdown Section */}
+          {taskCount > 0 && (
+            <View style={styles.categorySection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Category Breakdown</Text>
+              </View>
+              
+              {Object.keys(categoryStats).length > 0 ? (
+                <View style={styles.categoryList}>
+                  {TASK_CATEGORIES.map(category => (
+                    categoryStats[category] ? (
+                      <View key={category} style={styles.categoryItem}>
+                        <View style={styles.categoryHeader}>
                           <View 
                             style={[
-                              styles.categoryBarFill,
+                              styles.categoryDot, 
                               {backgroundColor: getCategoryColor(category)}
-                            ]}
+                            ]} 
                           />
+                          <Text style={styles.categoryName}>{category}</Text>
+                          <Text style={styles.categoryCount}>{categoryStats[category]}</Text>
+                        </View>
+                        <View style={styles.categoryBarContainer}>
+                          <View 
+                            style={[
+                              styles.categoryBar,
+                              {
+                                backgroundColor: getCategoryColor(category) + '40',
+                                width: `${(categoryStats[category] / taskCount) * 100}%`
+                              }
+                            ]}
+                          >
+                            <View 
+                              style={[
+                                styles.categoryBarFill,
+                                {backgroundColor: getCategoryColor(category)}
+                              ]}
+                            />
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  ) : null
-                ))}
-              </View>
-            ) : (
-              <Text style={styles.noCategoriesText}>
-                No categorized tasks yet
-              </Text>
-            )}
-          </View>
-        )}
-        
-        <View style={styles.cardContainer}>
-          <TouchableOpacity 
-            activeOpacity={0.99} // Use high activeOpacity so we can control the animation
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            onPress={navigateToRoutine}
-          >
-            <Animated.View 
-              style={[
-                styles.taskCard,
-                {
-                  opacity: taskCardOpacity,
-                  transform: [{ scale: taskCardScale }]
-                }
-              ]}
-            >
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>My Tasks</Text>
-                <Text style={styles.cardDescription}>
-                  Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
-                </Text>
-                
-                <View style={styles.cardActions}>
-                  <TouchableOpacity 
-                    style={styles.actionButton}
-                    onPress={navigateToRoutine}
-                  >
-                    <Text style={styles.actionButtonText}>View Tasks</Text>
-                  </TouchableOpacity>
+                    ) : null
+                  ))}
                 </View>
-              </View>
-            </Animated.View>
-          </TouchableOpacity>
+              ) : (
+                <Text style={styles.noCategoriesText}>
+                  No categorized tasks yet
+                </Text>
+              )}
+            </View>
+          )}
+          
+          <View style={styles.cardContainer}>
+            <TouchableOpacity 
+              activeOpacity={0.99} // Use high activeOpacity so we can control the animation
+              onPressIn={handlePressIn}
+              onPressOut={handlePressOut}
+              onPress={navigateToRoutine}
+            >
+              <Animated.View 
+                style={[
+                  styles.taskCard,
+                  {
+                    opacity: taskCardOpacity,
+                    transform: [{ scale: taskCardScale }]
+                  }
+                ]}
+              >
+                <View style={styles.cardContent}>
+                  <Text style={styles.cardTitle}>My Tasks</Text>
+                  <Text style={styles.cardDescription}>
+                    Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
+                  </Text>
+                  
+                  <View style={styles.cardActions}>
+                    <TouchableOpacity 
+                      style={styles.actionButton}
+                      onPress={navigateToRoutine}
+                    >
+                      <Text style={styles.actionButtonText}>View Tasks</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Animated.View>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+        
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Task Cat - Stay Organized</Text>
         </View>
-      </ScrollView>
-      
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Task Cat - Stay Organized</Text>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </Animated.View>
   );
 }
 
