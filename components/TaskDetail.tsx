@@ -1,13 +1,28 @@
 import React, { useState } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
-  TouchableOpacity, 
   ScrollView,
-  TextInput,
   TextStyle
 } from 'react-native';
+import {
+  Text,
+  Checkbox,
+  IconButton,
+  Card,
+  TextInput,
+  Divider,
+  Surface,
+  Chip,
+  Badge,
+  Button,
+  Avatar,
+  Title,
+  Subheading,
+  Caption,
+  List,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { Task, TaskCategory, TaskPriority, RecurrenceSettings, ReminderSettings } from '../models/Task';
 import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
@@ -90,206 +105,210 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
     });
   };
   
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+
   return (
     <ScrollView 
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={[styles.checkbox, task.completed && styles.checkedBox]}
-          onPress={() => onToggleComplete(task.id)}
-        >
-          {task.completed && (
-            <Ionicons 
-              name="checkmark" 
-              size={scale(isTablet() ? 18 : 16)} 
-              color={theme.colors.white} 
-            />
-          )}
-        </TouchableOpacity>
-        
-        <View style={styles.headerContent}>
-          {isEditing ? (
-            <TextInput
-              style={[styles.titleInput, { color: theme.colors.textPrimary }]}
-              value={title}
-              onChangeText={setTitle}
-              placeholder="Task title"
-              placeholderTextColor={theme.colors.textSecondary}
-            />
-          ) : (
-            <Text style={[styles.title, task.completed && styles.completedText]}>
-              {task.title}
-            </Text>
-          )}
+      <Card style={styles.card}>
+        <Card.Content style={styles.header}>
+          <Checkbox
+            status={task.completed ? 'checked' : 'unchecked'}
+            onPress={() => onToggleComplete(task.id)}
+            color={theme.colors.success}
+          />
           
-          <Text style={[styles.date, { color: theme.colors.textSecondary }]}>
-            Created {formatDate(task.createdAt)}
-          </Text>
-        </View>
-        
-        <View style={styles.actionsContainer}>
-          {isEditing ? (
-            <TouchableOpacity
-              style={[styles.iconButton, { backgroundColor: theme.colors.success + '20' }]}
-              onPress={handleSave}
-            >
-              <Ionicons 
-                name="checkmark-circle" 
-                size={24} 
-                color={theme.colors.success} 
+          <View style={styles.headerContent}>
+            {isEditing ? (
+              <TextInput
+                mode="outlined"
+                label="Task title"
+                value={title}
+                onChangeText={setTitle}
+                style={styles.titleInput}
+                outlineColor={theme.colors.primary}
+                activeOutlineColor={theme.colors.primary}
+                dense
               />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[styles.iconButton, { backgroundColor: theme.colors.primary + '20' }]}
-              onPress={() => setIsEditing(true)}
-            >
-              <Ionicons 
-                name="pencil" 
-                size={20} 
-                color={theme.colors.primary} 
-              />
-            </TouchableOpacity>
-          )}
+            ) : (
+              <Title 
+                style={[
+                  styles.title, 
+                  task.completed && styles.completedText
+                ]}
+                numberOfLines={2}
+              >
+                {task.title}
+              </Title>
+            )}
+            
+            <Caption style={styles.date}>
+              Created {formatDate(task.createdAt)}
+            </Caption>
+          </View>
           
-          <TouchableOpacity
-            style={[styles.iconButton, { backgroundColor: theme.colors.error + '20' }]}
-            onPress={() => onDelete(task.id)}
-          >
-            <Ionicons 
-              name="trash-outline" 
-              size={20} 
-              color={theme.colors.error} 
+          <View style={styles.actionsContainer}>
+            {isEditing ? (
+              <IconButton
+                icon="check-circle"
+                iconColor={theme.colors.success}
+                style={{backgroundColor: theme.colors.success + '20'}}
+                size={24}
+                onPress={handleSave}
+              />
+            ) : (
+              <IconButton
+                icon="pencil"
+                iconColor={theme.colors.primary}
+                style={{backgroundColor: theme.colors.primary + '20'}}
+                size={20}
+                onPress={() => setIsEditing(true)}
+              />
+            )}
+            
+            <IconButton
+              icon="trash-can-outline"
+              iconColor={theme.colors.error}
+              style={{backgroundColor: theme.colors.error + '20'}}
+              size={20}
+              onPress={() => onDelete(task.id)}
             />
-          </TouchableOpacity>
-        </View>
-      </View>
+          </View>
+        </Card.Content>
+      </Card>
       
-      <View style={styles.divider} />
+      <Divider style={styles.divider} />
       
       {isEditing ? (
-        <View style={styles.editForm}>
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Category</Text>
-            <CategorySelector 
-              selectedCategory={category}
-              onSelectCategory={setCategory}
-              showLabel
-            />
-          </View>
-          
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Priority</Text>
-            <PrioritySelector 
-              selectedPriority={priority}
-              onSelectPriority={setPriority}
-              showLabel
-            />
-          </View>
-          
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Recurrence</Text>
-            <RecurrenceSelector 
-              recurrence={recurrence}
-              onRecurrenceChange={setRecurrence}
-              showLabel
-            />
-          </View>
-          
-          <View style={styles.formSection}>
-            <Text style={styles.sectionTitle}>Reminder</Text>
-            <ReminderSelector 
-              reminderSettings={reminder}
-              onReminderChange={setReminder}
-              showLabel
-            />
-          </View>
-        </View>
+        <Card style={styles.editForm}>
+          <Card.Content>
+            <View style={styles.formSection}>
+              <Subheading style={styles.sectionTitle}>Category</Subheading>
+              <CategorySelector 
+                selectedCategory={category}
+                onSelectCategory={setCategory}
+                showLabel
+              />
+            </View>
+            
+            <Divider style={{marginVertical: 16}} />
+            
+            <View style={styles.formSection}>
+              <Subheading style={styles.sectionTitle}>Priority</Subheading>
+              <PrioritySelector 
+                selectedPriority={priority}
+                onSelectPriority={setPriority}
+                showLabel
+              />
+            </View>
+            
+            <Divider style={{marginVertical: 16}} />
+            
+            <View style={styles.formSection}>
+              <Subheading style={styles.sectionTitle}>Recurrence</Subheading>
+              <RecurrenceSelector 
+                recurrence={recurrence}
+                onRecurrenceChange={setRecurrence}
+                showLabel
+              />
+            </View>
+            
+            <Divider style={{marginVertical: 16}} />
+            
+            <View style={styles.formSection}>
+              <Subheading style={styles.sectionTitle}>Reminder</Subheading>
+              <ReminderSelector 
+                reminderSettings={reminder}
+                onReminderChange={setReminder}
+                showLabel
+              />
+            </View>
+          </Card.Content>
+        </Card>
       ) : (
-        <View style={styles.details}>
-          <View style={styles.detailRow}>
-            <View style={styles.labelContainer}>
-              <Ionicons name="bookmark-outline" size={18} color={theme.colors.textSecondary} />
-              <Text style={styles.label}>Category</Text>
-            </View>
-            <View style={[
-              styles.categoryBadge, 
-              { backgroundColor: getCategoryColor(task.category) + '20' }
-            ]}>
-              <Text style={[
-                styles.categoryText,
-                { color: getCategoryColor(task.category) }
-              ]}>
+        <Surface style={styles.details}>
+          <List.Item
+            title="Category"
+            left={props => <List.Icon {...props} icon="bookmark-outline" color={theme.colors.textSecondary} />}
+            right={props => (
+              <Chip
+                mode="outlined"
+                style={[
+                  styles.categoryChip, 
+                  { backgroundColor: getCategoryColor(task.category) + '20' }
+                ]}
+                textStyle={{ color: getCategoryColor(task.category) }}
+              >
                 {task.category}
-              </Text>
-            </View>
-          </View>
+              </Chip>
+            )}
+          />
           
-          <View style={styles.detailRow}>
-            <View style={styles.labelContainer}>
-              <Ionicons name="flag-outline" size={18} color={theme.colors.textSecondary} />
-              <Text style={styles.label}>Priority</Text>
-            </View>
-            <View style={[
-              styles.priorityBadge, 
-              { backgroundColor: getPriorityColor(task.priority) + '20' }
-            ]}>
-              <View style={[
-                styles.priorityIndicator, 
-                { backgroundColor: getPriorityColor(task.priority) }
-              ]} />
-              <Text style={[
-                styles.priorityText,
-                { color: getPriorityColor(task.priority) }
-              ]}>
+          <Divider />
+          
+          <List.Item
+            title="Priority"
+            left={props => <List.Icon {...props} icon="flag-outline" color={theme.colors.textSecondary} />}
+            right={props => (
+              <Chip
+                mode="outlined"
+                style={[
+                  styles.priorityChip, 
+                  { backgroundColor: getPriorityColor(task.priority) + '20' }
+                ]}
+                textStyle={{ color: getPriorityColor(task.priority) }}
+              >
                 {task.priority}
-              </Text>
-            </View>
-          </View>
+              </Chip>
+            )}
+          />
           
           {task.recurrence && (
-            <View style={styles.detailRow}>
-              <View style={styles.labelContainer}>
-                <Ionicons name="refresh" size={18} color={theme.colors.textSecondary} />
-                <Text style={styles.label}>Recurrence</Text>
-              </View>
-              <Text style={styles.valueText}>
-                {task.recurrence.pattern === 'Daily' ? 'Daily' : 
-                 task.recurrence.pattern === 'Weekly' ? 'Weekly' : 
-                 task.recurrence.pattern === 'Monthly' ? 'Monthly' : 
-                 'Custom'}
-              </Text>
-            </View>
+            <>
+              <Divider />
+              <List.Item
+                title="Recurrence"
+                description={
+                  task.recurrence.pattern === 'Daily' ? 'Repeats daily' : 
+                  task.recurrence.pattern === 'Weekly' ? 'Repeats weekly' : 
+                  task.recurrence.pattern === 'Monthly' ? 'Repeats monthly' : 
+                  'Custom recurrence pattern'
+                }
+                left={props => <List.Icon {...props} icon="refresh" color={theme.colors.textSecondary} />}
+              />
+            </>
           )}
           
           {task.reminder?.enabled && (
-            <View style={styles.detailRow}>
-              <View style={styles.labelContainer}>
-                <Ionicons name="notifications-outline" size={18} color={theme.colors.textSecondary} />
-                <Text style={styles.label}>Reminder</Text>
-              </View>
-              <Text style={styles.valueText}>
-                {task.reminder.reminderDate ? formatDate(task.reminder.reminderDate) : 'Enabled'}
-              </Text>
-            </View>
+            <>
+              <Divider />
+              <List.Item
+                title="Reminder"
+                description={task.reminder.reminderDate ? formatDate(task.reminder.reminderDate) : 'Enabled'}
+                left={props => <List.Icon {...props} icon="bell-outline" color={theme.colors.textSecondary} />}
+              />
+            </>
           )}
           
           {task.completed && task.completionHistory && task.completionHistory.length > 0 && (
-            <View style={styles.historySection}>
-              <Text style={styles.sectionTitle}>Completion History</Text>
-              {task.completionHistory.map((record, index) => (
-                <View key={index} style={styles.historyItem}>
-                  <Ionicons name="checkmark-circle" size={16} color={theme.colors.success} />
-                  <Text style={styles.historyText}>
-                    {formatDate(record.date)}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            <Card style={styles.historyCard}>
+              <Card.Title title="Completion History" />
+              <Card.Content>
+                {task.completionHistory.map((record, index) => (
+                  <List.Item
+                    key={index}
+                    title={formatDate(record.date)}
+                    left={props => <List.Icon {...props} icon="check-circle" color={theme.colors.success} />}
+                    style={styles.historyItem}
+                  />
+                ))}
+              </Card.Content>
+            </Card>
           )}
-        </View>
+        </Surface>
       )}
     </ScrollView>
   );
@@ -303,10 +322,16 @@ const styles = createStyles((theme) => {
       flex: 1,
       paddingHorizontal: 2,
     },
+    card: {
+      marginHorizontal: 0,
+      marginVertical: theme.spacing.sm,
+      elevation: 2,
+      backgroundColor: theme.colors.backgroundCard,
+    },
     header: {
       flexDirection: 'row',
       alignItems: 'center', 
-      marginBottom: theme.spacing.md,
+      paddingVertical: 0,
     },
     headerContent: {
       flex: 1,
@@ -325,15 +350,9 @@ const styles = createStyles((theme) => {
       color: theme.colors.textDisabled,
     },
     titleInput: {
-      fontSize: scaleFont(18),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      padding: 0,
-      paddingVertical: theme.spacing.sm,
-      marginBottom: 4,
-      borderBottomWidth: 2,
-      borderBottomColor: theme.colors.primary,
-      letterSpacing: 0.15,
+      fontSize: scaleFont(16),
+      backgroundColor: 'transparent',
+      marginVertical: 0,
     } as TextStyle,
     date: {
       fontSize: scaleFont(12),
@@ -371,74 +390,37 @@ const styles = createStyles((theme) => {
       ...theme.shadows.small,
     },
     divider: {
-      height: 1.5,
+      height: 1,
       backgroundColor: theme.colors.backgroundSecondary,
-      marginVertical: theme.spacing.md,
     },
     details: {
-      marginTop: theme.spacing.sm,
+      marginTop: theme.spacing.md,
+      borderRadius: 8,
+      overflow: 'hidden',
+      elevation: 1,
+      backgroundColor: theme.colors.backgroundCard,
     },
-    detailRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: theme.spacing.md,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.backgroundSecondary,
+    categoryChip: {
+      height: 32,
+      borderWidth: 1,
+      margin: 0,
     },
-    labelContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    priorityChip: {
+      height: 32,
+      borderWidth: 1,
+      margin: 0,
     },
-    label: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
-      color: theme.colors.textSecondary,
-      marginLeft: theme.spacing.sm,
-      letterSpacing: 0.15,
-    } as TextStyle,
-    valueText: {
-      fontSize: scaleFont(14),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
-      color: theme.colors.textPrimary,
-      letterSpacing: 0.1,
-    } as TextStyle,
-    categoryBadge: {
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: scale(isTab ? 8 : 6),
-      borderRadius: scale(isTab ? 18 : 14),
-      ...theme.shadows.small,
+    historyCard: {
+      marginTop: theme.spacing.lg,
+      marginHorizontal: theme.spacing.sm,
+      elevation: 1,
+      backgroundColor: theme.colors.backgroundCard,
     },
-    categoryText: {
-      fontSize: scaleFont(14),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      letterSpacing: 0.1,
-    } as TextStyle,
-    priorityBadge: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: theme.spacing.md,
-      paddingVertical: scale(isTab ? 8 : 6),
-      borderRadius: scale(isTab ? 18 : 14),
-      ...theme.shadows.small,
-    },
-    priorityIndicator: {
-      width: scale(isTab ? 12 : 10),
-      height: scale(isTab ? 12 : 10),
-      borderRadius: scale(isTab ? 6 : 5),
-      marginRight: theme.spacing.xs,
-    },
-    priorityText: {
-      fontSize: scaleFont(14),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      letterSpacing: 0.1,
-    } as TextStyle,
     editForm: {
       marginTop: theme.spacing.md,
+      marginHorizontal: 0,
+      elevation: 1,
+      backgroundColor: theme.colors.backgroundCard,
     },
     formSection: {
       marginBottom: theme.spacing.xl,
