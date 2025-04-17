@@ -40,7 +40,11 @@ Task Cat is a playful task management application built with Expo and React Nati
 
 ### Installation
 
-1. Clone the repository or download the project files
+1. Download the project from Replit:
+   - Click the three dots menu in the Replit interface
+   - Select "Download as zip"
+   - Extract the zip file to a local directory
+
 2. Install dependencies:
    ```
    npm install
@@ -67,6 +71,26 @@ If you encounter any issues:
 - Clear cache with: `npx expo start --clear`
 - Make sure Expo Go is up to date
 - Check your device and computer are on the same network
+
+#### Package Version Warnings
+
+You may see warnings about package compatibility with the current Expo SDK version:
+```
+The following packages should be updated for best compatibility with the installed expo version:
+  react-native-gesture-handler@2.14.0 - expected version: ~2.20.2
+  react-native-reanimated@3.6.2 - expected version: ~3.16.1
+  react-native-safe-area-context@4.8.2 - expected version: 4.12.0
+  react-native-screens@3.29.0 - expected version: ~4.4.0
+```
+
+To fix these warnings when running locally:
+
+```bash
+# Install with force option to override dependency conflicts
+npm install react-native-gesture-handler@~2.20.2 react-native-reanimated@~3.16.1 react-native-safe-area-context@4.12.0 react-native-screens@~4.4.0 --force
+```
+
+Note: The app should work fine even with these warnings, as they're just compatibility recommendations.
 
 ## Usage
 
