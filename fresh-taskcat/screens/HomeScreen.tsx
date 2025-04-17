@@ -1,18 +1,37 @@
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, FlatList, Text } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../navigation/types';
-import { Task, TaskCategory, TaskPriority, RecurrenceSettings, ReminderSettings } from '../models/Task';
+import { Task, TaskCategory, TaskPriority, RecurrenceSettings, ReminderSettings, TASK_CATEGORIES, TASK_PRIORITIES } from '../models/Task';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import EmptyState from '../components/EmptyState';
+import TaskItem from '../components/TaskItem';
+import Confetti from '../components/Confetti';
+import { StorageService } from '../services/StorageService';
 
-// Simplified placeholder component
+// Component props type
 type Props = {
   navigation: StackNavigationProp<RootStackParamList, 'Home'>;
 };
 
 export default function HomeScreen({ navigation }: Props) {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+  
+  // Load tasks on component mount
+  useEffect(() => {
+    loadTasks();
+  }, []);
+  
+  // Load tasks from storage
+  const loadTasks = async () => {
+    setLoading(true);
+    const loadedTasks = await StorageService.loadTasks();
+    setTasks(loadedTasks);
+    setLoading(false);
+  };
   
   const getCategoryColor = useCallback((category: TaskCategory): string => {
     switch (category) {
@@ -24,35 +43,71 @@ export default function HomeScreen({ navigation }: Props) {
     }
   }, []);
 
-  // Placeholder for task management functions
-  const handleAddTask = (
-    title: string, 
-    category: TaskCategory, 
-    priority: TaskPriority, 
-    recurrence?: RecurrenceSettings, 
-    reminder?: ReminderSettings
-  ) => {
+  // Task management functions
+  const handleAddTask = useCallback(() => {
+    // Simple demo task - in a real app, you'd have a form
+    const categories = TASK_CATEGORIES;
+    const priorities = TASK_PRIORITIES;
+    
     const newTask: Task = {
       id: Date.now().toString(),
-      title,
+      title: `Task ${tasks.length + 1}`,
       completed: false,
       createdAt: Date.now(),
-      category,
-      priority,
-      recurrence,
-      reminder,
+      category: categories[Math.floor(Math.random() * categories.length)],
+      priority: priorities[Math.floor(Math.random() * priorities.length)],
     };
     
-    setTasks([...tasks, newTask]);
-  };
+    StorageService.addTask(newTask)
+      .then(() => {
+        setTasks(prevTasks => [...prevTasks, newTask]);
+      });
+  }, [tasks.length]);
+  
+  const handleDeleteTask = useCallback((id: string) => {
+    StorageService.deleteTask(id)
+      .then(() => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+      });
+  }, []);
+  
+  const handleToggleComplete = useCallback((id: string) => {
+    const taskToUpdate = tasks.find(task => task.id === id);
+    
+    if (!taskToUpdate) return;
+    
+    const updatedTask: Task = {
+      ...taskToUpdate,
+      completed: !taskToUpdate.completed
+    };
+    
+    StorageService.updateTask(updatedTask)
+      .then(() => {
+        setTasks(prevTasks => 
+          prevTasks.map(task => task.id === id ? updatedTask : task)
+        );
+        
+        // Show confetti when task is completed
+        if (!taskToUpdate.completed) {
+          setShowConfetti(true);
+        }
+      });
+  }, [tasks]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Task Cat</Text>
+      {showConfetti && (
+        <Confetti 
+          count={50} 
+          duration={3000}
+          onAnimationComplete={() => setShowConfetti(false)}
+        />
+      )}
+      
       {tasks.length === 0 ? (
         <EmptyState 
           title="No Tasks Yet" 
-          message="Add your first task by using the + button" 
+          message="Add your first task by using the + button below" 
           type="tasks"
         />
       ) : (
@@ -60,12 +115,19 @@ export default function HomeScreen({ navigation }: Props) {
           data={tasks}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={styles.taskItem}>
-              <Text>{item.title}</Text>
-            </View>
+            <TaskItem
+              task={item}
+              onDelete={handleDeleteTask}
+              onToggleComplete={handleToggleComplete}
+            />
           )}
+          contentContainerStyle={styles.listContent}
         />
       )}
+      
+      <TouchableOpacity style={styles.fab} onPress={handleAddTask}>
+        <MaterialCommunityIcons name="plus" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
