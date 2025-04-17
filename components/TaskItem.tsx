@@ -30,7 +30,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <TouchableOpacity
         style={[styles.checkbox, task.completed && styles.checkedBox]}
         onPress={() => onToggleComplete(task.id)}
-      />
+      >
+        {task.completed && (
+          <Text style={styles.checkmark}>✓</Text>
+        )}
+      </TouchableOpacity>
       
       <View style={styles.textContainer}>
         <Text 
@@ -42,6 +46,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
         >
           {task.title}
         </Text>
+        {task.completed && (
+          <Text style={styles.completedLabel}>Completed</Text>
+        )}
       </View>
       
       <TouchableOpacity 
@@ -77,7 +84,8 @@ const styles = StyleSheet.create({
   },
   completedTask: {
     backgroundColor: '#f8f8f8',
-    opacity: 0.8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
   },
   textContainer: {
     flex: 1,
@@ -90,6 +98,11 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#888',
   },
+  completedLabel: {
+    fontSize: 12,
+    color: '#4CAF50',
+    marginTop: 4,
+  },
   checkbox: {
     width: 24,
     height: 24,
@@ -97,9 +110,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#0066cc',
     marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   checkedBox: {
-    backgroundColor: '#0066cc',
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+  },
+  checkmark: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   deleteButton: {
     width: 30,
