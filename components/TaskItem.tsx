@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextStyle } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextStyle, ViewStyle } from 'react-native';
 import { 
   Task, 
   TaskCategory, 
@@ -97,8 +97,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
         >
           {task.completed && (
             <Ionicons 
-              name="checkmark" 
-              size={scale(isTablet() ? 18 : 16)} 
+              name="checkmark-sharp" 
+              size={scaleFont(isTablet() ? 18 : 16)} 
               color={theme.colors.white} 
             />
           )}
@@ -120,7 +120,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         >
           <Ionicons 
             name="trash-outline" 
-            size={scale(isTablet() ? 18 : 16)} 
+            size={scaleFont(isTablet() ? 18 : 16)} 
             color={theme.colors.error} 
           />
         </TouchableOpacity>
@@ -167,7 +167,12 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <View style={styles.cardFooter}>
         {dueDate && (
           <View style={styles.dueDateContainer}>
-            <Ionicons name="calendar-outline" size={14} color={theme.colors.textSecondary} style={{marginRight: 4}} />
+            <Ionicons 
+              name="calendar-outline" 
+              size={scaleFont(isTablet() ? 16 : 14)} 
+              color={theme.colors.textSecondary} 
+              style={{marginRight: scale(4)}} 
+            />
             <Text style={styles.dueDateText}>Due: {dueDate}</Text>
           </View>
         )}
@@ -175,7 +180,12 @@ const TaskItem: React.FC<TaskItemProps> = ({
         <View style={styles.metaContainer}>
           {RecurrenceService.isRecurring(task) && (
             <View style={styles.recurrenceContainer}>
-              <Ionicons name="refresh" size={14} color={theme.colors.primary} style={{marginRight: 4}} />
+              <Ionicons 
+                name="sync-outline" 
+                size={scaleFont(isTablet() ? 16 : 14)} 
+                color={theme.colors.primary} 
+                style={{marginRight: scale(4)}} 
+              />
               <Text style={styles.recurrenceText}>
                 {task.recurrence?.pattern === 'Daily' ? 'Daily' : 
                  task.recurrence?.pattern === 'Weekly' ? 'Weekly' : 
@@ -187,14 +197,24 @@ const TaskItem: React.FC<TaskItemProps> = ({
           
           {task.reminder?.enabled && !dueDate && (
             <View style={styles.reminderContainer}>
-              <Ionicons name="notifications-outline" size={14} color={theme.colors.warning} style={{marginRight: 4}} />
+              <Ionicons 
+                name="notifications-outline" 
+                size={scaleFont(isTablet() ? 16 : 14)} 
+                color={theme.colors.warning} 
+                style={{marginRight: scale(4)}} 
+              />
               <Text style={styles.reminderText}>Reminder set</Text>
             </View>
           )}
           
           {task.completed && (
             <View style={styles.completedContainer}>
-              <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} style={{marginRight: 4}} />
+              <Ionicons 
+                name="checkmark-circle" 
+                size={scaleFont(isTablet() ? 16 : 14)} 
+                color={theme.colors.success} 
+                style={{marginRight: scale(4)}} 
+              />
               <Text style={styles.completedLabel}>Completed</Text>
             </View>
           )}
@@ -225,7 +245,7 @@ const styles = createStyles((theme) => {
     },
     completedCard: {
       backgroundColor: theme.colors.backgroundSecondary + '30',
-      borderLeftWidth: scale(4),
+      borderLeftWidth: 4,
       borderLeftColor: theme.colors.success,
     },
     cardHeader: {
@@ -270,11 +290,16 @@ const styles = createStyles((theme) => {
       flex: 1,
       ...(theme.typography.subtitle1 as TextStyle),
       color: theme.colors.textPrimary,
+      fontFamily: theme.fonts.semiBold,
+      fontWeight: '600',
+      letterSpacing: 0.1,
     } as TextStyle,
     completedText: {
       textDecorationLine: 'line-through',
       color: theme.colors.textDisabled,
-    },
+      fontWeight: '400',
+      fontFamily: theme.fonts.regular,
+    } as TextStyle,
     deleteButton: {
       width: scale(isTab ? 36 : 30),
       height: scale(isTab ? 36 : 30),
@@ -311,6 +336,9 @@ const styles = createStyles((theme) => {
     priorityText: {
       ...(theme.typography.caption as TextStyle),
       fontFamily: theme.fonts.medium,
+      fontWeight: '500',
+      letterSpacing: 0.4,
+      fontSize: scaleFont(12),
     } as TextStyle,
     categoryBadge: {
       paddingHorizontal: theme.spacing.sm,
@@ -322,42 +350,61 @@ const styles = createStyles((theme) => {
     categoryText: {
       ...(theme.typography.caption as TextStyle),
       fontFamily: theme.fonts.medium,
+      fontWeight: '500',
+      letterSpacing: 0.4,
+      fontSize: scaleFont(12),
     } as TextStyle,
     dueDateContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-    },
+    } as ViewStyle,
     dueDateText: {
       ...(theme.typography.caption as TextStyle),
       color: theme.colors.textSecondary,
+      fontWeight: '400',
+      letterSpacing: 0.25,
+      fontSize: scaleFont(11),
     } as TextStyle,
     metaContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       flexWrap: 'wrap',
-    },
+    } as ViewStyle,
     recurrenceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
       marginLeft: theme.spacing.sm,
-    },
+    } as ViewStyle,
     recurrenceText: {
       ...(theme.typography.caption as TextStyle),
       color: theme.colors.primary,
+      fontWeight: '500',
+      letterSpacing: 0.25,
+      fontSize: scaleFont(11),
     } as TextStyle,
     reminderContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
       marginLeft: theme.spacing.sm,
-    },
+    } as ViewStyle,
     reminderText: {
       ...(theme.typography.caption as TextStyle),
       color: theme.colors.warning,
+      fontWeight: '500',
+      letterSpacing: 0.25,
+      fontSize: scaleFont(11),
     } as TextStyle,
     completedContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       marginLeft: theme.spacing.sm,
-    },
+    } as ViewStyle,
     completedLabel: {
       ...(theme.typography.caption as TextStyle),
       color: theme.colors.success,
+      fontWeight: '500',
+      letterSpacing: 0.25,
+      fontSize: scaleFont(11),
     } as TextStyle,
   });
 });
