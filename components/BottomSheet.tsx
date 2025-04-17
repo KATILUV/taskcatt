@@ -2,16 +2,22 @@ import React, { useRef, useEffect } from 'react';
 import { 
   View, 
   StyleSheet, 
-  Modal, 
   TouchableWithoutFeedback, 
   Animated, 
   Dimensions,
-  PanResponder,
-  TouchableOpacity,
-  Text
+  PanResponder
 } from 'react-native';
+import { 
+  Portal,
+  Modal as PaperModal,
+  Surface,
+  IconButton,
+  Text,
+  Title,
+  Divider,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../utils/Theme';
 import { scale, scaleFont } from '../utils/ResponsiveUtils';
 
@@ -99,62 +105,77 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     });
   };
 
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={handleClose}
-    >
-      <TouchableWithoutFeedback onPress={handleClose}>
-        <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
-      </TouchableWithoutFeedback>
-      
-      <Animated.View
-        style={[
-          styles.bottomSheet,
-          {
-            height: bottomSheetHeight,
-            paddingBottom: insets.bottom,
-            backgroundColor: theme.colors.backgroundCard,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            transform: [{ translateY }],
-            ...theme.shadows.large,
-          },
-        ]}
+    <Portal>
+      <Modal
+        visible={visible}
+        onDismiss={handleClose}
+        contentContainerStyle={styles.modalContainer}
+        dismissable={true}
       >
-        <View 
-          style={styles.header} 
-          {...panResponder.panHandlers}
-        >
-          <View style={[styles.handle, { backgroundColor: theme.colors.gray }]} />
-          
-          {title && (
-            <View style={styles.titleContainer}>
-              <Text style={[styles.title, { color: theme.colors.textPrimary }]}>
-                {title}
-              </Text>
-            </View>
-          )}
-          
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={handleClose}
-          >
-            <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
+        <TouchableWithoutFeedback onPress={handleClose}>
+          <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
+        </TouchableWithoutFeedback>
         
-        <View style={styles.content}>
-          {children}
-        </View>
-      </Animated.View>
-    </Modal>
+        <Animated.View
+          style={[
+            styles.bottomSheet,
+            {
+              height: bottomSheetHeight,
+              paddingBottom: insets.bottom,
+              backgroundColor: theme.colors.backgroundCard,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              transform: [{ translateY }],
+              elevation: 8,
+            },
+          ]}
+        >
+          <Surface style={styles.surface}>
+            <View 
+              style={styles.header} 
+              {...panResponder.panHandlers}
+            >
+              <View style={[styles.handle, { backgroundColor: theme.colors.gray }]} />
+              
+              {title && (
+                <View style={styles.titleContainer}>
+                  <Title style={styles.title}>
+                    {title}
+                  </Title>
+                </View>
+              )}
+              
+              <IconButton
+                icon="close"
+                iconColor={theme.colors.textSecondary}
+                size={24}
+                style={styles.closeButton}
+                onPress={handleClose}
+              />
+            </View>
+            
+            <Divider />
+            
+            <View style={styles.content}>
+              {children}
+            </View>
+          </Surface>
+        </Animated.View>
+      </Modal>
+    </Portal>
   );
 };
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    margin: 0, // No margins for bottom sheet
+    justifyContent: 'flex-end', // Align to bottom
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
   },
@@ -163,15 +184,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    // Shadow is now applied in the component above using theme.shadows.large
+  },
+  surface: {
+    flex: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
   },
   header: {
     height: 64,
     paddingHorizontal: 24,
     alignItems: 'center',
     position: 'relative',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   handle: {
     position: 'absolute',
@@ -183,10 +207,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    right: 16,
-    top: 16,
-    padding: 8,
-    borderRadius: 20,
+    right: 8,
+    top: 8,
   },
   titleContainer: {
     marginTop: 28,
@@ -194,8 +216,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: scaleFont(18),
-    fontWeight: '600',
-    fontFamily: 'Inter-SemiBold',
     letterSpacing: 0.2,
   },
   content: {

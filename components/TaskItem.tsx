@@ -135,7 +135,7 @@ const TaskItem = memo(({
         </Text>
         
         <IconButton
-          icon="trash-outline"
+          icon="trash-can-outline"
           iconColor={theme.colors.error}
           size={scaleFont(isTablet() ? 20 : 18)}
           onPress={handleDelete}
@@ -175,17 +175,14 @@ const TaskItem = memo(({
       
       <Card.Actions style={styles.cardFooter}>
         {dueDate && (
-          <View style={styles.dueDateContainer}>
-            <Ionicons 
-              name="calendar-outline" 
-              size={scaleFont(isTablet() ? 16 : 14)} 
-              color={theme.colors.textSecondary} 
-              style={{marginRight: scale(4)}} 
-            />
-            <Text variant="labelSmall" style={styles.dueDateText}>
-              Due: {dueDate}
-            </Text>
-          </View>
+          <Chip
+            icon="calendar"
+            compact
+            style={styles.dueDateChip}
+            textStyle={styles.dueDateText}
+          >
+            Due: {dueDate}
+          </Chip>
         )}
         
         <View style={styles.metaContainer}>
@@ -216,7 +213,7 @@ const TaskItem = memo(({
           
           {task.completed && (
             <Chip
-              icon="checkmark-circle"
+              icon="check-circle"
               compact
               style={styles.completedContainer}
               textStyle={styles.completedLabel}
@@ -350,14 +347,14 @@ const styles = createStyles((theme) => {
       letterSpacing: 0.4,
       fontSize: scaleFont(12),
     } as TextStyle,
-    dueDateContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    dueDateChip: {
+      backgroundColor: theme.colors.backgroundSecondary + '50',
+      borderColor: theme.colors.backgroundSecondary,
     } as ViewStyle,
     dueDateText: {
       ...(theme.typography.caption as TextStyle),
       color: theme.colors.textSecondary,
-      fontWeight: '400',
+      fontWeight: '500',
       letterSpacing: 0.25,
       fontSize: scaleFont(11),
     } as TextStyle,
