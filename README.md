@@ -45,9 +45,14 @@ Task Cat is a playful task management application built with Expo and React Nati
    - Select "Download as zip"
    - Extract the zip file to a local directory
 
-2. Install dependencies:
+2. Install dependencies with the --legacy-peer-deps flag to avoid dependency conflicts:
    ```
-   npm install
+   npm install --legacy-peer-deps
+   ```
+   
+   If you prefer using yarn:
+   ```
+   yarn install --ignore-engines
    ```
    
 ### Running Locally
@@ -71,6 +76,21 @@ If you encounter any issues:
 - Clear cache with: `npx expo start --clear`
 - Make sure Expo Go is up to date
 - Check your device and computer are on the same network
+
+#### Dependency Conflicts
+
+If you see errors like:
+```
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+...
+peer react-native@"^0.0.0-0 || 0.60 - 0.72 || 1000.0.0" from @react-native-async-storage/async-storage
+```
+
+Use one of these solutions:
+1. Install with the legacy peer deps flag: `npm install --legacy-peer-deps`
+2. Use the force flag: `npm install --force`
+3. Use yarn with the ignore-engines flag: `yarn install --ignore-engines`
 
 #### Package Version Warnings
 

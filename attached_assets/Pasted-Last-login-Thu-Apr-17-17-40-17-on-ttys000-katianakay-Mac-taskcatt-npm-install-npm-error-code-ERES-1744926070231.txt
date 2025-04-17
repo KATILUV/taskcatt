@@ -1,0 +1,46 @@
+Last login: Thu Apr 17 17:40:17 on ttys000
+katianakay@Mac taskcatt % npm install
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+npm error
+npm error While resolving: task-cat@1.0.0
+npm error Found: react-native@0.73.2
+npm error node_modules/react-native
+npm error   react-native@"0.73.2" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer react-native@"^0.0.0-0 || 0.60 - 0.72 || 1000.0.0" from @react-native-async-storage/async-storage@1.18.2
+npm error node_modules/@react-native-async-storage/async-storage
+npm error   @react-native-async-storage/async-storage@"1.18.2" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/katianakay/.npm/_logs/2025-04-17T21_40_39_860Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/katianakay/.npm/_logs/2025-04-17T21_40_39_860Z-debug-0.log
+katianakay@Mac taskcatt % npm install
+npm error code ERESOLVE
+npm error ERESOLVE unable to resolve dependency tree
+npm error
+npm error While resolving: task-cat@1.0.0
+npm error Found: react-native@0.73.2
+npm error node_modules/react-native
+npm error   react-native@"0.73.2" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer react-native@"^0.0.0-0 || 0.60 - 0.72 || 1000.0.0" from @react-native-async-storage/async-storage@1.18.2
+npm error node_modules/@react-native-async-storage/async-storage
+npm error   @react-native-async-storage/async-storage@"1.18.2" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/katianakay/.npm/_logs/2025-04-17T21_41_03_978Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/katianakay/.npm/_logs/2025-04-17T21_41_03_978Z-debug-0.log
+katianakay@Mac taskcatt % 
