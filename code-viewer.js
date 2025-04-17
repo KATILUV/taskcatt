@@ -161,33 +161,74 @@ const indexTemplate = `<!DOCTYPE html>
     <table class="tech-table">
       <tr>
         <th>Technology</th>
+        <th>Version</th>
         <th>Purpose</th>
+        <th>Implementation Details</th>
       </tr>
       <tr>
         <td>React Native</td>
+        <td>Latest stable</td>
         <td>Cross-platform mobile UI framework</td>
+        <td>Core framework for building the mobile interface with native capabilities. Using functional components with hooks for state management.</td>
       </tr>
       <tr>
         <td>Expo</td>
+        <td>Latest SDK</td>
         <td>Development platform and toolchain</td>
+        <td>Simplifies development workflow with ready-to-use components. Using managed workflow for faster development cycles.</td>
       </tr>
       <tr>
         <td>TypeScript</td>
+        <td>5.x</td>
         <td>Type-safe JavaScript development</td>
+        <td>Using strict mode with interfaces for all data models and component props. Type checking for enhanced code reliability.</td>
       </tr>
       <tr>
         <td>React Navigation</td>
+        <td>6.x</td>
         <td>Screen navigation and routing</td>
+        <td>Implementing Stack Navigator with typed parameters. Configured with screen options for consistent header styling.</td>
       </tr>
       <tr>
-        <td>Async Storage</td>
+        <td>@react-native-async-storage/async-storage</td>
+        <td>Latest stable</td>
         <td>Persistent data storage</td>
+        <td>Storing and retrieving task data with JSON serialization/deserialization. Abstracting storage operations in a dedicated service.</td>
       </tr>
       <tr>
         <td>React Native Draggable FlatList</td>
-        <td>Drag-and-drop functionality for task reordering</td>
+        <td>Latest stable</td>
+        <td>Drag-and-drop functionality</td>
+        <td>Implementing fluid task reordering with haptic feedback and visual indicators. Using optimized rendering for smooth performance.</td>
+      </tr>
+      <tr>
+        <td>React Native Safe Area Context</td>
+        <td>Latest stable</td>
+        <td>Device-aware layout boundaries</td>
+        <td>Ensuring content is properly displayed on different device sizes and respects notches and system UI elements.</td>
+      </tr>
+      <tr>
+        <td>React Native Screens</td>
+        <td>Latest stable</td>
+        <td>Native screen containers</td>
+        <td>Performance optimization for navigation by using native screen containers instead of JS-based ones.</td>
       </tr>
     </table>
+    
+    <h3>Architecture Patterns</h3>
+    <ul>
+      <li><strong>Component-Based Architecture:</strong> Building the UI from reusable, isolated components that manage their own state and rendering.</li>
+      <li><strong>Custom Hooks:</strong> Extracting stateful logic into reusable functions to share behavior across components.</li>
+      <li><strong>Service Layer:</strong> Abstracting data operations (storage, API calls) into dedicated service modules.</li>
+      <li><strong>Unidirectional Data Flow:</strong> Following a clear pattern where data flows down through props and actions flow up through callbacks.</li>
+    </ul>
+    
+    <h3>Build & Configuration</h3>
+    <ul>
+      <li><strong>Babel:</strong> Using babel.config.js for advanced JavaScript transformations.</li>
+      <li><strong>TSConfig:</strong> Configured for strict type checking with modern ECMAScript features.</li>
+      <li><strong>Expo Config:</strong> Custom app.json configuration for platform-specific settings.</li>
+    </ul>
   </div>
 
   <h2>UI Design System</h2>
