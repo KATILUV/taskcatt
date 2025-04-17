@@ -322,8 +322,8 @@ export default function RoutineScreen({ navigation }: Props) {
     );
   }
 
-  // Get priority color for filter buttons
-  const getPriorityColor = (priority: TaskPriority): string => {
+  // Get priority color for filter buttons - memoized for better performance
+  const getPriorityColor = useCallback((priority: TaskPriority): string => {
     switch (priority) {
       case 'High':
         return theme.colors.priorityHigh;
@@ -334,26 +334,47 @@ export default function RoutineScreen({ navigation }: Props) {
       default:
         return theme.colors.categoryOther;
     }
-  };
+  }, [theme.colors]);
 
   // Filter tasks based on selected category and priority
-  // Memoize filtered tasks to avoid recomputation on re-renders
+  // Memoize filtered tasks with optimized performance for large lists
   const filteredTasks = useMemo(() => {
-    // Early return if no filters are applied to avoid unnecessary computation
+    // Fast path: Early return if no filters are applied to avoid unnecessary computation
     if (selectedCategoryFilter === 'All' && selectedPriorityFilter === 'All') {
       return tasks;
     }
     
-    return tasks.filter(task => {
-      const matchesCategory = selectedCategoryFilter === 'All' || task.category === selectedCategoryFilter;
-      const matchesPriority = selectedPriorityFilter === 'All' || task.priority === selectedPriorityFilter;
-      
-      return matchesCategory && matchesPriority;
-    });
+    // Optimization: Check if we only need to filter by one property
+    if (selectedCategoryFilter === 'All') {
+      // Only filter by priority (faster than checking two conditions)
+      return tasks.filter(task => task.priority === selectedPriorityFilter);
+    }
+    
+    if (selectedPriorityFilter === 'All') {
+      // Only filter by category (faster than checking two conditions)
+      return tasks.filter(task => task.category === selectedCategoryFilter);
+    }
+    
+    // If we need to filter by both, use a single pass with both conditions
+    // Pre-allocate result array capacity for better performance
+    const result: Task[] = [];
+    result.length = Math.floor(tasks.length / 2); // Estimate filtered size
+    
+    let actualLength = 0;
+    for (let i = 0; i < tasks.length; i++) {
+      const task = tasks[i];
+      if (task.category === selectedCategoryFilter && task.priority === selectedPriorityFilter) {
+        result[actualLength++] = task;
+      }
+    }
+    
+    // Trim result array to actual size
+    result.length = actualLength;
+    return result;
   }, [tasks, selectedCategoryFilter, selectedPriorityFilter]);
 
-  // Get category color for filter buttons
-  const getCategoryColor = (category: TaskCategory): string => {
+  // Get category color for filter buttons - memoized for better performance
+  const getCategoryColor = useCallback((category: TaskCategory): string => {
     switch (category) {
       case 'Health':
         return theme.colors.categoryHealth;
@@ -365,7 +386,7 @@ export default function RoutineScreen({ navigation }: Props) {
       default:
         return theme.colors.categoryOther;
     }
-  };
+  }, [theme.colors]);
 
   return (
     <Animated.View style={{...styles.container, opacity: fadeAnim}}>

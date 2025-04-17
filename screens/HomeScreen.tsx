@@ -56,23 +56,39 @@ export default function HomeScreen({ navigation }: Props) {
     return Math.round((completed / total) * 100);
   }, []);
 
-  // Load task statistics
+  // Load task statistics with optimized single-pass aggregation
   const loadTaskStats = useCallback(async () => {
     try {
+      // Use a single-pass algorithm to calculate all stats at once
       const tasks = await StorageService.loadTasks();
-      const completed = tasks.filter(task => task.completed).length;
       
-      // Calculate category statistics
+      // Initialize counters
+      let completedCount = 0;
       const catStats: Record<string, number> = {};
-      tasks.forEach(task => {
+      
+      // Single pass through tasks for multiple stats
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        
+        // Count completed tasks
+        if (task.completed) {
+          completedCount++;
+        }
+        
+        // Aggregate category stats
         if (task.category) {
           catStats[task.category] = (catStats[task.category] || 0) + 1;
         }
-      });
+      }
       
-      setTaskCount(tasks.length);
-      setCompletedCount(completed);
-      setProgressPercentage(calculateProgress(tasks.length, completed));
+      // Calculate progress once
+      const totalTasks = tasks.length;
+      const progress = calculateProgress(totalTasks, completedCount);
+      
+      // Batch state updates for better performance
+      setTaskCount(totalTasks);
+      setCompletedCount(completedCount);
+      setProgressPercentage(progress);
       setCategoryStats(catStats);
     } catch (error) {
       console.error('Error loading task stats:', error);
@@ -126,8 +142,8 @@ export default function HomeScreen({ navigation }: Props) {
   // Get theme from context
   const { theme } = useTheme();
   
-  // Get color for a category
-  const getCategoryColor = (category: TaskCategory): string => {
+  // Get color for a category - memoized for better performance
+  const getCategoryColor = useCallback((category: TaskCategory): string => {
     switch (category) {
       case 'Health':
         return theme.colors.categoryHealth;
@@ -139,7 +155,7 @@ export default function HomeScreen({ navigation }: Props) {
       default:
         return theme.colors.categoryOther;
     }
-  };
+  }, [theme.colors]);
   
   // Animation handlers for card press
   const handlePressIn = () => {
