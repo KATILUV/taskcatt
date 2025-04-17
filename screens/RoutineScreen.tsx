@@ -13,8 +13,18 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import type { RootStackParamList } from '../App';
-import { Task, TaskCategory, TASK_CATEGORIES, TaskPriority, TASK_PRIORITIES } from '../models/Task';
+import { 
+  Task, 
+  TaskCategory, 
+  TASK_CATEGORIES, 
+  TaskPriority, 
+  TASK_PRIORITIES,
+  RecurrenceSettings,
+  ReminderSettings 
+} from '../models/Task';
 import { StorageService } from '../services/StorageService';
+import { RecurrenceService } from '../services/RecurrenceService';
+import { ReminderService } from '../services/ReminderService';
 import TaskItem from '../components/TaskItem';
 import TaskInput from '../components/TaskInput';
 import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
@@ -56,19 +66,38 @@ export default function RoutineScreen({ navigation }: Props) {
   }, [tasks, loading]);
 
   // Add a new task
-  const handleAddTask = (title: string, category: TaskCategory, priority: TaskPriority) => {
+  const handleAddTask = (
+    title: string, 
+    category: TaskCategory, 
+    priority: TaskPriority,
+    recurrence?: RecurrenceSettings,
+    reminder?: ReminderSettings
+  ) => {
     const newTask: Task = {
       id: Date.now().toString(),
       title,
       completed: false,
       createdAt: Date.now(),
       category,
-      priority
+      priority,
+      recurrence,
+      reminder
     };
+
+    // If it has a reminder, schedule it
+    if (reminder && reminder.enabled) {
+      ReminderService.scheduleReminder(newTask)
+        .then(notificationId => {
+          if (notificationId && newTask.reminder) {
+            newTask.reminder.notificationId = notificationId;
+          }
+        })
+        .catch(err => console.error('Error scheduling reminder:', err));
+    }
 
     setTasks((prevTasks) => {
       const updatedTasks = [...prevTasks, newTask];
-      // Immediately save to AsyncStorage
+      // Immediately save to AsyncStorage - this will also generate recurring instances
       StorageService.saveTasks(updatedTasks).catch(err => 
         console.error('Error saving after adding task:', err)
       );
@@ -77,13 +106,33 @@ export default function RoutineScreen({ navigation }: Props) {
   };
 
   // Delete a task
-  const handleDeleteTask = (id: string) => {
+  const handleDeleteTask = async (id: string) => {
+    // Find the task to delete
+    const taskToDelete = tasks.find(task => task.id === id);
+    if (!taskToDelete) return;
+    
+    // Check if it's a recurring task or an instance
+    const isRecurringParent = RecurrenceService.isRecurring(taskToDelete) && !taskToDelete.parentTaskId;
+    const isRecurringInstance = !!taskToDelete.parentTaskId;
+    
+    // Special handling for recurring tasks
+    if (isRecurringParent || isRecurringInstance) {
+      // If it's a parent task, we need to delete all instances too
+      await StorageService.deleteTask(id, isRecurringParent);
+    }
+    
+    // Update the local state
     setTasks((prevTasks) => {
-      const updatedTasks = prevTasks.filter(task => task.id !== id);
-      // Immediately save to AsyncStorage
-      StorageService.saveTasks(updatedTasks).catch(err => 
-        console.error('Error saving after deleting task:', err)
-      );
+      const updatedTasks = prevTasks.filter(task => {
+        // Filter out the task with this ID
+        if (task.id === id) return false;
+        
+        // If it's a recurring parent, also filter out all its instances
+        if (isRecurringParent && task.parentTaskId === id) return false;
+        
+        return true;
+      });
+      
       return updatedTasks;
     });
   };
@@ -91,13 +140,35 @@ export default function RoutineScreen({ navigation }: Props) {
   // Toggle task completion status
   const handleToggleComplete = (id: string) => {
     setTasks((prevTasks) => {
-      const updatedTasks = prevTasks.map(task => 
-        task.id === id ? { ...task, completed: !task.completed } : task
+      // Find the task to update
+      const taskToUpdate = prevTasks.find(task => task.id === id);
+      if (!taskToUpdate) return prevTasks;
+      
+      // Create the updated task with toggled completion
+      const taskWithToggledCompletion = { 
+        ...taskToUpdate, 
+        completed: !taskToUpdate.completed 
+      };
+      
+      // Create updated tasks array
+      let updatedTasks = prevTasks.map(task => 
+        task.id === id ? taskWithToggledCompletion : task
       );
-      // Immediately save to AsyncStorage
+      
+      // If this is a recurring task instance, update completion history
+      if (taskWithToggledCompletion.completed && taskWithToggledCompletion.parentTaskId) {
+        // Update the parent task's completion history
+        updatedTasks = RecurrenceService.updateCompletionStatus(taskWithToggledCompletion, updatedTasks);
+      }
+      
+      // If this is being marked as completed and has a recurrence pattern,
+      // we might want to create the next instance (this happens in StorageService)
+      
+      // Immediately save to AsyncStorage, this will handle recurring instances
       StorageService.saveTasks(updatedTasks).catch(err => 
         console.error('Error saving after toggling completion:', err)
       );
+      
       return updatedTasks;
     });
   };
@@ -121,24 +192,32 @@ export default function RoutineScreen({ navigation }: Props) {
   const keyExtractor = useCallback((item: Task) => item.id, []);
   
   // Function to get item layout for improved performance
+  const CARD_HEIGHT = theme.layout.listItemHeight * 1.5; // Increased height for card layout
   const getItemLayout = useCallback(
     (_: any, index: number) => ({
-      length: theme.layout.listItemHeight,
-      offset: theme.layout.listItemHeight * index,
+      length: CARD_HEIGHT,
+      offset: CARD_HEIGHT * index,
       index,
     }),
-    []
+    [CARD_HEIGHT]
   );
   
   // Render individual task item with memoization for better performance
   const renderItem = useCallback(({ item, drag, isActive }: RenderItemParams<Task>) => {
+    // Wrap the async delete function for the TaskItem component
+    const handleDelete = (id: string) => {
+      handleDeleteTask(id).catch(err => 
+        console.error('Error deleting task:', err)
+      );
+    };
+    
     return (
       <ScaleDecorator>
         <TaskItem
           task={item}
           drag={drag}
           isActive={isActive}
-          onDelete={handleDeleteTask}
+          onDelete={handleDelete}
           onToggleComplete={handleToggleComplete}
         />
       </ScaleDecorator>
@@ -416,8 +495,8 @@ const styles = createStyles((theme) => {
       color: theme.colors.textDisabled,
     },
     listContent: {
-      paddingVertical: theme.spacing.sm,
-      paddingHorizontal: isTab ? theme.spacing.md : 0,
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: isTab ? theme.spacing.lg : theme.spacing.sm,
     },
   });
 });

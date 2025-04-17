@@ -30,9 +30,13 @@ export const colors = {
   
   // Status colors
   success: '#4caf50',
+  successLight: '#a5d6a7',
   warning: '#ff9800',
+  warningLight: '#ffcc80',
   error: '#f44336',
+  errorLight: '#ef9a9a',
   info: '#2196f3',
+  infoLight: '#90caf9',
   
   // Neutral colors
   white: '#ffffff',
@@ -60,6 +64,80 @@ export const createTheme = () => {
   return {
     colors,
     ...responsive,
+    
+    // Font configuration
+    fonts: {
+      regular: 'Inter',
+      medium: 'Inter-Medium',
+      semiBold: 'Inter-SemiBold',
+      bold: 'Inter-Bold',
+    },
+    
+    // Typography styles
+    typography: {
+      h1: {
+        fontFamily: 'Inter-Bold',
+        fontSize: 28,
+        lineHeight: 34,
+        letterSpacing: 0.25,
+      },
+      h2: {
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 24,
+        lineHeight: 30,
+        letterSpacing: 0.25,
+      },
+      h3: {
+        fontFamily: 'Inter-SemiBold',
+        fontSize: 20,
+        lineHeight: 26,
+        letterSpacing: 0.15,
+      },
+      subtitle1: {
+        fontFamily: 'Inter-Medium',
+        fontSize: 18,
+        lineHeight: 24,
+        letterSpacing: 0.15,
+      },
+      subtitle2: {
+        fontFamily: 'Inter-Medium',
+        fontSize: 16,
+        lineHeight: 22,
+        letterSpacing: 0.1,
+      },
+      body1: {
+        fontFamily: 'Inter',
+        fontSize: 16,
+        lineHeight: 24,
+        letterSpacing: 0.5,
+      },
+      body2: {
+        fontFamily: 'Inter',
+        fontSize: 14,
+        lineHeight: 20,
+        letterSpacing: 0.25,
+      },
+      button: {
+        fontFamily: 'Inter-Medium',
+        fontSize: 14,
+        lineHeight: 18,
+        letterSpacing: 1.25,
+        textTransform: 'uppercase',
+      },
+      caption: {
+        fontFamily: 'Inter',
+        fontSize: 12,
+        lineHeight: 16,
+        letterSpacing: 0.4,
+      },
+      overline: {
+        fontFamily: 'Inter-Medium',
+        fontSize: 10,
+        lineHeight: 16,
+        letterSpacing: 1.5,
+        textTransform: 'uppercase',
+      },
+    },
     
     // Extended styles
     shadows: {
@@ -91,6 +169,7 @@ export const createTheme = () => {
       backgroundColor: colors.backgroundCard,
       borderRadius: responsive.layout.cardRadius,
       padding: responsive.layout.cardPadding,
+      fontFamily: 'Inter',
       ...{
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -104,12 +183,14 @@ export const createTheme = () => {
       height: responsive.layout.headerHeight,
       backgroundColor: colors.primary,
       paddingHorizontal: responsive.spacing.md,
+      fontFamily: 'Inter-SemiBold',
     },
     
     screenStyle: {
       flex: 1,
       backgroundColor: colors.backgroundPrimary,
       padding: responsive.layout.screenPadding,
+      fontFamily: 'Inter',
     },
   };
 };
