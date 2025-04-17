@@ -13,14 +13,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Expo Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "task-cat-expo-app"
+args = "Task Cat App"
 
 [[workflows.workflow]]
-name = "Expo Server"
+name = "Task Cat App"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -34,19 +30,13 @@ task = "shell.exec"
 args = "npm install && npx expo start --web --port 5000"
 waitForPort = 5000
 
-[[workflows.workflow]]
-name = "task-cat-expo-app"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install && npx expo start --web"
-
 [deployment]
 run = ["sh", "-c", "npm install && npx expo start --web --port 5000"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 8081
+externalPort = 8081
