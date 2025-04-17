@@ -38,24 +38,42 @@ export const StorageService = {
     toDate: number = fromDate + 14 * 24 * 60 * 60 * 1000 // Default 2 weeks
   ): Promise<Task[]> => {
     try {
-      // Load parent tasks
+      // Load parent tasks with minimal processing
       const jsonValue = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
       const parentTasks: Task[] = jsonValue != null ? JSON.parse(jsonValue) : [];
       
+      // Early return for efficiency when instances aren't needed
       if (!includeInstances) {
         return parentTasks;
+      }
+      
+      // Only load instances if there are recurring parent tasks
+      const hasRecurringTasks = parentTasks.some(task => 
+        RecurrenceService.isRecurring(task)
+      );
+      
+      if (!hasRecurringTasks) {
+        return parentTasks; // No instances to load if no recurring tasks
       }
       
       // Load or generate instances for recurring tasks
       const instances = await StorageService.loadTaskInstances(parentTasks, fromDate, toDate);
       
+      // If no instances found, just return parent tasks
+      if (instances.length === 0) {
+        return parentTasks;
+      }
+      
+      // Determine current time once for filtering
+      const now = Date.now();
+      const oneDayInMs = 24 * 60 * 60 * 1000;
+      
       // Combine parent tasks and instances, filtering out completed instances
       return [...parentTasks, ...instances].filter(task => {
         // If it's an instance with a parent, check if it's in the past
         if (task.parentTaskId && task.instanceDate) {
-          const now = Date.now();
           // Keep incomplete future instances or instances from today
-          return !task.completed || task.instanceDate >= now - (24 * 60 * 60 * 1000);
+          return !task.completed || task.instanceDate >= now - oneDayInMs;
         }
         return true;
       });
@@ -155,47 +173,82 @@ export const StorageService = {
     toDate: number = fromDate + 14 * 24 * 60 * 60 * 1000 // Default 2 weeks
   ): Promise<Task[]> => {
     try {
+      // Quick check if there are any recurring tasks at all
+      const recurringParentIds = parentTasks
+        .filter(task => RecurrenceService.isRecurring(task))
+        .map(task => task.id);
+      
+      if (recurringParentIds.length === 0) {
+        return []; // No recurring tasks, so no instances needed
+      }
+      
       // Load existing instances
       const existingJson = await AsyncStorage.getItem(TASK_INSTANCES_KEY);
+      
+      // Early return if no instances stored (we'll need to generate new ones)
+      if (!existingJson) {
+        // Generate new instances for all recurring tasks directly
+        const allNewInstances: Task[] = [];
+        
+        for (const parent of parentTasks.filter(t => RecurrenceService.isRecurring(t))) {
+          const instances = RecurrenceService.generateInstances(parent, fromDate, toDate);
+          if (instances.length > 0) {
+            allNewInstances.push(...instances);
+          }
+        }
+        
+        // Save and return the newly generated instances
+        if (allNewInstances.length > 0) {
+          await StorageService.saveTaskInstances(allNewInstances);
+        }
+        return allNewInstances;
+      }
+      
       let existingInstances: Task[] = existingJson ? JSON.parse(existingJson) : [];
       
-      // Filter instances to the requested date range
+      // Optimization: If there are lots of instances, filter by parent ID first before date filtering
+      if (existingInstances.length > 100) {
+        // First filter by parent ID (faster than date comparison)
+        existingInstances = existingInstances.filter(task =>
+          task.parentTaskId && recurringParentIds.includes(task.parentTaskId)
+        );
+      }
+      
+      // Then filter by date range
       existingInstances = existingInstances.filter(task => 
         task.instanceDate && 
         task.instanceDate >= fromDate && 
         task.instanceDate <= toDate
       );
       
-      // Check if we need to generate additional instances
-      const recurringParentIds = parentTasks
-        .filter(task => RecurrenceService.isRecurring(task))
-        .map(task => task.id);
-      
-      // Find which parents already have instances in the time range
+      // Find which parents already have instances in the time range - use Set for O(1) lookups
       const existingParentIds = new Set(
         existingInstances
           .filter(task => task.parentTaskId)
           .map(task => task.parentTaskId)
       );
       
-      // Generate instances for parents that don't have them yet
+      // Generate instances only for parents that don't have them yet
       const parentsNeedingInstances = parentTasks.filter(task => 
         RecurrenceService.isRecurring(task) && 
         !existingParentIds.has(task.id)
       );
       
       if (parentsNeedingInstances.length > 0) {
-        let newInstances: Task[] = [];
+        // Calculate bulk instances all at once to optimize memory usage
+        const newInstances: Task[] = [];
         
         for (const parent of parentsNeedingInstances) {
           const instances = RecurrenceService.generateInstances(parent, fromDate, toDate);
-          newInstances = [...newInstances, ...instances];
+          if (instances.length > 0) {
+            newInstances.push(...instances);
+          }
         }
         
-        // Save the new instances
+        // Save the new instances only if we have any
         if (newInstances.length > 0) {
           await StorageService.saveTaskInstances(newInstances);
-          existingInstances = [...existingInstances, ...newInstances];
+          existingInstances.push(...newInstances);
         }
       }
       

@@ -15,6 +15,10 @@ author = "agent"
 task = "workflow.run"
 args = "Task Cat Code Viewer"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Expo App"
+
 [[workflows.workflow]]
 name = "Task Cat Code Viewer"
 author = "agent"
@@ -30,12 +34,31 @@ task = "shell.exec"
 args = "node code-viewer.js"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "Expo App"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "expo start --port 5000"
+waitForPort = 5000
+
 [deployment]
 run = ["sh", "-c", "npm install && npx expo start --web --port 5000"]
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
 
 [[ports]]
 localPort = 8081
