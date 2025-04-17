@@ -8,17 +8,20 @@ import {
   KeyboardAvoidingView, 
   Platform 
 } from 'react-native';
+import { TaskCategory } from '../models/Task';
+import CategorySelector from './CategorySelector';
 
 interface TaskInputProps {
-  onAddTask: (title: string) => void;
+  onAddTask: (title: string, category: TaskCategory) => void;
 }
 
 const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
   const [taskTitle, setTaskTitle] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<TaskCategory>('Personal');
 
   const handleAddTask = () => {
     if (taskTitle.trim() !== '') {
-      onAddTask(taskTitle.trim());
+      onAddTask(taskTitle.trim(), selectedCategory);
       setTaskTitle('');
     }
   };
@@ -28,6 +31,12 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
+      <View style={styles.categoryContainer}>
+        <CategorySelector 
+          selectedCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+      </View>
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -55,14 +64,19 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
+    backgroundColor: 'white',
+  },
+  categoryContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#eeeeee',
   },
   inputContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 16,
     backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#eeeeee',
   },
   input: {
     flex: 1,

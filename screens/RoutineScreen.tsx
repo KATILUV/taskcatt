@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, Text, View, Button, SafeAreaView, ActivityIndicator } from 'react-native';
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  Button, 
+  SafeAreaView, 
+  ActivityIndicator,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import type { RootStackParamList } from '../App';
-import { Task } from '../models/Task';
+import { Task, TaskCategory, TASK_CATEGORIES } from '../models/Task';
 import { StorageService } from '../services/StorageService';
 import TaskItem from '../components/TaskItem';
 import TaskInput from '../components/TaskInput';
@@ -13,6 +22,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Routine'>;
 export default function RoutineScreen({ navigation }: Props) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedFilter, setSelectedFilter] = useState<TaskCategory | 'All'>('All');
 
   // Load tasks from AsyncStorage on component mount
   useEffect(() => {
@@ -42,12 +52,13 @@ export default function RoutineScreen({ navigation }: Props) {
   }, [tasks, loading]);
 
   // Add a new task
-  const handleAddTask = (title: string) => {
+  const handleAddTask = (title: string, category: TaskCategory) => {
     const newTask: Task = {
       id: Date.now().toString(),
       title,
       completed: false,
       createdAt: Date.now(),
+      category
     };
 
     setTasks((prevTasks) => {
@@ -118,6 +129,31 @@ export default function RoutineScreen({ navigation }: Props) {
     );
   }
 
+  // Filter tasks based on selected category
+  const getFilteredTasks = useCallback(() => {
+    if (selectedFilter === 'All') {
+      return tasks;
+    }
+    return tasks.filter(task => task.category === selectedFilter);
+  }, [tasks, selectedFilter]);
+
+  const filteredTasks = getFilteredTasks();
+
+  // Get category color for filter buttons
+  const getCategoryColor = (category: TaskCategory): string => {
+    switch (category) {
+      case 'Health':
+        return '#4CAF50'; // Green
+      case 'Work':
+        return '#2196F3'; // Blue
+      case 'Personal':
+        return '#9C27B0'; // Purple
+      case 'Other':
+      default:
+        return '#757575'; // Gray
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -128,14 +164,53 @@ export default function RoutineScreen({ navigation }: Props) {
         />
       </View>
       
-      {tasks.length === 0 ? (
+      <View style={styles.filterContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              selectedFilter === 'All' && styles.filterButtonActive
+            ]}
+            onPress={() => setSelectedFilter('All')}
+          >
+            <Text style={[
+              styles.filterButtonText,
+              selectedFilter === 'All' && styles.filterButtonTextActive
+            ]}>All</Text>
+          </TouchableOpacity>
+          
+          {TASK_CATEGORIES.map(category => (
+            <TouchableOpacity
+              key={category}
+              style={[
+                styles.filterButton,
+                selectedFilter === category && styles.filterButtonActive,
+                { borderColor: getCategoryColor(category) }
+              ]}
+              onPress={() => setSelectedFilter(category)}
+            >
+              <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(category) }]} />
+              <Text style={[
+                styles.filterButtonText,
+                selectedFilter === category && styles.filterButtonTextActive
+              ]}>{category}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+      
+      {filteredTasks.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No tasks yet</Text>
-          <Text style={styles.emptySubtext}>Add a task to get started</Text>
+          <Text style={styles.emptyText}>
+            {tasks.length === 0 ? 'No tasks yet' : 'No tasks in this category'}
+          </Text>
+          <Text style={styles.emptySubtext}>
+            {tasks.length === 0 ? 'Add a task to get started' : 'Try selecting a different category'}
+          </Text>
         </View>
       ) : (
         <DraggableFlatList
-          data={tasks}
+          data={filteredTasks}
           onDragEnd={handleDragEnd}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
@@ -173,6 +248,44 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#0066cc',
+  },
+  filterContainer: {
+    backgroundColor: 'white',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eeeeee',
+  },
+  filterScroll: {
+    paddingHorizontal: 12,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#dddddd',
+    backgroundColor: 'white',
+  },
+  filterButtonActive: {
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1.5,
+  },
+  filterButtonText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  filterButtonTextActive: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  categoryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
   },
   emptyContainer: {
     flex: 1,

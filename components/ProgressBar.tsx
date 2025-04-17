@@ -23,18 +23,19 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   };
 
   const progressColor = getProgressColor();
-  
-  const progressFillStyle = {
-    width: `${normalizedProgress}%`,
-    height: '100%',
-    backgroundColor: progressColor,
-    borderRadius: 10,
-  };
 
   return (
     <View style={styles.container}>
       <View style={[styles.progressBackground, { height }]}>
-        <View style={progressFillStyle} />
+        <View 
+          style={[
+            styles.progressFill, 
+            { 
+              width: `${normalizedProgress}%`,
+              backgroundColor: progressColor,
+            }
+          ]} 
+        />
       </View>
       
       {showPercentage && (
@@ -60,6 +61,7 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     borderRadius: 10,
+    height: '100%',
   },
   percentageText: {
     marginLeft: 10,

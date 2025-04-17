@@ -12,6 +12,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { StorageService } from '../services/StorageService';
+import { TASK_CATEGORIES, TaskCategory } from '../models/Task';
 import ProgressBar from '../components/ProgressBar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
@@ -20,6 +21,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [taskCount, setTaskCount] = useState(0);
   const [completedCount, setCompletedCount] = useState(0);
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState(false);
 
   // Calculate progress percentage
@@ -34,9 +36,18 @@ export default function HomeScreen({ navigation }: Props) {
       const tasks = await StorageService.loadTasks();
       const completed = tasks.filter(task => task.completed).length;
       
+      // Calculate category statistics
+      const catStats: Record<string, number> = {};
+      tasks.forEach(task => {
+        if (task.category) {
+          catStats[task.category] = (catStats[task.category] || 0) + 1;
+        }
+      });
+      
       setTaskCount(tasks.length);
       setCompletedCount(completed);
       setProgressPercentage(calculateProgress(tasks.length, completed));
+      setCategoryStats(catStats);
     } catch (error) {
       console.error('Error loading task stats:', error);
     }
@@ -69,6 +80,21 @@ export default function HomeScreen({ navigation }: Props) {
     if (progressPercentage >= 50) return "Halfway there! You're making progress!";
     if (progressPercentage >= 25) return "Good start! Keep it up!";
     return "Just getting started. You can do it!";
+  };
+  
+  // Get color for a category
+  const getCategoryColor = (category: TaskCategory): string => {
+    switch (category) {
+      case 'Health':
+        return '#4CAF50'; // Green
+      case 'Work':
+        return '#2196F3'; // Blue
+      case 'Personal':
+        return '#9C27B0'; // Purple
+      case 'Other':
+      default:
+        return '#757575'; // Gray
+    }
   };
 
   return (
@@ -122,6 +148,58 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* Category Breakdown Section */}
+        {taskCount > 0 && (
+          <View style={styles.categorySection}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Category Breakdown</Text>
+            </View>
+            
+            {Object.keys(categoryStats).length > 0 ? (
+              <View style={styles.categoryList}>
+                {TASK_CATEGORIES.map(category => (
+                  categoryStats[category] ? (
+                    <View key={category} style={styles.categoryItem}>
+                      <View style={styles.categoryHeader}>
+                        <View 
+                          style={[
+                            styles.categoryDot, 
+                            {backgroundColor: getCategoryColor(category)}
+                          ]} 
+                        />
+                        <Text style={styles.categoryName}>{category}</Text>
+                        <Text style={styles.categoryCount}>{categoryStats[category]}</Text>
+                      </View>
+                      <View style={styles.categoryBarContainer}>
+                        <View 
+                          style={[
+                            styles.categoryBar,
+                            {
+                              backgroundColor: getCategoryColor(category) + '40',
+                              width: `${(categoryStats[category] / taskCount) * 100}%`
+                            }
+                          ]}
+                        >
+                          <View 
+                            style={[
+                              styles.categoryBarFill,
+                              {backgroundColor: getCategoryColor(category)}
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  ) : null
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.noCategoriesText}>
+                No categorized tasks yet
+              </Text>
+            )}
+          </View>
+        )}
+        
         <View style={styles.cardContainer}>
           <TouchableOpacity 
             style={styles.taskCard}
@@ -239,6 +317,78 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 14,
     color: '#666',
+  },
+  categorySection: {
+    backgroundColor: 'white',
+    padding: 16,
+    marginTop: 16,
+    marginHorizontal: 16,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#444',
+  },
+  categoryList: {
+    marginTop: 8,
+  },
+  categoryItem: {
+    marginBottom: 12,
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  categoryDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  categoryName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    flex: 1,
+  },
+  categoryCount: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666',
+    marginLeft: 8,
+  },
+  categoryBarContainer: {
+    height: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginLeft: 18,
+  },
+  categoryBar: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  categoryBarFill: {
+    width: '40%',
+    height: '100%',
+    borderRadius: 4,
+  },
+  noCategoriesText: {
+    fontSize: 14,
+    color: '#888',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: 12,
   },
   cardContainer: {
     padding: 16,

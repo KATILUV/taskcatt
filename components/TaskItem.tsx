@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { Task } from '../models/Task';
+import { Task, TaskCategory } from '../models/Task';
 
 interface TaskItemProps {
   task: Task;
@@ -17,6 +17,19 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onDelete,
   onToggleComplete
 }) => {
+  const getCategoryColor = (category: TaskCategory): string => {
+    switch (category) {
+      case 'Health':
+        return '#4CAF5080'; // Green with opacity
+      case 'Work':
+        return '#2196F380'; // Blue with opacity
+      case 'Personal':
+        return '#9C27B080'; // Purple with opacity
+      case 'Other':
+      default:
+        return '#75757580'; // Gray with opacity
+    }
+  };
   return (
     <TouchableOpacity
       onLongPress={drag}
@@ -46,9 +59,19 @@ const TaskItem: React.FC<TaskItemProps> = ({
         >
           {task.title}
         </Text>
-        {task.completed && (
-          <Text style={styles.completedLabel}>Completed</Text>
-        )}
+        <View style={styles.detailsContainer}>
+          {task.category && (
+            <View style={[
+              styles.categoryBadge, 
+              { backgroundColor: getCategoryColor(task.category) }
+            ]}>
+              <Text style={styles.categoryText}>{task.category}</Text>
+            </View>
+          )}
+          {task.completed && (
+            <Text style={styles.completedLabel}>Completed</Text>
+          )}
+        </View>
       </View>
       
       <TouchableOpacity 
@@ -91,6 +114,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 10,
   },
+  detailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginTop: 4,
+  },
   taskTitle: {
     fontSize: 16,
   },
@@ -98,10 +127,20 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
     color: '#888',
   },
+  categoryBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    marginRight: 8,
+  },
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#333',
+  },
   completedLabel: {
     fontSize: 12,
     color: '#4CAF50',
-    marginTop: 4,
   },
   checkbox: {
     width: 24,
