@@ -8,7 +8,8 @@ import {
 } from '../models/Task';
 import { RecurrenceService } from '../services/RecurrenceService'; 
 import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
-import { createStyles, theme } from '../utils/Theme';
+import { createStyles, useTheme } from '../utils/Theme';
+import { Ionicons } from '@expo/vector-icons';
 
 interface TaskItemProps {
   task: Task;
@@ -25,6 +26,8 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onDelete,
   onToggleComplete
 }) => {
+  // Get theme from context
+  const { theme } = useTheme();
   const getCategoryColor = (category: TaskCategory): string => {
     switch (category) {
       case 'Health':
@@ -107,12 +110,12 @@ const TaskItem: React.FC<TaskItemProps> = ({
           {task.title}
         </Text>
         
-        <TouchableOpacity 
-          style={styles.deleteButton}
+        <IconButton
+          name="trash-outline"
+          variant="danger"
+          size="small"
           onPress={() => onDelete(task.id)}
-        >
-          <Text style={styles.deleteButtonText}>×</Text>
-        </TouchableOpacity>
+        />
       </View>
       
       {/* Card Content */}

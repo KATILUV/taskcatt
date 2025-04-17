@@ -20,8 +20,10 @@ import CategorySelector from './CategorySelector';
 import PrioritySelector from './PrioritySelector';
 import RecurrenceSelector from './RecurrenceSelector';
 import ReminderSelector from './ReminderSelector';
-import { theme } from '../utils/Theme';
+import { createStyles, useTheme } from '../utils/Theme';
 import { scale, scaleFont } from '../utils/ResponsiveUtils';
+import { IconButton } from './IconButton';
+import { Ionicons } from '@expo/vector-icons';
 
 interface TaskInputProps {
   onAddTask: (
@@ -40,6 +42,9 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [recurrence, setRecurrence] = useState<RecurrenceSettings | undefined>(undefined);
   const [reminder, setReminder] = useState<ReminderSettings | undefined>(undefined);
+  
+  // Get theme from context
+  const { theme } = useTheme();
 
   const handleAddTask = () => {
     if (taskTitle.trim() !== '') {
@@ -125,7 +130,7 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles = createStyles((theme) => StyleSheet.create({
   container: {
     width: '100%',
     backgroundColor: theme.colors.white,
@@ -194,6 +199,6 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(14),
     fontWeight: '500',
   }
-});
+}));
 
 export default TaskInput;
