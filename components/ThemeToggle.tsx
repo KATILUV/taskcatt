@@ -4,7 +4,6 @@ import {
   TouchableOpacity, 
   View, 
   Text,
-  Animated,
   ViewStyle,
   TextStyle
 } from 'react-native';
@@ -86,22 +85,19 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   );
 };
 
-const useStyles = createStyles((theme) => {
-  return StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    } as ViewStyle,
-    button: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: scale(18),
-      borderWidth: 1,
-    } as ViewStyle,
-    label: {
-      marginRight: theme.spacing.sm,
-      fontSize: theme.typography.caption.fontSize,
-      fontFamily: theme.typography.caption.fontFamily,
-    } as TextStyle
-  });
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  } as ViewStyle,
+  button: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: scale(18),
+    borderWidth: 1,
+  } as ViewStyle,
+  label: {
+    marginRight: 8,
+    fontSize: 12,
+  } as TextStyle
 });
