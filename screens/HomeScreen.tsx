@@ -273,6 +273,13 @@ export default function HomeScreen({ navigation }: Props) {
 
   return (
     <Animated.View style={{ flex: 1, opacity: screenOpacity }}>
+      {showConfetti && (
+        <Confetti
+          count={75}
+          duration={2000}
+          onAnimationComplete={() => setShowConfetti(false)}
+        />
+      )}
       <SafeAreaView style={styles.container}>
         <Surface style={styles.header} elevation={2}>
           <View style={styles.headerContent}>
