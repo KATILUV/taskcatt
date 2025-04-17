@@ -282,5 +282,26 @@ export const StorageService = {
       console.error('Error loading settings:', error);
       return {};
     }
+  },
+
+  /**
+   * Add a new task and save to storage
+   */
+  addTask: async (task: Task): Promise<boolean> => {
+    try {
+      // Load current tasks
+      const tasks = await StorageService.loadTasks();
+      
+      // Add the new task
+      tasks.push(task);
+      
+      // Save all tasks
+      await StorageService.saveTasks(tasks);
+      
+      return true;
+    } catch (error) {
+      console.error('Error adding task:', error);
+      return false;
+    }
   }
 };

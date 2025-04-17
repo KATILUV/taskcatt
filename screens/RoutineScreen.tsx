@@ -45,6 +45,9 @@ export default function RoutineScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<TaskCategory | 'All'>('All');
   const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<TaskPriority | 'All'>('All');
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailVisible, setIsDetailVisible] = useState(false);
+  const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
   
   // Get theme from context
   const { theme } = useTheme();
@@ -282,16 +285,30 @@ export default function RoutineScreen({ navigation }: Props) {
       ],
     };
     
+    // Handle task selection to show details in the bottom sheet
+    const handleTaskSelect = () => {
+      setSelectedTask(item);
+      setIsDetailVisible(true);
+    };
+    
     return (
       <Animated.View style={animatedStyle}>
         <ScaleDecorator>
-          <TaskItem
-            task={item}
-            drag={drag}
-            isActive={isActive}
-            onDelete={handleDelete}
-            onToggleComplete={handleToggleComplete}
-          />
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            onPress={handleTaskSelect}
+            onLongPress={drag}
+            delayLongPress={200}
+            disabled={isActive}
+          >
+            <TaskItem
+              task={item}
+              drag={drag}
+              isActive={isActive}
+              onDelete={handleDelete}
+              onToggleComplete={handleToggleComplete}
+            />
+          </TouchableOpacity>
         </ScaleDecorator>
       </Animated.View>
     );
@@ -471,7 +488,92 @@ export default function RoutineScreen({ navigation }: Props) {
           />
         )}
         
-        <TaskInput onAddTask={handleAddTask} />
+        {/* Replace TaskInput with a FAB */}
+        <FloatingActionButton
+          mainIcon="add"
+          position="bottomRight"
+          color={theme.colors.primary}
+          size="large"
+          actions={[
+            {
+              icon: "create-outline",
+              label: "New Task",
+              onPress: () => setIsTaskInputVisible(true),
+              color: theme.colors.success,
+            },
+            {
+              icon: "filter-outline",
+              label: "Reset Filters",
+              onPress: () => {
+                setSelectedCategoryFilter('All');
+                setSelectedPriorityFilter('All');
+              },
+              color: theme.colors.info,
+            },
+          ]}
+        />
+        
+        {/* Bottom Sheets */}
+        <BottomSheet
+          visible={isDetailVisible}
+          onClose={() => setIsDetailVisible(false)}
+          title="Task Details"
+          height={Dimensions.get('window').height * 0.8}
+        >
+          {selectedTask && (
+            <TaskDetail
+              task={selectedTask}
+              onTaskUpdate={async (updatedTask) => {
+                try {
+                  const updatedTasks = tasks.map(task => 
+                    task.id === updatedTask.id ? updatedTask : task
+                  );
+                  await StorageService.saveTasks(updatedTasks);
+                  setTasks(updatedTasks);
+                  setIsDetailVisible(false);
+                } catch (error) {
+                  console.error('Error updating task:', error);
+                }
+              }}
+              onDelete={async (id) => {
+                try {
+                  await handleDeleteTask(id);
+                  setIsDetailVisible(false);
+                } catch (error) {
+                  console.error('Error deleting task:', error);
+                }
+              }}
+              onToggleComplete={async (id) => {
+                try {
+                  handleToggleComplete(id);
+                  
+                  // Update selected task state to reflect change in completion status
+                  if (selectedTask && selectedTask.id === id) {
+                    setSelectedTask({
+                      ...selectedTask,
+                      completed: !selectedTask.completed
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error toggling task completion:', error);
+                }
+              }}
+            />
+          )}
+        </BottomSheet>
+        
+        <BottomSheet
+          visible={isTaskInputVisible}
+          onClose={() => setIsTaskInputVisible(false)}
+          title="Add New Task"
+        >
+          <TaskInput
+            onAddTask={(title, category, priority, recurrence, reminder) => {
+              handleAddTask(title, category, priority, recurrence, reminder);
+              setIsTaskInputVisible(false);
+            }}
+          />
+        </BottomSheet>
       </SafeAreaView>
     </Animated.View>
   );
