@@ -2,7 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
-const port = 5000;
+const port = 5001; // Changed from 5000 to avoid conflict with Expo
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
