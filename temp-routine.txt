@@ -1,0 +1,40 @@
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { 
+  StyleSheet, 
+  Text, 
+  View, 
+  Button, 
+  SafeAreaView, 
+  ActivityIndicator,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  Animated
+} from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
+import type { RootStackParamList } from '../App';
+import { 
+  Task, 
+  TaskCategory, 
+  TASK_CATEGORIES, 
+  TaskPriority, 
+  TASK_PRIORITIES,
+  RecurrenceSettings,
+  ReminderSettings 
+} from '../models/Task';
+import { StorageService } from '../services/StorageService';
+import { RecurrenceService } from '../services/RecurrenceService';
+import { ReminderService } from '../services/ReminderService';
+import TaskItem from '../components/TaskItem';
+import TaskInput from '../components/TaskInput';
+import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
+import { createStyles, theme } from '../utils/Theme';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Routine'>;
+
+export default function RoutineScreen({ navigation }: Props) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<TaskCategory | 'All'>('All');
+  const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<TaskPriority | 'All'>('All');

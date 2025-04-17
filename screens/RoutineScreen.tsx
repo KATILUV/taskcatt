@@ -8,7 +8,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
-  FlatList
+  FlatList,
+  Animated
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -37,6 +38,10 @@ export default function RoutineScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<TaskCategory | 'All'>('All');
   const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<TaskPriority | 'All'>('All');
+  
+  // Animation values for screen transitions and staggered item animations
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const animatedItemValues = useRef<{[key: string]: Animated.Value}>({}).current;
 
   // Load tasks from AsyncStorage on component mount
   useEffect(() => {
@@ -53,6 +58,42 @@ export default function RoutineScreen({ navigation }: Props) {
 
     loadTasks();
   }, []);
+  
+  // Screen transition animation
+  useEffect(() => {
+    // When tasks load and loading is complete, fade in the screen
+    if (!loading) {
+      // Animate the overall screen fade-in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      // Set up staggered animations for each task item
+      const animations: Animated.CompositeAnimation[] = [];
+      
+      // Create an animated value for each task if it doesn't exist
+      tasks.forEach((task, index) => {
+        if (!animatedItemValues[task.id]) {
+          animatedItemValues[task.id] = new Animated.Value(0);
+        }
+        
+        // Add staggered animation for each task
+        animations.push(
+          Animated.timing(animatedItemValues[task.id], {
+            toValue: 1,
+            duration: 200,
+            delay: 100 + (index * 50), // Stagger the animations
+            useNativeDriver: true,
+          })
+        );
+      });
+      
+      // Run all animations in parallel
+      Animated.parallel(animations).start();
+    }
+  }, [loading, tasks, fadeAnim, animatedItemValues]);
 
   // Save tasks to AsyncStorage whenever they change
   useEffect(() => {
@@ -211,18 +252,38 @@ export default function RoutineScreen({ navigation }: Props) {
       );
     };
     
+    // Get or create the animated value for this task
+    if (!animatedItemValues[item.id]) {
+      animatedItemValues[item.id] = new Animated.Value(0);
+    }
+    
+    // Animation style for the staggered fade-in and translate
+    const animatedStyle = {
+      opacity: animatedItemValues[item.id],
+      transform: [
+        {
+          translateY: animatedItemValues[item.id].interpolate({
+            inputRange: [0, 1],
+            outputRange: [20, 0], // Start 20 pixels down and move up to final position
+          }),
+        },
+      ],
+    };
+    
     return (
-      <ScaleDecorator>
-        <TaskItem
-          task={item}
-          drag={drag}
-          isActive={isActive}
-          onDelete={handleDelete}
-          onToggleComplete={handleToggleComplete}
-        />
-      </ScaleDecorator>
+      <Animated.View style={animatedStyle}>
+        <ScaleDecorator>
+          <TaskItem
+            task={item}
+            drag={drag}
+            isActive={isActive}
+            onDelete={handleDelete}
+            onToggleComplete={handleToggleComplete}
+          />
+        </ScaleDecorator>
+      </Animated.View>
     );
-  }, [handleDeleteTask, handleToggleComplete]);
+  }, [handleDeleteTask, handleToggleComplete, animatedItemValues]);
 
   if (loading) {
     return (
@@ -274,15 +335,25 @@ export default function RoutineScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My Tasks</Text>
-        <Button
-          title="Home"
-          onPress={() => navigation.navigate('Home')}
-        />
-      </View>
-      
+    <Animated.View style={{...styles.container, opacity: fadeAnim}}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>My Tasks</Text>
+          <Button
+            title="Home"
+            onPress={() => {
+              // Fade out animation when navigating away
+              Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+              }).start(() => {
+                navigation.navigate('Home');
+              });
+            }}
+          />
+        </View>
+        
       <View style={styles.filtersSection}>
         <Text style={styles.filterSectionTitle}>Categories</Text>
         <View style={styles.filterContainer}>
