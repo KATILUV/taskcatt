@@ -14,6 +14,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   height = scale(isTablet() ? 16 : 12),
   showPercentage = true,
 }) => {
+  const { theme } = useTheme();
+  const styles = useStyles();
+  
   // Ensure progress is between 0 and 100
   const normalizedProgress = Math.max(0, Math.min(100, progress));
   
@@ -50,7 +53,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 };
 
 // Use createStyles from Theme utils to create responsive styles
-const styles = createStyles((theme) => {
+const useStyles = createStyles((theme) => {
   const isTab = isTablet();
   
   return StyleSheet.create({
@@ -75,7 +78,7 @@ const styles = createStyles((theme) => {
       fontSize: scaleFont(isTab ? 16 : 14),
       width: scale(isTab ? 50 : 40), // Fixed width to avoid layout shifts
       textAlign: 'right',
-    },
+    } as TextStyle,
   });
 });
 

@@ -5,10 +5,12 @@ import {
   View, 
   Text,
   Animated,
-  ViewStyle 
+  ViewStyle,
+  TextStyle
 } from 'react-native';
-import { useTheme } from '../utils/Theme';
+import { useTheme, createStyles } from '../utils/Theme';
 import { Ionicons } from '@expo/vector-icons';
+import { scale } from '../utils/ResponsiveUtils';
 
 interface ThemeToggleProps {
   style?: ViewStyle;
@@ -84,19 +86,22 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  button: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 18,
-    borderWidth: 1,
-  },
-  label: {
-    marginRight: 8,
-    fontSize: 14,
-  }
+const styles = createStyles((theme) => {
+  return StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    } as ViewStyle,
+    button: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: scale(18),
+      borderWidth: 1,
+    } as ViewStyle,
+    label: {
+      marginRight: theme.spacing.sm,
+      fontSize: theme.typography.bodySmall.fontSize,
+      fontFamily: theme.typography.bodySmall.fontFamily,
+    } as TextStyle
+  });
 });
