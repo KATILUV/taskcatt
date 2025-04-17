@@ -147,14 +147,14 @@ const styles = createStyles((theme) => StyleSheet.create({
     paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: theme.colors.lightGray,
-  },
+  } as ViewStyle,
   advancedContainer: {
     maxHeight: 300,
     paddingHorizontal: 16,
     backgroundColor: theme.colors.backgroundSecondary,
     borderTopWidth: 1,
     borderTopColor: theme.colors.lightGray,
-  },
+  } as ViewStyle,
   inputContainer: {
     flexDirection: 'column',
     paddingHorizontal: 16,
@@ -162,11 +162,11 @@ const styles = createStyles((theme) => StyleSheet.create({
     backgroundColor: theme.colors.white,
     borderTopWidth: 1,
     borderTopColor: theme.colors.lightGray,
-  },
+  } as ViewStyle,
   inputRow: {
     flexDirection: 'row',
     width: '100%',
-  },
+  } as ViewStyle,
   input: {
     flex: 1,
     height: 44,
@@ -185,23 +185,24 @@ const styles = createStyles((theme) => StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-  },
+  } as ViewStyle,
   disabledButton: {
     backgroundColor: theme.colors.gray,
-  },
+  } as ViewStyle,
   addButtonText: {
     color: theme.colors.white,
     fontSize: scaleFont(24),
     fontWeight: 'bold',
-  },
+    fontFamily: theme.typography.button.fontFamily,
+  } as TextStyle,
   spacing: {
     height: 12,
-  },
+  } as ViewStyle,
   advancedToggle: {
     alignSelf: 'center',
     marginTop: 8,
     paddingVertical: 4,
-  },
+  } as ViewStyle,
   advancedToggleText: {
     color: theme.colors.primary,
     fontSize: scaleFont(14),
@@ -213,10 +214,10 @@ const styles = createStyles((theme) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  },
+  } as ViewStyle,
   advancedToggleIcon: {
     marginRight: 4
-  }
+  } as ViewStyle
 }));
 
 export default TaskInput;
