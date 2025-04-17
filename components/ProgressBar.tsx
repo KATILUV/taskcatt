@@ -11,7 +11,7 @@ interface ProgressBarProps {
 
 const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
-  height = 12,
+  height = scale(isTablet() ? 16 : 12),
   showPercentage = true,
 }) => {
   // Ensure progress is between 0 and 100
@@ -19,9 +19,9 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   
   // Calculate color based on progress
   const getProgressColor = () => {
-    if (normalizedProgress < 30) return '#FF6B6B'; // Red for low progress
-    if (normalizedProgress < 70) return '#FFD166'; // Amber for medium progress
-    return '#06D6A0'; // Green for high progress
+    if (normalizedProgress < 30) return theme.colors.error; // Red for low progress
+    if (normalizedProgress < 70) return theme.colors.warning; // Amber for medium progress
+    return theme.colors.success; // Green for high progress
   };
 
   const progressColor = getProgressColor();
@@ -49,29 +49,34 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  progressBackground: {
-    backgroundColor: '#E9ECEF',
-    borderRadius: 10,
-    overflow: 'hidden',
-    flex: 1,
-  },
-  progressFill: {
-    borderRadius: 10,
-    height: '100%',
-  },
-  percentageText: {
-    marginLeft: 10,
-    fontWeight: 'bold',
-    fontSize: 14,
-    width: 40, // Fixed width to avoid layout shifts
-    textAlign: 'right',
-  },
+// Use createStyles from Theme utils to create responsive styles
+const styles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: theme.spacing.sm,
+    },
+    progressBackground: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderRadius: scale(isTab ? 12 : 10),
+      overflow: 'hidden',
+      flex: 1,
+    },
+    progressFill: {
+      borderRadius: scale(isTab ? 12 : 10),
+      height: '100%',
+    },
+    percentageText: {
+      marginLeft: theme.spacing.sm,
+      fontWeight: 'bold',
+      fontSize: scaleFont(isTab ? 16 : 14),
+      width: scale(isTab ? 50 : 40), // Fixed width to avoid layout shifts
+      textAlign: 'right',
+    },
+  });
 });
 
 export default ProgressBar;

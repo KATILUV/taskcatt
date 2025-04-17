@@ -1,6 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Task, TaskCategory, TaskPriority } from '../models/Task';
+import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
+import { createStyles, theme } from '../utils/Theme';
 
 interface TaskItemProps {
   task: Task;
@@ -20,27 +22,27 @@ const TaskItem: React.FC<TaskItemProps> = ({
   const getCategoryColor = (category: TaskCategory): string => {
     switch (category) {
       case 'Health':
-        return '#4CAF5080'; // Green with opacity
+        return theme.colors.categoryHealth + '80'; // With opacity
       case 'Work':
-        return '#2196F380'; // Blue with opacity
+        return theme.colors.categoryWork + '80'; // With opacity
       case 'Personal':
-        return '#9C27B080'; // Purple with opacity
+        return theme.colors.categoryPersonal + '80'; // With opacity
       case 'Other':
       default:
-        return '#75757580'; // Gray with opacity
+        return theme.colors.categoryOther + '80'; // With opacity
     }
   };
   
   const getPriorityColor = (priority: TaskPriority): string => {
     switch (priority) {
       case 'High':
-        return '#E5393580'; // Red with opacity
+        return theme.colors.priorityHigh + '80'; // With opacity
       case 'Medium':
-        return '#FB8C0080'; // Orange with opacity
+        return theme.colors.priorityMedium + '80'; // With opacity
       case 'Low':
-        return '#43A04780'; // Green with opacity
+        return theme.colors.priorityLow + '80'; // With opacity
       default:
-        return '#75757580'; // Gray with opacity
+        return theme.colors.secondary + '80'; // With opacity
     }
   };
   return (
@@ -105,107 +107,109 @@ const TaskItem: React.FC<TaskItemProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  taskContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginVertical: 8,
-    marginHorizontal: 16,
-    padding: 16,
-    borderRadius: 8,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  activeTask: {
-    backgroundColor: '#f0f9ff',
-    shadowOpacity: 0.4,
-    elevation: 4,
-    transform: [{ scale: 1.03 }],
-  },
-  completedTask: {
-    backgroundColor: '#f8f8f8',
-    borderLeftWidth: 4,
-    borderLeftColor: '#4CAF50',
-  },
-  textContainer: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
-  detailsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    marginTop: 4,
-  },
-  taskTitle: {
-    fontSize: 16,
-  },
-  completedText: {
-    textDecorationLine: 'line-through',
-    color: '#888',
-  },
-  categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-    marginRight: 8,
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#333',
-  },
-  priorityBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
-    marginRight: 8,
-  },
-  priorityText: {
-    fontSize: 11,
-    fontWeight: '500',
-    color: '#333',
-  },
-  completedLabel: {
-    fontSize: 12,
-    color: '#4CAF50',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#0066cc',
-    marginRight: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkedBox: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
-  },
-  checkmark: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ffeeee',
-  },
-  deleteButtonText: {
-    fontSize: 20,
-    color: '#ff6666',
-    fontWeight: 'bold',
-  },
+// Use createStyles from Theme utils to create responsive styles
+const styles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    taskContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.white,
+      marginVertical: theme.spacing.sm,
+      marginHorizontal: theme.spacing.md,
+      padding: theme.layout.cardPadding,
+      borderRadius: theme.layout.cardRadius,
+      ...theme.shadows.small,
+      height: theme.layout.listItemHeight,
+    },
+    activeTask: {
+      backgroundColor: '#f0f9ff',
+      ...theme.shadows.medium,
+      transform: [{ scale: 1.03 }],
+    },
+    completedTask: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderLeftWidth: scale(4),
+      borderLeftColor: theme.colors.success,
+    },
+    textContainer: {
+      flex: 1,
+      paddingHorizontal: theme.spacing.sm,
+    },
+    detailsContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      marginTop: theme.spacing.xs,
+    },
+    taskTitle: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      color: theme.colors.textPrimary,
+    },
+    completedText: {
+      textDecorationLine: 'line-through',
+      color: theme.colors.textDisabled,
+    },
+    categoryBadge: {
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: scale(isTab ? 3 : 2),
+      borderRadius: scale(isTab ? 14 : 12),
+      marginRight: theme.spacing.sm,
+    },
+    categoryText: {
+      fontSize: scaleFont(isTab ? 13 : 11),
+      fontWeight: '500',
+      color: theme.colors.textPrimary,
+    },
+    priorityBadge: {
+      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: scale(isTab ? 3 : 2),
+      borderRadius: scale(isTab ? 14 : 12),
+      marginRight: theme.spacing.sm,
+    },
+    priorityText: {
+      fontSize: scaleFont(isTab ? 13 : 11),
+      fontWeight: '500',
+      color: theme.colors.textPrimary,
+    },
+    completedLabel: {
+      fontSize: scaleFont(isTab ? 14 : 12),
+      color: theme.colors.success,
+    },
+    checkbox: {
+      width: scale(isTab ? 28 : 24),
+      height: scale(isTab ? 28 : 24),
+      borderRadius: scale(isTab ? 14 : 12),
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+      marginRight: theme.spacing.sm,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    checkedBox: {
+      backgroundColor: theme.colors.success,
+      borderColor: theme.colors.success,
+    },
+    checkmark: {
+      color: theme.colors.white,
+      fontSize: scaleFont(isTab ? 18 : 16),
+      fontWeight: 'bold',
+    },
+    deleteButton: {
+      width: scale(isTab ? 36 : 30),
+      height: scale(isTab ? 36 : 30),
+      borderRadius: scale(isTab ? 18 : 15),
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#ffeeee',
+    },
+    deleteButtonText: {
+      fontSize: scaleFont(isTab ? 24 : 20),
+      color: theme.colors.error,
+      fontWeight: 'bold',
+    },
+  });
 });
 
 export default TaskItem;
