@@ -6,10 +6,12 @@ import {
   Animated,
   ViewStyle,
   Text,
-  View
+  View,
+  TextStyle
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../utils/Theme';
+import { scale as scaleSize, scaleFont } from '../utils/ResponsiveUtils';
 
 // Available icon variants
 export type IconButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
@@ -41,21 +43,21 @@ export const IconButton: React.FC<IconButtonProps> = ({
   // Animation values for press feedback
   const [scale] = useState(new Animated.Value(1));
   
-  // Determine icon size based on 'size' prop
+  // Determine icon size based on 'size' prop with scaling for device size
   const getIconSize = () => {
     switch (size) {
-      case 'small': return 16;
-      case 'large': return 28;
-      default: return 22;
+      case 'small': return scaleFont(16);
+      case 'large': return scaleFont(28);
+      default: return scaleFont(22);
     }
   };
   
-  // Determine container size based on 'size' prop
+  // Determine container size based on 'size' prop with scaling for device size
   const getContainerSize = () => {
     switch (size) {
-      case 'small': return 32;
-      case 'large': return 52;
-      default: return 42;
+      case 'small': return scaleSize(32);
+      case 'large': return scaleSize(52);
+      default: return scaleSize(42);
     }
   };
   
@@ -157,7 +159,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
         <Text
           style={[
             styles.label,
-            { color: theme.colors.textSecondary },
+            { 
+              color: disabled ? theme.colors.textDisabled : theme.colors.textSecondary,
+              fontFamily: theme.fonts.medium
+            } as TextStyle,
           ]}
         >
           {label}
@@ -170,21 +175,23 @@ export const IconButton: React.FC<IconButtonProps> = ({
 const styles = StyleSheet.create({
   wrapper: {
     alignItems: 'center',
-  },
+  } as ViewStyle,
   container: {
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 100,
     borderWidth: 1,
     overflow: 'hidden',
-  },
+  } as ViewStyle,
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
+  } as ViewStyle,
   label: {
-    fontSize: 12,
-    marginTop: 4,
+    fontSize: scaleFont(12),
+    marginTop: scaleSize(4),
     textAlign: 'center',
-  },
+    fontWeight: '500',
+    letterSpacing: 0.3,
+  } as TextStyle,
 });
