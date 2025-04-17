@@ -3,9 +3,12 @@ import {
   View, 
   Text, 
   StyleSheet, 
-  TouchableOpacity 
+  TouchableOpacity,
+  TextStyle
 } from 'react-native';
 import { TaskPriority } from '../models/Task';
+import { useTheme, createStyles } from '../utils/Theme';
+import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
 
 interface PrioritySelectorProps {
   selectedPriority: TaskPriority;
@@ -18,18 +21,20 @@ export default function PrioritySelector({
   onSelectPriority,
   showLabel = true 
 }: PrioritySelectorProps) {
+  const { theme } = useTheme();
+  const styles = useStyles();
   
   // Get color for a priority
   const getPriorityColor = (priority: TaskPriority): string => {
     switch (priority) {
       case 'High':
-        return '#E53935'; // Red
+        return theme.colors.priorityHigh;
       case 'Medium':
-        return '#FB8C00'; // Orange
+        return theme.colors.priorityMedium;
       case 'Low':
-        return '#43A047'; // Green
+        return theme.colors.priorityLow;
       default:
-        return '#757575'; // Gray
+        return theme.colors.gray;
     }
   };
 
@@ -78,30 +83,34 @@ export default function PrioritySelector({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-    color: '#333',
-  },
-  badgeContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-    marginBottom: 8,
-    borderWidth: 1.5,
-  },
-  badgeText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
+const useStyles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      marginVertical: scale(8),
+    },
+    label: {
+      fontSize: scaleFont(16),
+      fontWeight: '500',
+      marginBottom: scale(8),
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    badgeContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
+    badge: {
+      paddingHorizontal: scale(12),
+      paddingVertical: scale(6),
+      borderRadius: scale(16),
+      marginRight: scale(8),
+      marginBottom: scale(8),
+      borderWidth: 1.5,
+    },
+    badgeText: {
+      fontSize: scaleFont(14),
+      fontWeight: '500',
+    } as TextStyle,
+  });
 });
