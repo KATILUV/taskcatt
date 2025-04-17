@@ -88,29 +88,35 @@ const useStyles = createStyles((theme) => {
   
   return StyleSheet.create({
     container: {
-      marginVertical: scale(8),
+      marginVertical: theme.spacing.md,
     },
     label: {
       fontSize: scaleFont(16),
       fontWeight: '500',
-      marginBottom: scale(8),
+      fontFamily: theme.fonts.medium,
+      marginBottom: theme.spacing.sm,
       color: theme.colors.textPrimary,
+      letterSpacing: 0.1,
     } as TextStyle,
     badgeContainer: {
       flexDirection: 'row',
       flexWrap: 'wrap',
+      alignItems: 'center',
     },
     badge: {
-      paddingHorizontal: scale(12),
-      paddingVertical: scale(6),
-      borderRadius: scale(16),
-      marginRight: scale(8),
-      marginBottom: scale(8),
-      borderWidth: 1.5,
+      paddingHorizontal: scale(14),
+      paddingVertical: scale(7),
+      borderRadius: scale(18),
+      marginRight: theme.spacing.sm,
+      marginBottom: theme.spacing.sm,
+      borderWidth: 2,
+      ...theme.shadows.small,
     },
     badgeText: {
       fontSize: scaleFont(14),
-      fontWeight: '500',
+      fontWeight: '600',
+      fontFamily: theme.fonts.semiBold,
+      letterSpacing: 0.2,
     } as TextStyle,
   });
 });
