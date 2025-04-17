@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { 
   StyleSheet, 
-  Text, 
   View, 
   TouchableOpacity, 
   SafeAreaView, 
@@ -12,6 +11,15 @@ import {
   Animated,
   StatusBar
 } from 'react-native';
+import {
+  Text,
+  Surface,
+  Button,
+  Card,
+  Title,
+  Paragraph,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { StorageService } from '../services/StorageService';

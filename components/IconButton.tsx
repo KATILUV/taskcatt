@@ -39,7 +39,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   style,
   iconStyle,
   disabled = false,
-  ...rest
+  onPress
 }) => {
   const { theme } = useTheme();
   
@@ -170,7 +170,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
           icon={getMaterialIconName(name)}
           iconColor={getColor()}
           size={getIconSize()}
-          onPress={rest.onPress}
+          onPress={onPress}
           disabled={disabled}
           style={[
             styles.container,
