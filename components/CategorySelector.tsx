@@ -6,9 +6,12 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
-  SafeAreaView
+  SafeAreaView,
+  TextStyle
 } from 'react-native';
 import { TaskCategory, TASK_CATEGORIES } from '../models/Task';
+import { createStyles, useTheme } from '../utils/Theme';
+import { scaleFont, scale, isTablet } from '../utils/ResponsiveUtils';
 
 interface CategorySelectorProps {
   selectedCategory: TaskCategory;
@@ -22,18 +25,20 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   showLabel = true,
 }) => {
   const [modalVisible, setModalVisible] = React.useState(false);
+  const { theme } = useTheme();
+  const styles = useStyles();
 
   const getCategoryColor = (category: TaskCategory): string => {
     switch (category) {
       case 'Health':
-        return '#4CAF50'; // Green
+        return theme.colors.categoryHealth; // Green
       case 'Work':
-        return '#2196F3'; // Blue
+        return theme.colors.categoryWork; // Blue
       case 'Personal':
-        return '#9C27B0'; // Purple
+        return theme.colors.categoryPersonal; // Purple
       case 'Other':
       default:
-        return '#757575'; // Gray
+        return theme.colors.categoryOther; // Gray
     }
   };
 
@@ -109,76 +114,81 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-  },
-  label: {
-    fontSize: 16,
-    color: '#555',
-    marginRight: 8,
-  },
-  selector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  categoryBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-  },
-  categoryText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: 'white',
-  },
-  selectedCategoryText: {
-    fontWeight: 'bold',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#333',
-  },
-  categoriesList: {
-    paddingBottom: 20,
-  },
-  categoryItem: {
-    paddingVertical: 12,
-  },
-  closeButton: {
-    backgroundColor: '#e0e0e0',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#555',
-  },
+const useStyles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: scale(4),
+    },
+    label: {
+      fontSize: scaleFont(16),
+      fontWeight: '500',
+      color: theme.colors.textPrimary,
+      marginRight: scale(8),
+    } as TextStyle,
+    selector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    categoryBadge: {
+      paddingHorizontal: scale(12),
+      paddingVertical: scale(6),
+      borderRadius: scale(16),
+      marginRight: scale(8),
+    },
+    categoryText: {
+      fontSize: scaleFont(14),
+      fontWeight: '500',
+      color: theme.colors.white,
+    } as TextStyle,
+    selectedCategoryText: {
+      fontWeight: 'bold',
+    } as TextStyle,
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: theme.colors.backgroundCard,
+      borderTopLeftRadius: scale(20),
+      borderTopRightRadius: scale(20),
+      padding: scale(20),
+      elevation: 5,
+      shadowColor: theme.colors.shadowColor,
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+    },
+    modalTitle: {
+      fontSize: scaleFont(20),
+      fontWeight: 'bold',
+      marginBottom: scale(16),
+      textAlign: 'center',
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    categoriesList: {
+      paddingBottom: scale(20),
+    },
+    categoryItem: {
+      paddingVertical: scale(12),
+    },
+    closeButton: {
+      backgroundColor: theme.colors.lightGray,
+      padding: scale(16),
+      borderRadius: scale(12),
+      alignItems: 'center',
+      marginTop: scale(10),
+    },
+    closeButtonText: {
+      fontSize: scaleFont(16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+  });
 });
 
 export default CategorySelector;
