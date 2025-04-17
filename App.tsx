@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, Text, Animated, Platform, ViewStyle, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StackNavigationOptions } from '@react-navigation/stack';
 import { 
   useFonts, 
   Inter_400Regular,
@@ -20,6 +21,7 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './screens/HomeScreen';
 import RoutineScreen from './screens/RoutineScreen';
+import ErrorBoundary from './components/ErrorBoundary';
 import { defaultTheme, useTheme, darkColors, lightColors } from './utils/Theme';
 import { ThemeProvider } from './utils/ThemeProvider';
 import { 
@@ -125,51 +127,60 @@ const AppNavigator = () => {
             headerTitleStyle: {
               fontFamily: 'Inter-SemiBold',
             },
-            // Apply our custom cat animation to screens by default
-            cardStyleInterpolator: catTransition.cardStyleInterpolator,
-            gestureEnabled: true,
-            // Configure gestures based on our custom transitions
-            gestureDirection: 'horizontal',
-            transitionSpec: {
-              open: catTransition.transitionSpec.open,
-              close: catTransition.transitionSpec.close,
-            },
             // Custom UI settings
             contentStyle: {
               backgroundColor: theme.colors.backgroundPrimary,
             },
+            // Use type assertion to allow for our custom animation properties
+            ...(({
+              // Apply our custom cat animation to screens by default
+              cardStyleInterpolator: catTransition.cardStyleInterpolator,
+              gestureEnabled: true,
+              // Configure gestures based on our custom transitions
+              gestureDirection: 'horizontal',
+              transitionSpec: {
+                open: catTransition.transitionSpec.open,
+                close: catTransition.transitionSpec.close,
+              },
+            } as unknown) as StackNavigationOptions)
           }}
         >
           <Stack.Screen 
             name="Home" 
-            component={HomeScreen} 
+            component={HomeScreen}
             options={{ 
               title: 'Task Cat',
-              // Custom fade animation for home screen
-              cardStyleInterpolator: fadeTransition.cardStyleInterpolator,
               headerShown: true,
               headerTransparent: false,
               // Add subtle animation
               contentStyle: {
                 backgroundColor: theme.colors.backgroundPrimary,
               },
+              // Use type assertion for custom animation properties
+              ...(({
+                // Custom fade animation for home screen
+                cardStyleInterpolator: fadeTransition.cardStyleInterpolator,
+              } as unknown) as StackNavigationOptions)
             }}
           />
           <Stack.Screen 
             name="Routine" 
-            component={RoutineScreen} 
+            component={RoutineScreen}
             options={{ 
               title: 'My Routines',
-              // Use material design animation for routine screen
-              cardStyleInterpolator: materialNavigationTransition.cardStyleInterpolator,
-              transitionSpec: {
-                open: materialNavigationTransition.transitionSpec.open,
-                close: materialNavigationTransition.transitionSpec.close,
-              },
               // Subtle styling for better contrast
               contentStyle: {
                 backgroundColor: theme.colors.backgroundPrimary,
-              }
+              },
+              // Use type assertion for custom animation properties
+              ...(({
+                // Use material design animation for routine screen
+                cardStyleInterpolator: materialNavigationTransition.cardStyleInterpolator,
+                transitionSpec: {
+                  open: materialNavigationTransition.transitionSpec.open,
+                  close: materialNavigationTransition.transitionSpec.close,
+                },
+              } as unknown) as StackNavigationOptions)
             }}
           />
         </Stack.Navigator>
@@ -227,11 +238,13 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider initialTheme="system">
-        <FadeInView style={{ flex: 1 }} duration={800}>
-          <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-            <AppNavigator />
-          </View>
-        </FadeInView>
+        <ErrorBoundary>
+          <FadeInView style={{ flex: 1 }} duration={800}>
+            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+              <AppNavigator />
+            </View>
+          </FadeInView>
+        </ErrorBoundary>
       </ThemeProvider>
     </SafeAreaProvider>
   );

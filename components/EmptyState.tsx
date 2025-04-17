@@ -5,10 +5,13 @@ import { useTheme } from '../utils/Theme';
 import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+// Define allowed icon names explicitly for TypeScript
+type IconName = 'cat' | 'clipboard-text-outline' | 'repeat' | 'alert-circle-outline' | 'alert-circle';
+
 interface EmptyStateProps {
   title: string;
   message: string;
-  icon?: string;
+  icon?: IconName;
   type?: 'default' | 'tasks' | 'routines' | 'error';
   style?: ViewStyle;
 }
