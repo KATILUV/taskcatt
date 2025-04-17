@@ -1,11 +1,11 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import SimpleHomeScreen from './screens/SimpleHomeScreen';
 import SimpleRoutineScreen from './screens/SimpleRoutineScreen';
 import { RootStackParamList } from './navigation/types';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
