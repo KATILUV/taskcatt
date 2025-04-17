@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextStyle } from 'react-native';
 import { 
   Task, 
   TaskCategory, 
@@ -268,9 +268,9 @@ const styles = createStyles((theme) => {
     },
     taskTitle: {
       flex: 1,
-      ...theme.typography.subtitle1,
+      ...(theme.typography.subtitle1 as TextStyle),
       color: theme.colors.textPrimary,
-    },
+    } as TextStyle,
     completedText: {
       textDecorationLine: 'line-through',
       color: theme.colors.textDisabled,
@@ -309,9 +309,9 @@ const styles = createStyles((theme) => {
       marginRight: theme.spacing.xs,
     },
     priorityText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       fontFamily: theme.fonts.medium,
-    },
+    } as TextStyle,
     categoryBadge: {
       paddingHorizontal: theme.spacing.sm,
       paddingVertical: scale(isTab ? 6 : 4),
@@ -320,17 +320,17 @@ const styles = createStyles((theme) => {
       marginBottom: theme.spacing.xs,
     },
     categoryText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       fontFamily: theme.fonts.medium,
-    },
+    } as TextStyle,
     dueDateContainer: {
       flexDirection: 'row',
       alignItems: 'center',
     },
     dueDateText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       color: theme.colors.textSecondary,
-    },
+    } as TextStyle,
     metaContainer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -340,25 +340,25 @@ const styles = createStyles((theme) => {
       marginLeft: theme.spacing.sm,
     },
     recurrenceText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       color: theme.colors.primary,
-    },
+    } as TextStyle,
     reminderContainer: {
       marginLeft: theme.spacing.sm,
     },
     reminderText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       color: theme.colors.warning,
-    },
+    } as TextStyle,
     completedContainer: {
       flexDirection: 'row',
       alignItems: 'center',
       marginLeft: theme.spacing.sm,
     },
     completedLabel: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       color: theme.colors.success,
-    },
+    } as TextStyle,
   });
 });
 

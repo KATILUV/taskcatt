@@ -5,7 +5,8 @@ import {
   StyleSheet, 
   TouchableOpacity, 
   ScrollView,
-  TextInput
+  TextInput,
+  TextStyle
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Task, TaskCategory, TaskPriority, RecurrenceSettings, ReminderSettings } from '../models/Task';
