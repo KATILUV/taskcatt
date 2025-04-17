@@ -312,18 +312,18 @@ const styles = createStyles((theme) => {
       paddingHorizontal: 12,
     },
     title: {
-      ...theme.typography.subtitle1,
+      ...(theme.typography.subtitle1 as TextStyle),
       fontSize: scaleFont(18),
       fontWeight: 'bold',
       color: theme.colors.textPrimary,
       marginBottom: 4,
-    },
+    } as TextStyle,
     completedText: {
       textDecorationLine: 'line-through',
       color: theme.colors.textDisabled,
     },
     titleInput: {
-      ...theme.typography.subtitle1,
+      ...(theme.typography.subtitle1 as TextStyle),
       fontSize: scaleFont(18),
       fontWeight: 'bold',
       padding: 0,
@@ -331,11 +331,11 @@ const styles = createStyles((theme) => {
       marginBottom: 4,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.primary,
-    },
+    } as TextStyle,
     date: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       color: theme.colors.textSecondary,
-    },
+    } as TextStyle,
     actionsContainer: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -382,23 +382,23 @@ const styles = createStyles((theme) => {
       alignItems: 'center',
     },
     label: {
-      ...theme.typography.subtitle2,
+      ...(theme.typography.subtitle2 as TextStyle),
       color: theme.colors.textSecondary,
       marginLeft: 8,
-    },
+    } as TextStyle,
     valueText: {
-      ...theme.typography.body2,
+      ...(theme.typography.body2 as TextStyle),
       color: theme.colors.textPrimary,
-    },
+    } as TextStyle,
     categoryBadge: {
       paddingHorizontal: theme.spacing.sm,
       paddingVertical: scale(isTab ? 6 : 4),
       borderRadius: scale(isTab ? 16 : 12),
     },
     categoryText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       fontFamily: theme.fonts.medium,
-    },
+    } as TextStyle,
     priorityBadge: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -413,9 +413,9 @@ const styles = createStyles((theme) => {
       marginRight: theme.spacing.xs,
     },
     priorityText: {
-      ...theme.typography.caption,
+      ...(theme.typography.caption as TextStyle),
       fontFamily: theme.fonts.medium,
-    },
+    } as TextStyle,
     editForm: {
       marginTop: 8,
     },
@@ -423,10 +423,10 @@ const styles = createStyles((theme) => {
       marginBottom: 24,
     },
     sectionTitle: {
-      ...theme.typography.subtitle2,
+      ...(theme.typography.subtitle2 as TextStyle),
       color: theme.colors.textPrimary,
       marginBottom: 12,
-    },
+    } as TextStyle,
     historySection: {
       marginTop: 24,
     },
@@ -437,10 +437,10 @@ const styles = createStyles((theme) => {
       paddingVertical: 4,
     },
     historyText: {
-      ...theme.typography.body2,
+      ...(theme.typography.body2 as TextStyle),
       color: theme.colors.textSecondary,
       marginLeft: 8,
-    },
+    } as TextStyle,
   });
 });
 
