@@ -24,6 +24,7 @@ import { ThemeToggle } from '../components/ThemeToggle';
 import BottomSheet from '../components/BottomSheet';
 import TaskDetail from '../components/TaskDetail';
 import FloatingActionButton from '../components/FloatingActionButton';
+import TaskInput from '../components/TaskInput';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
