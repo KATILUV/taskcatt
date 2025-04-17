@@ -1,15 +1,19 @@
 import React, { useRef, useState } from 'react';
 import { 
   StyleSheet, 
-  TouchableOpacity, 
   Animated, 
   View, 
-  Text,
   Easing,
-  Dimensions,
   Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { 
+  FAB, 
+  Text, 
+  Surface, 
+  TouchableRipple,
+  useTheme as usePaperTheme 
+} from 'react-native-paper';
 import { useTheme } from '../utils/Theme';
 import { scale, scaleFont } from '../utils/ResponsiveUtils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -143,6 +147,42 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
     outputRange: ['0deg', '45deg'],
   });
   
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
+  // Convert the Ionicons name to a string that FAB can use
+  const getIconName = (ionIconName: string): string => {
+    // This is a simple mapping of common icons from Ionicons to Material Design icons
+    // In a production app, a more complete mapping would be needed
+    const iconMap: Record<string, string> = {
+      'add': 'plus',
+      'checkmark': 'check',
+      'close': 'close',
+      'create': 'pencil',
+      'trash': 'delete',
+      'list': 'format-list-bulleted',
+      'calendar': 'calendar',
+      'person': 'account',
+      'settings': 'cog',
+      'search': 'magnify',
+      'home': 'home'
+    };
+    
+    return iconMap[ionIconName] || 'plus'; // Default to plus if no mapping exists
+  };
+  
+  // Generate FAB actions from our action items
+  const fabActions = actions.map(action => ({
+    icon: getIconName(action.icon),
+    label: action.label,
+    onPress: () => {
+      setIsOpen(false);
+      action.onPress();
+    },
+    color: action.color || theme.colors.primary,
+    style: { backgroundColor: action.bgcolor || theme.colors.white },
+  }));
+  
   return (
     <>
       {/* Backdrop for when menu is open */}
@@ -162,7 +202,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
       )}
       
       <View style={[styles.container, getPositionStyle()]}>
-        {/* Action Items Menu */}
+        {/* Action Items Menu - Using Paper Surface for elevation */}
         {actions.length > 0 && (
           <Animated.View
             style={[
@@ -183,7 +223,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
             pointerEvents={isOpen ? 'auto' : 'none'}
           >
             {actions.map((action, index) => (
-              <TouchableOpacity
+              <Surface
                 key={index}
                 style={[
                   styles.actionButton,
@@ -192,68 +232,66 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
                     marginBottom: 12,
                   },
                 ]}
-                onPress={() => {
-                  setIsOpen(false);
-                  actionMenuAnimation.setValue(0);
-                  backdropAnimation.setValue(0);
-                  rotateAnimation.setValue(0);
-                  action.onPress();
-                }}
+                elevation={3}
               >
-                <View style={styles.actionContent}>
-                  <View 
-                    style={[
-                      styles.actionIconContainer,
-                      {
-                        backgroundColor: action.color || theme.colors.primary,
-                      }
-                    ]}
-                  >
-                    <Ionicons
-                      name={action.icon as any}
-                      size={22}
-                      color={theme.colors.white}
-                    />
+                <TouchableRipple
+                  onPress={() => {
+                    setIsOpen(false);
+                    actionMenuAnimation.setValue(0);
+                    backdropAnimation.setValue(0);
+                    rotateAnimation.setValue(0);
+                    action.onPress();
+                  }}
+                  style={styles.touchableRipple}
+                  rippleColor={`${theme.colors.primary}20`}
+                >
+                  <View style={styles.actionContent}>
+                    <Surface
+                      style={[
+                        styles.actionIconContainer,
+                        {
+                          backgroundColor: action.color || theme.colors.primary,
+                        }
+                      ]}
+                      elevation={2}
+                    >
+                      <Ionicons
+                        name={action.icon as any}
+                        size={22}
+                        color={theme.colors.white}
+                      />
+                    </Surface>
+                    <Text variant="labelLarge" style={{ color: theme.colors.textPrimary }}>
+                      {action.label}
+                    </Text>
                   </View>
-                  <Text style={[styles.actionLabel, { color: theme.colors.textPrimary }]}>
-                    {action.label}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                </TouchableRipple>
+              </Surface>
             ))}
           </Animated.View>
         )}
         
-        {/* Main FAB */}
+        {/* Main FAB using Paper FAB */}
         <Animated.View
-          style={[
-            {
-              transform: [
-                { scale: scaleAnimation },
-                { rotate },
-              ],
-            },
-          ]}
+          style={{
+            transform: [
+              { scale: scaleAnimation },
+              { rotate },
+            ],
+          }}
         >
-          <TouchableOpacity
+          {/* Use FAB from React Native Paper */}
+          <FAB
+            icon={getIconName(mainIcon)}
             style={[
               styles.fab,
-              {
-                backgroundColor: color || theme.colors.primary,
-                width: sizeValues.button,
-                height: sizeValues.button,
-                borderRadius: sizeValues.button / 2,
-              },
+              { backgroundColor: color || theme.colors.primary }
             ]}
+            size={size === 'small' ? 'small' : 'medium'}
             onPress={handlePress}
-            activeOpacity={0.8}
-          >
-            <Ionicons
-              name={mainIcon as any}
-              size={sizeValues.icon}
-              color={theme.colors.white}
-            />
-          </TouchableOpacity>
+            mode="elevated"
+            customSize={sizeValues.button}
+          />
         </Animated.View>
       </View>
     </>
@@ -288,10 +326,11 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
     flexDirection: 'row',
     alignItems: 'center',
+    overflow: 'hidden',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -303,6 +342,11 @@ const styles = StyleSheet.create({
         elevation: 3,
       },
     }),
+  },
+  touchableRipple: {
+    width: '100%',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
   },
   actionContent: {
     flexDirection: 'row',

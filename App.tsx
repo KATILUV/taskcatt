@@ -85,20 +85,24 @@ const createPaperTheme = (isLightTheme: boolean) => {
     colors: {
       ...baseTheme.colors,
       primary: colorScheme.primary,
-      accent: colorScheme.accent,
+      secondary: colorScheme.secondary,
       background: colorScheme.backgroundPrimary,
       surface: colorScheme.backgroundCard,
       text: colorScheme.textPrimary,
       // Additional colors for consistent styling
-      error: colorScheme.danger,
+      error: colorScheme.error,
       onSurface: colorScheme.textPrimary,
-      backdrop: colorScheme.overlay,
-      notification: colorScheme.notification,
-      // Task Cat specific colors
-      categoryHealth: colorScheme.categoryHealth,
-      categoryWork: colorScheme.categoryWork,
-      categoryPersonal: colorScheme.categoryPersonal,
-      categoryOther: colorScheme.categoryOther,
+      // Custom Task Cat specific colors (to be used in our components)
+      customColors: {
+        accent: colorScheme.accent,
+        categoryHealth: colorScheme.categoryHealth,
+        categoryWork: colorScheme.categoryWork,
+        categoryPersonal: colorScheme.categoryPersonal,
+        categoryOther: colorScheme.categoryOther,
+        priorityHigh: colorScheme.priorityHigh,
+        priorityMedium: colorScheme.priorityMedium,
+        priorityLow: colorScheme.priorityLow,
+      }
     },
     // Customize the overall shape style
     roundness: 12,

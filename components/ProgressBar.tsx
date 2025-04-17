@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Text, TextStyle } from 'react-native';
+import { View, StyleSheet, TextStyle } from 'react-native';
+import { ProgressBar as PaperProgressBar, Text, useTheme as usePaperTheme } from 'react-native-paper';
 import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
 import { createStyles, useTheme } from '../utils/Theme';
 
@@ -34,22 +35,27 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
   const progressColor = getProgressColor();
 
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
+  // Convert progress from percentage (0-100) to decimal (0-1) for Paper ProgressBar
+  const progressDecimal = normalizedProgress / 100;
+  
   return (
     <View style={styles.container}>
-      <View style={[styles.progressBackground, { height }]}>
-        <View 
-          style={[
-            styles.progressFill, 
-            { 
-              width: `${normalizedProgress}%`,
-              backgroundColor: progressColor,
-            }
-          ]} 
+      <View style={[styles.progressContainer, { height }]}>
+        <PaperProgressBar
+          progress={progressDecimal}
+          color={progressColor}
+          style={styles.paperProgressBar}
         />
       </View>
       
       {showPercentage && (
-        <Text style={[styles.percentageText, { color: progressColor }]}>
+        <Text
+          variant="labelMedium"
+          style={[styles.percentageText, { color: progressColor }]}
+        >
           {getPercentageText()}
         </Text>
       )}
@@ -67,22 +73,19 @@ const useStyles = createStyles((theme) => {
       alignItems: 'center',
       marginVertical: theme.spacing.md,
     },
-    progressBackground: {
-      backgroundColor: theme.colors.backgroundSecondary,
-      borderRadius: scale(isTab ? 16 : 12),
-      overflow: 'hidden',
+    progressContainer: {
       flex: 1,
-      ...theme.shadows.small,
+      justifyContent: 'center',
+      overflow: 'hidden',
     },
-    progressFill: {
-      borderRadius: scale(isTab ? 16 : 12),
+    paperProgressBar: {
       height: '100%',
+      borderRadius: scale(isTab ? 16 : 12),
+      backgroundColor: theme.colors.backgroundSecondary,
     },
     percentageText: {
       marginLeft: theme.spacing.md,
-      fontWeight: '600',
       fontFamily: theme.fonts.semiBold,
-      fontSize: scaleFont(isTab ? 16 : 14),
       width: scale(isTab ? 54 : 44), // Fixed width to avoid layout shifts
       textAlign: 'right',
       letterSpacing: 0.3,

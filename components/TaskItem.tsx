@@ -1,5 +1,14 @@
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import { 
+  Card, 
+  Text, 
+  Checkbox, 
+  IconButton, 
+  Surface, 
+  Chip,
+  useTheme as usePaperTheme,
+} from 'react-native-paper';
 import { 
   Task, 
   TaskCategory, 
@@ -94,32 +103,28 @@ const TaskItem = memo(({
     onDelete(task.id);
   }, [task.id, onDelete]);
   
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
   return (
-    <TouchableOpacity
-      onLongPress={drag}
+    <Card
+      mode="elevated"
       style={[
         styles.taskCard,
         isActive && styles.activeCard,
         task.completed && styles.completedCard
       ]}
-      activeOpacity={0.8}
+      onLongPress={drag}
     >
-      {/* Card Header */}
-      <View style={styles.cardHeader}>
-        <TouchableOpacity
-          style={[styles.checkbox, task.completed && styles.checkedBox]}
+      <Card.Content style={styles.cardHeader}>
+        <Checkbox
+          status={task.completed ? 'checked' : 'unchecked'}
+          color={task.completed ? theme.colors.success : theme.colors.primary}
           onPress={handleToggleComplete}
-        >
-          {task.completed && (
-            <Ionicons 
-              name="checkmark-sharp" 
-              size={scaleFont(isTablet() ? 18 : 16)} 
-              color={theme.colors.white} 
-            />
-          )}
-        </TouchableOpacity>
+        />
         
         <Text 
+          variant="titleMedium"
           style={[
             styles.taskTitle, 
             task.completed && styles.completedText
@@ -129,57 +134,46 @@ const TaskItem = memo(({
           {task.title}
         </Text>
         
-        <TouchableOpacity
-          style={styles.deleteButton}
+        <IconButton
+          icon="trash-outline"
+          iconColor={theme.colors.error}
+          size={scaleFont(isTablet() ? 20 : 18)}
           onPress={handleDelete}
-        >
-          <Ionicons 
-            name="trash-outline" 
-            size={scaleFont(isTablet() ? 18 : 16)} 
-            color={theme.colors.error} 
-          />
-        </TouchableOpacity>
-      </View>
+          style={styles.deleteButton}
+        />
+      </Card.Content>
       
-      {/* Card Content */}
-      <View style={styles.cardContent}>
+      <Card.Content style={styles.cardContent}>
         <View style={styles.badgeContainer}>
           {task.priority && (
-            <View style={[
-              styles.priorityBadge, 
-              { backgroundColor: priorityColor + '20' }
-            ]}>
-              <View style={[
-                styles.priorityIndicator, 
-                { backgroundColor: priorityColor }
-              ]} />
-              <Text style={[
-                styles.priorityText,
-                { color: priorityColor }
-              ]}>
-                {task.priority}
-              </Text>
-            </View>
+            <Chip 
+              mode="outlined"
+              style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}
+              textStyle={{ color: priorityColor }}
+              icon={({ size }) => (
+                <View style={[
+                  styles.priorityIndicator, 
+                  { backgroundColor: priorityColor }
+                ]} />
+              )}
+            >
+              {task.priority}
+            </Chip>
           )}
           
           {task.category && (
-            <View style={[
-              styles.categoryBadge, 
-              { backgroundColor: categoryColor + '15' }
-            ]}>
-              <Text style={[
-                styles.categoryText,
-                { color: categoryColor }
-              ]}>
-                {task.category}
-              </Text>
-            </View>
+            <Chip
+              mode="outlined"
+              style={[styles.categoryBadge, { backgroundColor: categoryColor + '15' }]}
+              textStyle={{ color: categoryColor }}
+            >
+              {task.category}
+            </Chip>
           )}
         </View>
-      </View>
+      </Card.Content>
       
-      {/* Card Footer */}
-      <View style={styles.cardFooter}>
+      <Card.Actions style={styles.cardFooter}>
         {dueDate && (
           <View style={styles.dueDateContainer}>
             <Ionicons 
@@ -188,54 +182,51 @@ const TaskItem = memo(({
               color={theme.colors.textSecondary} 
               style={{marginRight: scale(4)}} 
             />
-            <Text style={styles.dueDateText}>Due: {dueDate}</Text>
+            <Text variant="labelSmall" style={styles.dueDateText}>
+              Due: {dueDate}
+            </Text>
           </View>
         )}
         
         <View style={styles.metaContainer}>
           {RecurrenceService.isRecurring(task) && (
-            <View style={styles.recurrenceContainer}>
-              <Ionicons 
-                name="sync-outline" 
-                size={scaleFont(isTablet() ? 16 : 14)} 
-                color={theme.colors.primary} 
-                style={{marginRight: scale(4)}} 
-              />
-              <Text style={styles.recurrenceText}>
-                {task.recurrence?.pattern === 'Daily' ? 'Daily' : 
-                 task.recurrence?.pattern === 'Weekly' ? 'Weekly' : 
-                 task.recurrence?.pattern === 'Monthly' ? 'Monthly' : 
-                 'Recurring'}
-              </Text>
-            </View>
+            <Chip 
+              icon="sync-outline"
+              compact
+              style={styles.recurrenceContainer}
+              textStyle={styles.recurrenceText}
+            >
+              {task.recurrence?.pattern === 'Daily' ? 'Daily' : 
+               task.recurrence?.pattern === 'Weekly' ? 'Weekly' : 
+               task.recurrence?.pattern === 'Monthly' ? 'Monthly' : 
+               'Recurring'}
+            </Chip>
           )}
           
           {task.reminder?.enabled && !dueDate && (
-            <View style={styles.reminderContainer}>
-              <Ionicons 
-                name="notifications-outline" 
-                size={scaleFont(isTablet() ? 16 : 14)} 
-                color={theme.colors.warning} 
-                style={{marginRight: scale(4)}} 
-              />
-              <Text style={styles.reminderText}>Reminder set</Text>
-            </View>
+            <Chip
+              icon="bell-outline"
+              compact
+              style={styles.reminderContainer}
+              textStyle={styles.reminderText}
+            >
+              Reminder
+            </Chip>
           )}
           
           {task.completed && (
-            <View style={styles.completedContainer}>
-              <Ionicons 
-                name="checkmark-circle" 
-                size={scaleFont(isTablet() ? 16 : 14)} 
-                color={theme.colors.success} 
-                style={{marginRight: scale(4)}} 
-              />
-              <Text style={styles.completedLabel}>Completed</Text>
-            </View>
+            <Chip
+              icon="checkmark-circle"
+              compact
+              style={styles.completedContainer}
+              textStyle={styles.completedLabel}
+            >
+              Completed
+            </Chip>
           )}
         </View>
-      </View>
-    </TouchableOpacity>
+      </Card.Actions>
+    </Card>
   );
 });
 

@@ -1,12 +1,16 @@
 import React from 'react';
 import { 
   StyleSheet, 
-  TouchableOpacity, 
   View, 
-  Text,
   ViewStyle,
   TextStyle
 } from 'react-native';
+import { 
+  IconButton, 
+  Text, 
+  Switch,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { useTheme } from '../utils/Theme';
 import { Ionicons } from '@expo/vector-icons';
 import { scale, scaleFont } from '../utils/ResponsiveUtils';
@@ -45,42 +49,62 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
     }
   };
   
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
+  // Determine icon and size based on current theme and size prop
+  const iconName = isDarkMode ? "sunny-outline" : "moon-outline";
+  const iconSize = getIconSize();
+  
+  // Get Paper size based on our size prop
+  const getPaperSize = () => {
+    switch (size) {
+      case 'small': return 'small';
+      case 'large': return 'medium';
+      default: return 'small';
+    }
+  };
+  
   return (
     <View style={[styles.container, style]}>
       {showLabel && (
-        <Text 
-          style={[
-            styles.label, 
-            { color: theme.colors.textSecondary }
-          ]}
+        <Text
+          variant="labelLarge"
+          style={[styles.label, { color: theme.colors.textSecondary }]}
         >
           {isDarkMode ? 'Dark Mode' : 'Light Mode'}
         </Text>
       )}
       
-      <TouchableOpacity
-        style={[
-          styles.button,
-          { 
-            backgroundColor: isDarkMode 
-              ? theme.colors.backgroundSecondary 
-              : theme.colors.backgroundCard,
-            width: getContainerSize(),
-            height: getContainerSize(),
-            borderColor: theme.colors.primary,
-            ...theme.shadows.small
-          }
-        ]}
-        onPress={toggleTheme}
-        accessibilityLabel={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
-        accessibilityHint="Changes the app color theme"
-      >
-        <Ionicons 
-          name={isDarkMode ? "sunny" : "moon"} 
-          size={getIconSize()} 
-          color={theme.colors.primary} 
+      {/* First option: Use Switch component */}
+      {size === 'small' && (
+        <Switch
+          value={isDarkMode}
+          onValueChange={toggleTheme}
+          color={theme.colors.primary}
+          accessibilityLabel={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
         />
-      </TouchableOpacity>
+      )}
+      
+      {/* Second option: Use IconButton for medium/large sizes */}
+      {size !== 'small' && (
+        <IconButton
+          icon={iconName}
+          iconColor={theme.colors.primary}
+          size={iconSize}
+          mode="contained-tonal"
+          onPress={toggleTheme}
+          style={[
+            styles.iconButton,
+            {
+              backgroundColor: isDarkMode 
+                ? theme.colors.backgroundSecondary 
+                : theme.colors.backgroundCard,
+            }
+          ]}
+          accessibilityLabel={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        />
+      )}
     </View>
   );
 };
@@ -90,17 +114,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   } as ViewStyle,
-  button: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: scale(20),
-    borderWidth: 1.5,
+  iconButton: {
+    borderWidth: 1,
+    borderColor: 'transparent',
   } as ViewStyle,
   label: {
     marginRight: 12,
-    fontSize: scaleFont(14),
-    fontFamily: 'Inter-Medium',
-    fontWeight: '500',
     letterSpacing: 0.1,
   } as TextStyle
 });
