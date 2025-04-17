@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -8,7 +8,8 @@ import {
   Image,
   ScrollView,
   RefreshControl,
-  Dimensions
+  Dimensions,
+  Animated
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
@@ -26,6 +27,10 @@ export default function HomeScreen({ navigation }: Props) {
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Animation values
+  const taskCardScale = useRef(new Animated.Value(1)).current;
+  const taskCardOpacity = useRef(new Animated.Value(1)).current;
 
   // Calculate progress percentage
   const calculateProgress = useCallback((total: number, completed: number) => {
@@ -98,6 +103,48 @@ export default function HomeScreen({ navigation }: Props) {
       default:
         return theme.colors.categoryOther;
     }
+  };
+  
+  // Animation handlers for card press
+  const handlePressIn = () => {
+    Animated.parallel([
+      Animated.timing(taskCardScale, {
+        toValue: 0.96,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(taskCardOpacity, {
+        toValue: 0.9,
+        duration: 150,
+        useNativeDriver: true,
+      })
+    ]).start();
+  };
+  
+  const handlePressOut = () => {
+    Animated.parallel([
+      Animated.timing(taskCardScale, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(taskCardOpacity, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      })
+    ]).start();
+  };
+  
+  // Navigation with animation
+  const navigateToRoutine = () => {
+    // Trigger press out animation to reset card
+    handlePressOut();
+    
+    // Short delay to let the animation complete for a smooth feeling
+    setTimeout(() => {
+      navigation.navigate('Routine');
+    }, 100);
   };
 
   return (
@@ -205,24 +252,36 @@ export default function HomeScreen({ navigation }: Props) {
         
         <View style={styles.cardContainer}>
           <TouchableOpacity 
-            style={styles.taskCard}
-            onPress={() => navigation.navigate('Routine')}
+            activeOpacity={0.99} // Use high activeOpacity so we can control the animation
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={navigateToRoutine}
           >
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>My Tasks</Text>
-              <Text style={styles.cardDescription}>
-                Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
-              </Text>
-              
-              <View style={styles.cardActions}>
-                <TouchableOpacity 
-                  style={styles.actionButton}
-                  onPress={() => navigation.navigate('Routine')}
-                >
-                  <Text style={styles.actionButtonText}>View Tasks</Text>
-                </TouchableOpacity>
+            <Animated.View 
+              style={[
+                styles.taskCard,
+                {
+                  opacity: taskCardOpacity,
+                  transform: [{ scale: taskCardScale }]
+                }
+              ]}
+            >
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>My Tasks</Text>
+                <Text style={styles.cardDescription}>
+                  Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
+                </Text>
+                
+                <View style={styles.cardActions}>
+                  <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={navigateToRoutine}
+                  >
+                    <Text style={styles.actionButtonText}>View Tasks</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </Animated.View>
           </TouchableOpacity>
         </View>
       </ScrollView>
