@@ -337,7 +337,13 @@ export default function RoutineScreen({ navigation }: Props) {
   };
 
   // Filter tasks based on selected category and priority
-  const getFilteredTasks = useCallback(() => {
+  // Memoize filtered tasks to avoid recomputation on re-renders
+  const filteredTasks = useMemo(() => {
+    // Early return if no filters are applied to avoid unnecessary computation
+    if (selectedCategoryFilter === 'All' && selectedPriorityFilter === 'All') {
+      return tasks;
+    }
+    
     return tasks.filter(task => {
       const matchesCategory = selectedCategoryFilter === 'All' || task.category === selectedCategoryFilter;
       const matchesPriority = selectedPriorityFilter === 'All' || task.priority === selectedPriorityFilter;
@@ -345,8 +351,6 @@ export default function RoutineScreen({ navigation }: Props) {
       return matchesCategory && matchesPriority;
     });
   }, [tasks, selectedCategoryFilter, selectedPriorityFilter]);
-
-  const filteredTasks = getFilteredTasks();
 
   // Get category color for filter buttons
   const getCategoryColor = (category: TaskCategory): string => {
@@ -479,12 +483,22 @@ export default function RoutineScreen({ navigation }: Props) {
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
             getItemLayout={getItemLayout}
-            maxToRenderPerBatch={10}
-            windowSize={10}
-            updateCellsBatchingPeriod={50}
-            initialNumToRender={15}
+            maxToRenderPerBatch={8} // Reduced for smoother scrolling
+            windowSize={8} // Optimized window size
+            updateCellsBatchingPeriod={30} // Faster batching for smoother performance
+            initialNumToRender={10} // Optimal for most device screens
             removeClippedSubviews={true}
             extraData={taskIds}
+            maintainVisibleContentPosition={{ // Keep scroll position consistent
+              minIndexForVisible: 0,
+              autoscrollToTopThreshold: 10
+            }}
+            // Enhanced performance via list configuration
+            showsVerticalScrollIndicator={false}
+            // Memory optimization
+            onEndReachedThreshold={0.5}
+            // Optimize scrolling performance
+            scrollEventThrottle={16} // Targets 60fps
           />
         )}
         
