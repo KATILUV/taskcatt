@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { 
   StyleSheet, 
-  TouchableOpacity,
-  TouchableOpacityProps,
   Animated,
   ViewStyle,
-  Text,
   View,
   TextStyle
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { 
+  IconButton as PaperIconButton, 
+  Text,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { useTheme } from '../utils/Theme';
 import { scale as scaleSize, scaleFont } from '../utils/ResponsiveUtils';
 
@@ -17,14 +18,16 @@ import { scale as scaleSize, scaleFont } from '../utils/ResponsiveUtils';
 export type IconButtonVariant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
 
 // Props for the IconButton component
-interface IconButtonProps extends Omit<TouchableOpacityProps, 'style'> {
-  name: keyof typeof Ionicons.glyphMap;
+interface IconButtonProps {
+  name: string;
   size?: 'small' | 'medium' | 'large';
   variant?: IconButtonVariant;
   label?: string;
   showLabel?: boolean;
   style?: ViewStyle;
   iconStyle?: ViewStyle;
+  disabled?: boolean;
+  onPress?: () => void;
 }
 
 export const IconButton: React.FC<IconButtonProps> = ({
@@ -120,49 +123,79 @@ export const IconButton: React.FC<IconButtonProps> = ({
     }).start();
   };
   
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
+  // Convert icon name to material icon name
+  const getMaterialIconName = (iconName: string): string => {
+    // Basic mapping from commonly used Ionicons to Material Design icons
+    const iconMap: Record<string, string> = {
+      'add': 'plus',
+      'checkmark': 'check',
+      'close': 'close',
+      'create': 'pencil',
+      'trash': 'delete',
+      'list': 'format-list-bulleted',
+      'calendar': 'calendar',
+      'person': 'account',
+      'settings': 'cog',
+      'search': 'magnify',
+      'home': 'home',
+      'add-circle': 'plus-circle',
+      'arrow-back': 'arrow-left',
+      'arrow-forward': 'arrow-right',
+      'notifications': 'bell',
+      'help-circle': 'help-circle',
+      'information-circle': 'information',
+      'time': 'clock',
+      'heart': 'heart',
+      'star': 'star',
+      'refresh': 'refresh',
+      'save': 'content-save',
+      'share': 'share',
+      'menu': 'menu',
+    };
+    
+    return iconMap[iconName] || 'circle'; // Default to circle if no mapping exists
+  };
+
   return (
     <View style={[styles.wrapper, style]}>
-      <TouchableOpacity
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={0.8}
-        disabled={disabled}
-        {...rest}
-        style={[
-          styles.container,
-          {
-            width: getContainerSize(),
-            height: getContainerSize(),
-            backgroundColor: getBackgroundColor(),
-            borderColor: getColor(),
-          },
-          iconStyle,
-        ]}
+      <Animated.View
+        style={{
+          transform: [{ scale }],
+        }}
       >
-        <Animated.View
+        <PaperIconButton
+          icon={getMaterialIconName(name)}
+          iconColor={getColor()}
+          size={getIconSize()}
+          onPress={rest.onPress}
+          disabled={disabled}
           style={[
-            styles.iconContainer,
+            styles.container,
             {
-              transform: [{ scale }],
+              backgroundColor: getBackgroundColor(),
+              borderColor: getColor(),
+              width: getContainerSize(),
+              height: getContainerSize(),
             },
+            iconStyle,
           ]}
-        >
-          <Ionicons
-            name={name}
-            size={getIconSize()}
-            color={getColor()}
-          />
-        </Animated.View>
-      </TouchableOpacity>
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          mode="contained"
+        />
+      </Animated.View>
       
       {showLabel && label && (
         <Text
+          variant="labelSmall"
           style={[
             styles.label,
             { 
               color: disabled ? theme.colors.textDisabled : theme.colors.textSecondary,
-              fontFamily: theme.fonts.medium
-            } as TextStyle,
+            }
           ]}
         >
           {label}

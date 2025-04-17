@@ -110,62 +110,64 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   return (
     <Portal>
-      <Modal
+      <PaperModal
         visible={visible}
         onDismiss={handleClose}
         contentContainerStyle={styles.modalContainer}
         dismissable={true}
       >
-        <TouchableWithoutFeedback onPress={handleClose}>
-          <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
-        </TouchableWithoutFeedback>
-        
-        <Animated.View
-          style={[
-            styles.bottomSheet,
-            {
-              height: bottomSheetHeight,
-              paddingBottom: insets.bottom,
-              backgroundColor: theme.colors.backgroundCard,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              transform: [{ translateY }],
-              elevation: 8,
-            },
-          ]}
-        >
-          <Surface style={styles.surface}>
-            <View 
-              style={styles.header} 
-              {...panResponder.panHandlers}
-            >
-              <View style={[styles.handle, { backgroundColor: theme.colors.gray }]} />
+        <View style={{ flex: 1 }}>
+          <TouchableWithoutFeedback onPress={handleClose}>
+            <Animated.View style={[styles.overlay, { opacity, backgroundColor: 'rgba(0, 0, 0, 0.5)' }]} />
+          </TouchableWithoutFeedback>
+          
+          <Animated.View
+            style={[
+              styles.bottomSheet,
+              {
+                height: bottomSheetHeight,
+                paddingBottom: insets.bottom,
+                backgroundColor: theme.colors.backgroundCard,
+                borderTopLeftRadius: 24,
+                borderTopRightRadius: 24,
+                transform: [{ translateY }],
+                elevation: 8,
+              },
+            ]}
+          >
+            <Surface style={styles.surface}>
+              <View 
+                style={styles.header} 
+                {...panResponder.panHandlers}
+              >
+                <View style={[styles.handle, { backgroundColor: theme.colors.gray }]} />
+                
+                {title && (
+                  <View style={styles.titleContainer}>
+                    <Title style={styles.title}>
+                      {title}
+                    </Title>
+                  </View>
+                )}
+                
+                <IconButton
+                  icon="close"
+                  iconColor={theme.colors.textSecondary}
+                  size={24}
+                  style={styles.closeButton}
+                  onPress={handleClose}
+                />
+              </View>
               
-              {title && (
-                <View style={styles.titleContainer}>
-                  <Title style={styles.title}>
-                    {title}
-                  </Title>
-                </View>
-              )}
+              <Divider />
               
-              <IconButton
-                icon="close"
-                iconColor={theme.colors.textSecondary}
-                size={24}
-                style={styles.closeButton}
-                onPress={handleClose}
-              />
-            </View>
-            
-            <Divider />
-            
-            <View style={styles.content}>
-              {children}
-            </View>
-          </Surface>
-        </Animated.View>
-      </Modal>
+              <View style={styles.content}>
+                {children}
+              </View>
+            </Surface>
+          </Animated.View>
+        </View>
+      </PaperModal>
     </Portal>
   );
 };

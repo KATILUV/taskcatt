@@ -6,7 +6,6 @@ import {
   Easing,
   Platform
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { 
   FAB, 
   Text, 
@@ -255,10 +254,13 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
                       ]}
                       elevation={2}
                     >
-                      <Ionicons
-                        name={action.icon as any}
-                        size={22}
+                      <FAB
+                        icon={getIconName(action.icon)}
+                        size="small"
+                        style={{ backgroundColor: action.color || theme.colors.primary }}
                         color={theme.colors.white}
+                        onPress={() => {}}
+                        customSize={22}
                       />
                     </Surface>
                     <Text variant="labelLarge" style={{ color: theme.colors.textPrimary }}>
