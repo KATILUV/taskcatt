@@ -13,26 +13,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Task Cat Code Viewer"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Expo App"
-
-[[workflows.workflow]]
-name = "Task Cat Code Viewer"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node code-viewer.js"
-waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Expo App"
@@ -46,7 +27,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "expo start --port 5000"
+args = "node start.js"
 waitForPort = 5000
 
 [deployment]
@@ -63,3 +44,7 @@ externalPort = 3000
 [[ports]]
 localPort = 8081
 externalPort = 8081
+
+[[ports]]
+localPort = 19000
+externalPort = 3001
