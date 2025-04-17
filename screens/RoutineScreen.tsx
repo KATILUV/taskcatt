@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -7,7 +7,8 @@ import {
   SafeAreaView, 
   ActivityIndicator,
   TouchableOpacity,
-  ScrollView
+  ScrollView,
+  FlatList
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -16,6 +17,8 @@ import { Task, TaskCategory, TASK_CATEGORIES, TaskPriority, TASK_PRIORITIES } fr
 import { StorageService } from '../services/StorageService';
 import TaskItem from '../components/TaskItem';
 import TaskInput from '../components/TaskInput';
+import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
+import { createStyles, theme } from '../utils/Theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Routine'>;
 
@@ -108,7 +111,26 @@ export default function RoutineScreen({ navigation }: Props) {
     );
   }, []);
 
-  // Render individual task item
+  // Create a ref for the FlatList to use for scrolling
+  const flatListRef = useRef<any>(null);
+  
+  // Extract task IDs for optimized rendering (helps with memoization)
+  const taskIds = useMemo(() => tasks.map(task => task.id), [tasks]);
+  
+  // Item key extractor function
+  const keyExtractor = useCallback((item: Task) => item.id, []);
+  
+  // Function to get item layout for improved performance
+  const getItemLayout = useCallback(
+    (_: any, index: number) => ({
+      length: theme.layout.listItemHeight,
+      offset: theme.layout.listItemHeight * index,
+      index,
+    }),
+    []
+  );
+  
+  // Render individual task item with memoization for better performance
   const renderItem = useCallback(({ item, drag, isActive }: RenderItemParams<Task>) => {
     return (
       <ScaleDecorator>
@@ -121,7 +143,7 @@ export default function RoutineScreen({ navigation }: Props) {
         />
       </ScaleDecorator>
     );
-  }, []);
+  }, [handleDeleteTask, handleToggleComplete]);
 
   if (loading) {
     return (
@@ -135,13 +157,13 @@ export default function RoutineScreen({ navigation }: Props) {
   const getPriorityColor = (priority: TaskPriority): string => {
     switch (priority) {
       case 'High':
-        return '#E53935'; // Red
+        return theme.colors.priorityHigh;
       case 'Medium':
-        return '#FB8C00'; // Orange
+        return theme.colors.priorityMedium;
       case 'Low':
-        return '#43A047'; // Green
+        return theme.colors.priorityLow;
       default:
-        return '#757575'; // Gray
+        return theme.colors.categoryOther;
     }
   };
 
@@ -161,14 +183,14 @@ export default function RoutineScreen({ navigation }: Props) {
   const getCategoryColor = (category: TaskCategory): string => {
     switch (category) {
       case 'Health':
-        return '#4CAF50'; // Green
+        return theme.colors.categoryHealth;
       case 'Work':
-        return '#2196F3'; // Blue
+        return theme.colors.categoryWork;
       case 'Personal':
-        return '#9C27B0'; // Purple
+        return theme.colors.categoryPersonal;
       case 'Other':
       default:
-        return '#757575'; // Gray
+        return theme.colors.categoryOther;
     }
   };
 
@@ -267,11 +289,19 @@ export default function RoutineScreen({ navigation }: Props) {
         </View>
       ) : (
         <DraggableFlatList
+          ref={flatListRef}
           data={filteredTasks}
           onDragEnd={handleDragEnd}
-          keyExtractor={(item) => item.id}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
+          getItemLayout={getItemLayout}
+          maxToRenderPerBatch={10}
+          windowSize={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={15}
+          removeClippedSubviews={true}
+          extraData={taskIds}
         />
       )}
       
@@ -280,106 +310,114 @@ export default function RoutineScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
-    backgroundColor: 'white',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0066cc',
-  },
-  filterContainer: {
-    backgroundColor: 'white',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
-  },
-  filterScroll: {
-    paddingHorizontal: 12,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginHorizontal: 4,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#dddddd',
-    backgroundColor: 'white',
-  },
-  filterButtonActive: {
-    backgroundColor: '#f0f0f0',
-    borderWidth: 1.5,
-  },
-  filterButtonText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  filterButtonTextActive: {
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  filtersSection: {
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eeeeee',
-  },
-  filterSectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginLeft: 16,
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  categoryDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  priorityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 50,
-  },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 16,
-    color: '#999',
-  },
-  listContent: {
-    paddingVertical: 8,
-  },
+// Use createStyles from Theme utils to create responsive styles
+const styles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.backgroundPrimary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.backgroundPrimary,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.gray,
+      backgroundColor: theme.colors.white,
+      height: theme.layout.headerHeight,
+    },
+    title: {
+      fontSize: scaleFont(isTab ? 26 : 22),
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+    },
+    filterContainer: {
+      backgroundColor: theme.colors.white,
+      paddingVertical: theme.spacing.md,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.gray,
+    },
+    filterScroll: {
+      paddingHorizontal: theme.spacing.md,
+    },
+    filterButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      marginHorizontal: theme.spacing.xs,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.lightGray,
+      backgroundColor: theme.colors.white,
+      height: scale(isTab ? 40 : 36),
+    },
+    filterButtonActive: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderWidth: 1.5,
+    },
+    filterButtonText: {
+      fontSize: scaleFont(isTab ? 16 : 14),
+      color: theme.colors.textSecondary,
+    },
+    filterButtonTextActive: {
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    },
+    filtersSection: {
+      backgroundColor: theme.colors.white,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.gray,
+    },
+    filterSectionTitle: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginLeft: theme.spacing.md,
+      marginTop: theme.spacing.md,
+      marginBottom: theme.spacing.xs,
+    },
+    categoryDot: {
+      width: scale(isTab ? 10 : 8),
+      height: scale(isTab ? 10 : 8),
+      borderRadius: scale(isTab ? 5 : 4),
+      marginRight: theme.spacing.xs,
+    },
+    priorityDot: {
+      width: scale(isTab ? 10 : 8),
+      height: scale(isTab ? 10 : 8),
+      borderRadius: scale(isTab ? 5 : 4),
+      marginRight: theme.spacing.xs,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: scale(50),
+    },
+    emptyText: {
+      fontSize: scaleFont(isTab ? 24 : 20),
+      fontWeight: 'bold',
+      color: theme.colors.textSecondary,
+      marginBottom: theme.spacing.sm,
+    },
+    emptySubtext: {
+      fontSize: scaleFont(isTab ? 18 : 16),
+      color: theme.colors.textDisabled,
+    },
+    listContent: {
+      paddingVertical: theme.spacing.sm,
+      paddingHorizontal: isTab ? theme.spacing.md : 0,
+    },
+  });
 });
