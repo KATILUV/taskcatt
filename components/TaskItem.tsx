@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextStyle, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { 
   Task, 
   TaskCategory, 

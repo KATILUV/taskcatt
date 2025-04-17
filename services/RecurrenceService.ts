@@ -154,14 +154,24 @@ export const RecurrenceService = {
     }
 
     const instances: Task[] = [];
-    let currentDate = fromDate;
     let instanceCount = 0;
-
+    
     // Use either creation date or the fromDate as the base
     const baseDate = Math.max(task.createdAt, fromDate);
     
+    // Cache for previously calculated dates to avoid redundant calculations
+    const dateCache = new Map<string, number | null>();
+    
     // Find the first occurrence after the fromDate
-    let nextInstanceDate = RecurrenceService.getNextInstanceDate(baseDate, task.recurrence);
+    const cacheKey1 = `${baseDate}_${JSON.stringify(task.recurrence)}`;
+    let nextInstanceDate: number | null;
+    
+    if (dateCache.has(cacheKey1)) {
+      nextInstanceDate = dateCache.get(cacheKey1) as number | null;
+    } else {
+      nextInstanceDate = RecurrenceService.getNextInstanceDate(baseDate, task.recurrence);
+      dateCache.set(cacheKey1, nextInstanceDate);
+    }
 
     while (
       nextInstanceDate && 
@@ -180,8 +190,18 @@ export const RecurrenceService = {
       instances.push(instance);
       instanceCount++;
 
-      // Calculate the next instance date
-      nextInstanceDate = RecurrenceService.getNextInstanceDate(nextInstanceDate, task.recurrence);
+      // Calculate the next instance date using cache when possible
+      const cacheKey2 = `${nextInstanceDate}_${JSON.stringify(task.recurrence)}`;
+      let nextDate: number | null;
+      
+      if (dateCache.has(cacheKey2)) {
+        nextDate = dateCache.get(cacheKey2) as number | null;
+      } else {
+        nextDate = RecurrenceService.getNextInstanceDate(nextInstanceDate, task.recurrence);
+        dateCache.set(cacheKey2, nextDate);
+      }
+      
+      nextInstanceDate = nextDate;
     }
 
     return instances;
