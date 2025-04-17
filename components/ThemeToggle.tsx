@@ -8,7 +8,7 @@ import {
   ViewStyle,
   TextStyle
 } from 'react-native';
-import { useTheme, createStyles } from '../utils/Theme';
+import { useTheme } from '../utils/Theme';
 import { Ionicons } from '@expo/vector-icons';
 import { scale } from '../utils/ResponsiveUtils';
 
@@ -86,7 +86,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   );
 };
 
-const styles = createStyles((theme) => {
+const useStyles = createStyles((theme) => {
   return StyleSheet.create({
     container: {
       flexDirection: 'row',
@@ -100,8 +100,8 @@ const styles = createStyles((theme) => {
     } as ViewStyle,
     label: {
       marginRight: theme.spacing.sm,
-      fontSize: theme.typography.bodySmall.fontSize,
-      fontFamily: theme.typography.bodySmall.fontFamily,
+      fontSize: theme.typography.caption.fontSize,
+      fontFamily: theme.typography.caption.fontFamily,
     } as TextStyle
   });
 });
