@@ -41,21 +41,21 @@ export const lightColors = {
   ...commonColors,
   
   // Secondary colors for light theme
-  secondary: '#6c757d',
-  secondaryLight: '#9aa0a6',
-  secondaryDark: '#495057',
+  secondary: '#5a6268',
+  secondaryLight: '#8d949a',
+  secondaryDark: '#3d4347',
   
   // Neutral colors
   white: '#ffffff',
   lightGray: '#f8f9fa',
   gray: '#e9ecef',
   darkGray: '#343a40',
-  black: '#212529',
+  black: '#1a1d20',
   
-  // Text colors
-  textPrimary: '#212529',
-  textSecondary: '#6c757d',
-  textDisabled: '#adb5bd',
+  // Text colors with increased contrast
+  textPrimary: '#161819', // Darker for stronger contrast
+  textSecondary: '#4d545a', // Darker secondary text for better readability
+  textDisabled: '#97a0a8', // Slightly darker disabled text for better visibility
   textInverted: '#ffffff',
   
   // Background colors
@@ -63,11 +63,11 @@ export const lightColors = {
   backgroundSecondary: '#e9ecef',
   backgroundCard: '#ffffff',
   
-  // Icon colors
-  iconPrimary: '#212529',
-  iconSecondary: '#6c757d',
-  iconDisabled: '#adb5bd',
-  iconAccent: '#0066cc',
+  // Icon colors with increased contrast
+  iconPrimary: '#161819',
+  iconSecondary: '#4d545a', 
+  iconDisabled: '#97a0a8',
+  iconAccent: '#0059b3', // Slightly darker for better contrast on light backgrounds
   
   // Shadow colors
   shadowColor: '#000000',
@@ -78,9 +78,9 @@ export const darkColors = {
   ...commonColors,
   
   // Secondary colors for dark theme
-  secondary: '#9aa0a6',
-  secondaryLight: '#bdc4c9',
-  secondaryDark: '#6c757d',
+  secondary: '#a5acb3',
+  secondaryLight: '#c9cfd5',
+  secondaryDark: '#7c858e',
   
   // Neutral colors
   white: '#ffffff', // Still needed for specific UI elements
@@ -89,22 +89,22 @@ export const darkColors = {
   darkGray: '#dee2e6',
   black: '#f8f9fa',
   
-  // Text colors
-  textPrimary: '#f8f9fa',
-  textSecondary: '#ced4da',
-  textDisabled: '#6c757d',
-  textInverted: '#212529',
+  // Text colors with increased contrast
+  textPrimary: '#ffffff', // Pure white for maximum contrast and readability
+  textSecondary: '#d9d9d9', // Lighter gray for better contrast with dark backgrounds
+  textDisabled: '#8c8c8c', // Brighter disabled text for better visibility
+  textInverted: '#121212',
   
   // Background colors
   backgroundPrimary: '#121212',
   backgroundSecondary: '#1e1e1e',
   backgroundCard: '#2c2c2c',
   
-  // Icon colors
-  iconPrimary: '#f8f9fa',
-  iconSecondary: '#ced4da',
-  iconDisabled: '#6c757d',
-  iconAccent: '#4d94ff',
+  // Icon colors with increased contrast
+  iconPrimary: '#ffffff',
+  iconSecondary: '#d9d9d9',
+  iconDisabled: '#8c8c8c',
+  iconAccent: '#5c9fff', // Lighter blue for better contrast on dark backgrounds
   
   // Shadow colors
   shadowColor: '#000000',
@@ -151,87 +151,105 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
     themeType: activeColorScheme,
     ...responsive,
     
-    // Font configuration
+    // Font configuration with variable weights
     fonts: {
       regular: 'Inter',
       medium: 'Inter-Medium',
       semiBold: 'Inter-SemiBold',
       bold: 'Inter-Bold',
+      weight: {
+        light: '300',
+        regular: 'normal',
+        medium: '500',
+        semiBold: '600',
+        bold: 'bold',
+        extraBold: '800',
+      }
     },
     
-    // Typography styles
+    // Typography styles with improved hierarchy and consistent vertical rhythm
     typography: {
       h1: {
         fontFamily: 'Inter-Bold',
-        fontSize: 28,
-        lineHeight: 34,
-        letterSpacing: 0.25,
+        fontSize: 32,
+        lineHeight: 40, // 1.25× line height ratio
+        letterSpacing: -0.5,
         color: colors.textPrimary,
+        fontWeight: '800',
       },
       h2: {
         fontFamily: 'Inter-SemiBold',
-        fontSize: 24,
-        lineHeight: 30,
-        letterSpacing: 0.25,
+        fontSize: 26,
+        lineHeight: 34, // ~1.3× line height ratio
+        letterSpacing: -0.25,
         color: colors.textPrimary,
+        fontWeight: '700',
       },
       h3: {
         fontFamily: 'Inter-SemiBold',
-        fontSize: 20,
-        lineHeight: 26,
-        letterSpacing: 0.15,
+        fontSize: 22,
+        lineHeight: 30, // ~1.36× line height ratio
+        letterSpacing: 0,
         color: colors.textPrimary,
+        fontWeight: '600',
       },
       subtitle1: {
         fontFamily: 'Inter-Medium',
         fontSize: 18,
-        lineHeight: 24,
+        lineHeight: 26, // ~1.44× line height ratio
         letterSpacing: 0.15,
         color: colors.textPrimary,
+        fontWeight: '600',
       },
       subtitle2: {
         fontFamily: 'Inter-Medium',
         fontSize: 16,
-        lineHeight: 22,
+        lineHeight: 24, // 1.5× line height ratio
         letterSpacing: 0.1,
         color: colors.textPrimary,
+        fontWeight: '500',
       },
       body1: {
         fontFamily: 'Inter',
         fontSize: 16,
-        lineHeight: 24,
-        letterSpacing: 0.5,
+        lineHeight: 24, // 1.5× line height ratio
+        letterSpacing: 0.2,
         color: colors.textSecondary,
+        fontWeight: '400',
       },
       body2: {
         fontFamily: 'Inter',
         fontSize: 14,
-        lineHeight: 20,
+        lineHeight: 22, // ~1.57× line height ratio
         letterSpacing: 0.25,
         color: colors.textSecondary,
+        fontWeight: '400',
       },
       button: {
         fontFamily: 'Inter-Medium',
         fontSize: 14,
-        lineHeight: 18,
-        letterSpacing: 1.25,
+        lineHeight: 20, // ~1.43× line height ratio
+        letterSpacing: 0.75,
         textTransform: 'uppercase',
         color: colors.textInverted,
+        fontWeight: '600',
       },
       caption: {
         fontFamily: 'Inter',
         fontSize: 12,
-        lineHeight: 16,
+        lineHeight: 18, // 1.5× line height ratio
         letterSpacing: 0.4,
         color: colors.textSecondary,
+        fontWeight: '400',
       },
       overline: {
         fontFamily: 'Inter-Medium',
         fontSize: 10,
-        lineHeight: 16,
+        lineHeight: 16, // 1.6× line height ratio
         letterSpacing: 1.5,
         textTransform: 'uppercase',
         color: colors.textSecondary,
+        fontWeight: '500',
       },
     },
     
