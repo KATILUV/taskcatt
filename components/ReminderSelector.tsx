@@ -7,10 +7,11 @@ import {
   Modal,
   ScrollView,
   Switch,
-  Platform
+  Platform,
+  TextStyle
 } from 'react-native';
 import { ReminderSettings } from '../models/Task';
-import { theme } from '../utils/Theme';
+import { useTheme, createStyles } from '../utils/Theme';
 import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
 
 interface ReminderSelectorProps {
@@ -24,6 +25,8 @@ export default function ReminderSelector({
   onReminderChange,
   showLabel = true
 }: ReminderSelectorProps) {
+  const { theme } = useTheme();
+  const styles = useStyles();
   const [modalVisible, setModalVisible] = useState(false);
   const [tempSettings, setTempSettings] = useState<ReminderSettings>(() => {
     return reminderSettings || { enabled: false };
