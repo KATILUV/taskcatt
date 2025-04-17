@@ -211,9 +211,9 @@ const styles = createStyles((theme) => {
   return StyleSheet.create({
     taskCard: {
       backgroundColor: theme.colors.backgroundCard,
-      marginVertical: theme.spacing.md,
-      marginHorizontal: theme.spacing.md,
-      borderRadius: theme.layout.cardRadius * 1.5,
+      marginVertical: theme.spacing.md + 4,
+      marginHorizontal: theme.spacing.lg,
+      borderRadius: theme.layout.cardRadius * 2,
       ...theme.shadows.medium,
       overflow: 'hidden',
       minHeight: theme.layout.listItemHeight * 1.2,
@@ -221,26 +221,27 @@ const styles = createStyles((theme) => {
     activeCard: {
       backgroundColor: theme.colors.white,
       ...theme.shadows.large,
-      transform: [{ scale: 1.02 }],
+      transform: [{ scale: 1.03 }],
     },
     completedCard: {
-      backgroundColor: theme.colors.backgroundSecondary + '50',
+      backgroundColor: theme.colors.backgroundSecondary + '30',
       borderLeftWidth: scale(4),
       borderLeftColor: theme.colors.success,
     },
     cardHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: theme.spacing.md,
+      padding: theme.spacing.lg,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.backgroundSecondary,
     },
     cardContent: {
-      padding: theme.spacing.md,
+      padding: theme.spacing.lg,
+      paddingVertical: theme.spacing.md + 4,
     },
     cardFooter: {
-      padding: theme.spacing.md,
-      paddingTop: 0,
+      padding: theme.spacing.lg,
+      paddingTop: theme.spacing.sm,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',

@@ -9,17 +9,21 @@ import {
   ScrollView,
   RefreshControl,
   Dimensions,
-  Animated
+  Animated,
+  StatusBar
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../App';
 import { StorageService } from '../services/StorageService';
-import { TASK_CATEGORIES, TaskCategory } from '../models/Task';
+import { TASK_CATEGORIES, TaskCategory, Task } from '../models/Task';
 import ProgressBar from '../components/ProgressBar';
 import { isTablet, scale, scaleFont, getResponsiveStyles } from '../utils/ResponsiveUtils';
 import { createStyles, useTheme } from '../utils/Theme';
 import { IconButton } from '../components/IconButton';
 import { ThemeToggle } from '../components/ThemeToggle';
+import BottomSheet from '../components/BottomSheet';
+import TaskDetail from '../components/TaskDetail';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
