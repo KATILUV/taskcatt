@@ -18,6 +18,7 @@ interface CardInterpolationProps {
   current: AnimatedValue;
   next?: AnimatedValue;
   layouts: ScreenLayouts;
+  closing?: boolean;
 }
 
 interface CardInterpolationResult {
@@ -26,7 +27,7 @@ interface CardInterpolationResult {
   nextCardStyle?: object;
 }
 
-// Custom transition configurations for React Navigation
+// Enhanced transition configurations for React Navigation
 export const transitionSpecs = {
   // Base transition configuration (shared across types)
   default: {
@@ -50,6 +51,30 @@ export const transitionSpecs = {
     config: {
       duration: 400,
       easing: Easing.inOut(Easing.cubic),
+    },
+  },
+  // Material Design inspired spring animation
+  material: {
+    animation: 'spring' as const,
+    config: {
+      stiffness: 1000,
+      damping: 70,
+      mass: 3,
+      overshootClamping: false,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 0.01,
+    },
+  },
+  // Bouncy spring animation for playful interactions
+  bouncy: {
+    animation: 'spring' as const,
+    config: {
+      stiffness: 100,
+      damping: 10,
+      mass: 1,
+      overshootClamping: false,
+      restDisplacementThreshold: 0.01,
+      restSpeedThreshold: 0.01,
     },
   },
 };
@@ -171,6 +196,112 @@ export const scaleTransition = {
           },
         ],
       },
+    };
+  },
+};
+
+// Material Design inspired animation for switching between primary views
+export const materialNavigationTransition = {
+  gestureDirection: 'horizontal' as const,
+  transitionSpec: {
+    open: transitionSpecs.material,
+    close: transitionSpecs.material,
+  },
+  cardStyleInterpolator: ({ current, layouts, next, closing }: CardInterpolationProps): CardInterpolationResult => {
+    const translateX = current.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [layouts.screen.width, 0],
+    });
+    
+    // Add a slight elevation change during transition
+    const elevation = current.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 8],
+    });
+
+    // For next screen
+    const nextCardOpacity = next ? next.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.5],
+    }) : 1;
+    
+    const nextCardScale = next ? next.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.92],
+    }) : 1;
+
+    return {
+      cardStyle: {
+        transform: [{ translateX }],
+        elevation,
+      },
+      overlayStyle: {
+        opacity: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 0.1],
+        }),
+      },
+      nextCardStyle: next ? {
+        transform: [{ scale: nextCardScale }],
+        opacity: nextCardOpacity,
+      } : undefined,
+    };
+  },
+};
+
+// Playful transition with a slight bounce for Task Cat's personality
+export const catTransition = {
+  gestureDirection: 'horizontal' as const,
+  transitionSpec: {
+    open: transitionSpecs.bouncy,
+    close: transitionSpecs.default,
+  },
+  cardStyleInterpolator: ({ current, layouts, next }: CardInterpolationProps): CardInterpolationResult => {
+    const translateX = current.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [layouts.screen.width, 0],
+    });
+    
+    // Add slight rotation for a playful effect
+    const rotate = current.progress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ['2deg', '1deg', '0deg'],
+    });
+
+    // For next screen
+    const nextCardScale = next ? next.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.85],
+    }) : 1;
+    
+    const nextCardOpacity = next ? next.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.7],
+    }) : 1;
+
+    return {
+      cardStyle: {
+        transform: [
+          { translateX },
+          { rotate },
+        ],
+      },
+      overlayStyle: {
+        opacity: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, 0.3],
+        }),
+      },
+      nextCardStyle: next ? {
+        transform: [
+          { scale: nextCardScale },
+          { translateX: next.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, -50],
+          })},
+        ],
+        opacity: nextCardOpacity,
+      } : undefined,
     };
   },
 };

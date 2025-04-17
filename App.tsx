@@ -22,6 +22,12 @@ import HomeScreen from './screens/HomeScreen';
 import RoutineScreen from './screens/RoutineScreen';
 import { defaultTheme, useTheme, darkColors, lightColors } from './utils/Theme';
 import { ThemeProvider } from './utils/ThemeProvider';
+import { 
+  materialNavigationTransition, 
+  catTransition, 
+  slideFromRight, 
+  fadeTransition 
+} from './utils/NavigationTransitions';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -29,19 +35,6 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-// Custom transitions
-const customTransitionConfig = {
-  animation: 'spring',
-  config: {
-    stiffness: 1000,
-    damping: 50,
-    mass: 3,
-    overshootClamping: false,
-    restDisplacementThreshold: 0.01,
-    restSpeedThreshold: 0.01,
-  },
-};
 
 // Fade-in animation for the app startup
 interface FadeInViewProps {
@@ -132,9 +125,15 @@ const AppNavigator = () => {
             headerTitleStyle: {
               fontFamily: 'Inter-SemiBold',
             },
-            // Apply smooth animations to all screens by default
-            animation: 'fade',
+            // Apply our custom cat animation to screens by default
+            cardStyleInterpolator: catTransition.cardStyleInterpolator,
             gestureEnabled: true,
+            // Configure gestures based on our custom transitions
+            gestureDirection: 'horizontal',
+            transitionSpec: {
+              open: catTransition.transitionSpec.open,
+              close: catTransition.transitionSpec.close,
+            },
             // Custom UI settings
             contentStyle: {
               backgroundColor: theme.colors.backgroundPrimary,
@@ -146,8 +145,8 @@ const AppNavigator = () => {
             component={HomeScreen} 
             options={{ 
               title: 'Task Cat',
-              // Custom animation for home screen
-              animation: 'fade',
+              // Custom fade animation for home screen
+              cardStyleInterpolator: fadeTransition.cardStyleInterpolator,
               headerShown: true,
               headerTransparent: false,
               // Add subtle animation
@@ -161,8 +160,12 @@ const AppNavigator = () => {
             component={RoutineScreen} 
             options={{ 
               title: 'My Routines',
-              // Custom animation
-              animation: 'slide_from_right',
+              // Use material design animation for routine screen
+              cardStyleInterpolator: materialNavigationTransition.cardStyleInterpolator,
+              transitionSpec: {
+                open: materialNavigationTransition.transitionSpec.open,
+                close: materialNavigationTransition.transitionSpec.close,
+              },
               // Subtle styling for better contrast
               contentStyle: {
                 backgroundColor: theme.colors.backgroundPrimary,

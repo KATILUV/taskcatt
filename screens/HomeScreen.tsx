@@ -40,6 +40,8 @@ import BottomSheet from '../components/BottomSheet';
 import TaskDetail from '../components/TaskDetail';
 import FloatingActionButton from '../components/FloatingActionButton';
 import TaskInput from '../components/TaskInput';
+import EmptyState from '../components/EmptyState';
+import Confetti from '../components/Confetti';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -52,6 +54,7 @@ export default function HomeScreen({ navigation }: Props) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   
   // Animation values
   const taskCardScale = useRef(new Animated.Value(1)).current;
@@ -326,7 +329,7 @@ export default function HomeScreen({ navigation }: Props) {
           </Surface>
 
           {/* Category Breakdown Section */}
-          {taskCount > 0 && (
+          {taskCount > 0 ? (
             <Surface style={styles.categorySection} elevation={1}>
               <View style={styles.sectionHeader}>
                 <Title style={styles.sectionTitle}>Category Breakdown</Title>
@@ -374,6 +377,14 @@ export default function HomeScreen({ navigation }: Props) {
                   No categorized tasks yet
                 </Text>
               )}
+            </Surface>
+          ) : (
+            <Surface style={styles.emptyStateContainer} elevation={1}>
+              <EmptyState
+                type="tasks"
+                title="No Tasks Yet"
+                message="Your task list is empty. Add your first task to get started and stay organized!"
+              />
             </Surface>
           )}
           
@@ -470,6 +481,17 @@ export default function HomeScreen({ navigation }: Props) {
                     ...tasks[taskIndex],
                     completed: !tasks[taskIndex].completed
                   };
+                  
+                  // Show confetti if task is being marked as completed
+                  if (updatedTask.completed) {
+                    setShowConfetti(true);
+                    
+                    // Automatically hide confetti after animation duration
+                    setTimeout(() => {
+                      setShowConfetti(false);
+                    }, 2500); // slightly longer than confetti animation duration
+                  }
+                  
                   await StorageService.updateTask(updatedTask);
                   
                   // Update selected task too if needed
@@ -783,6 +805,14 @@ const styles = createStyles((theme) => {
       ...theme.typography.caption,
       fontFamily: theme.fonts.regular,
       color: theme.colors.textDisabled,
+    },
+    emptyStateContainer: {
+      backgroundColor: theme.colors.backgroundCard,
+      marginTop: theme.spacing.lg,
+      marginHorizontal: theme.spacing.md,
+      padding: theme.spacing.lg,
+      borderRadius: theme.layout.cardRadius * 1.5,
+      ...theme.shadows.medium,
     },
   });
 });

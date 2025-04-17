@@ -46,6 +46,8 @@ import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
 import { createStyles, useTheme } from '../utils/Theme';
 import { IconButton } from '../components/IconButton';
 import { ThemeToggle } from '../components/ThemeToggle';
+import EmptyState from '../components/EmptyState';
+import Confetti from '../components/Confetti';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Routine'>;
 
@@ -57,6 +59,7 @@ export default function RoutineScreen({ navigation }: Props) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   
   // Get theme from context
   const { theme } = useTheme();
@@ -299,6 +302,16 @@ export default function RoutineScreen({ navigation }: Props) {
         completed: !taskToUpdate.completed 
       };
       
+      // Show confetti if task is being marked as completed
+      if (taskWithToggledCompletion.completed) {
+        setShowConfetti(true);
+        
+        // Automatically hide confetti after animation duration
+        setTimeout(() => {
+          setShowConfetti(false);
+        }, 2500); // slightly longer than confetti animation duration
+      }
+      
       // Create updated tasks array
       let updatedTasks = prevTasks.map(task => 
         task.id === id ? taskWithToggledCompletion : task
@@ -483,6 +496,13 @@ export default function RoutineScreen({ navigation }: Props) {
 
   return (
     <Animated.View style={{...styles.container, opacity: fadeAnim}}>
+      {showConfetti && (
+        <Confetti 
+          count={75} 
+          duration={2000}
+          onAnimationComplete={() => setShowConfetti(false)}
+        />
+      )}
       <SafeAreaView style={styles.container}>
         <Surface style={styles.header} elevation={4}>
           <Appbar.Header style={styles.appbarHeader}>
@@ -575,12 +595,19 @@ export default function RoutineScreen({ navigation }: Props) {
         
         {filteredTasks.length === 0 ? (
           <Surface style={styles.emptyContainer} elevation={0}>
-            <Title style={styles.emptyText}>
-              {tasks.length === 0 ? 'No tasks yet' : 'No tasks in this category'}
-            </Title>
-            <Text style={styles.emptySubtext}>
-              {tasks.length === 0 ? 'Add a task to get started' : 'Try selecting a different category'}
-            </Text>
+            {tasks.length === 0 ? (
+              <EmptyState
+                type="tasks"
+                title="No Tasks Yet"
+                message="Your task list is empty. Add your first task to get started and stay organized!"
+              />
+            ) : (
+              <EmptyState
+                type="routines"
+                title="No Tasks in This Category"
+                message="Try selecting a different category or priority filter to see your tasks."
+              />
+            )}
           </Surface>
         ) : (
           <DraggableFlatList
