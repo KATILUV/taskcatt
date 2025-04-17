@@ -1,14 +1,9 @@
 import React from 'react';
-import { View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './screens/HomeScreen';
-import RoutineScreen from './screens/RoutineScreen';
-
-export type RootStackParamList = {
-  Home: undefined;
-  Routine: undefined;
-};
+import SimpleHomeScreen from './screens/SimpleHomeScreen';
+import SimpleRoutineScreen from './screens/SimpleRoutineScreen';
+import { RootStackParamList } from './navigation/types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -18,12 +13,12 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen 
           name="Home" 
-          component={HomeScreen}
+          component={SimpleHomeScreen}
           options={{ title: 'Task Cat' }}
         />
         <Stack.Screen 
           name="Routine" 
-          component={RoutineScreen}
+          component={SimpleRoutineScreen}
           options={{ title: 'My Routines' }}
         />
       </Stack.Navigator>
