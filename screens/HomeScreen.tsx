@@ -33,6 +33,9 @@ export default function HomeScreen({ navigation }: Props) {
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailVisible, setIsDetailVisible] = useState(false);
+  const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
   
   // Animation values
   const taskCardScale = useRef(new Animated.Value(1)).current;
@@ -330,6 +333,96 @@ export default function HomeScreen({ navigation }: Props) {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Task Cat - Stay Organized</Text>
         </View>
+        
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          mainIcon="add"
+          position="bottomRight"
+          color={theme.colors.primary}
+          size="large"
+          actions={[
+            {
+              icon: "create-outline",
+              label: "New Task",
+              onPress: () => setIsTaskInputVisible(true),
+              color: theme.colors.success,
+            },
+            {
+              icon: "list-outline",
+              label: "View All Tasks",
+              onPress: navigateToRoutine,
+              color: theme.colors.primary,
+            },
+          ]}
+        />
+        
+        {/* Bottom Sheets */}
+        <BottomSheet
+          visible={isDetailVisible}
+          onClose={() => setIsDetailVisible(false)}
+          title="Task Details"
+          height={Dimensions.get('window').height * 0.8}
+        >
+          {selectedTask && (
+            <TaskDetail
+              task={selectedTask}
+              onTaskUpdate={async (updatedTask) => {
+                await StorageService.updateTask(updatedTask);
+                loadTaskStats();
+                setIsDetailVisible(false);
+              }}
+              onDelete={async (id) => {
+                await StorageService.deleteTask(id);
+                loadTaskStats();
+                setIsDetailVisible(false);
+              }}
+              onToggleComplete={async (id) => {
+                const tasks = await StorageService.loadTasks();
+                const taskIndex = tasks.findIndex(t => t.id === id);
+                if (taskIndex >= 0) {
+                  const updatedTask = {
+                    ...tasks[taskIndex],
+                    completed: !tasks[taskIndex].completed
+                  };
+                  await StorageService.updateTask(updatedTask);
+                  
+                  // Update selected task too if needed
+                  if (selectedTask && selectedTask.id === id) {
+                    setSelectedTask(updatedTask);
+                  }
+                  
+                  loadTaskStats();
+                }
+              }}
+            />
+          )}
+        </BottomSheet>
+        
+        <BottomSheet
+          visible={isTaskInputVisible}
+          onClose={() => setIsTaskInputVisible(false)}
+          title="Add New Task"
+        >
+          <TaskInput
+            onAddTask={async (title, category, priority, recurrence, reminder) => {
+              // Create a new task
+              const newTask: Task = {
+                id: `task-${Date.now()}`,
+                title,
+                category,
+                priority,
+                completed: false,
+                createdAt: Date.now(),
+                recurrence,
+                reminder
+              };
+              
+              await StorageService.addTask(newTask);
+              loadTaskStats();
+              setIsTaskInputVisible(false);
+            }}
+          />
+        </BottomSheet>
       </SafeAreaView>
     </Animated.View>
   );

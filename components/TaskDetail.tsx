@@ -311,7 +311,9 @@ const styles = createStyles((theme) => {
       paddingHorizontal: 12,
     },
     title: {
-      ...theme.typography.h6,
+      ...theme.typography.subtitle1,
+      fontSize: scaleFont(18),
+      fontWeight: 'bold',
       color: theme.colors.textPrimary,
       marginBottom: 4,
     },
@@ -320,7 +322,9 @@ const styles = createStyles((theme) => {
       color: theme.colors.textDisabled,
     },
     titleInput: {
-      ...theme.typography.h6,
+      ...theme.typography.subtitle1,
+      fontSize: scaleFont(18),
+      fontWeight: 'bold',
       padding: 0,
       paddingVertical: 8,
       marginBottom: 4,

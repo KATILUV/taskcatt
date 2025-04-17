@@ -9,7 +9,9 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  Animated
+  Animated,
+  Dimensions,
+  StatusBar
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
@@ -28,6 +30,9 @@ import { RecurrenceService } from '../services/RecurrenceService';
 import { ReminderService } from '../services/ReminderService';
 import TaskItem from '../components/TaskItem';
 import TaskInput from '../components/TaskInput';
+import BottomSheet from '../components/BottomSheet';
+import TaskDetail from '../components/TaskDetail';
+import FloatingActionButton from '../components/FloatingActionButton';
 import { isTablet, scale, scaleFont } from '../utils/ResponsiveUtils';
 import { createStyles, useTheme } from '../utils/Theme';
 import { IconButton } from '../components/IconButton';
