@@ -289,14 +289,19 @@ export const StorageService = {
    */
   addTask: async (task: Task): Promise<boolean> => {
     try {
-      // Load current tasks
-      const tasks = await StorageService.loadTasks();
+      // Load only parent tasks (no instances) for efficiency
+      const tasks = await StorageService.loadTasks(false);
       
       // Add the new task
       tasks.push(task);
       
       // Save all tasks
       await StorageService.saveTasks(tasks);
+      
+      // If the task is recurring, generate instances immediately
+      if (RecurrenceService.isRecurring(task)) {
+        await StorageService.generateAndSaveInstances([task]);
+      }
       
       return true;
     } catch (error) {

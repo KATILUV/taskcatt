@@ -45,10 +45,25 @@ export const RecurrenceService = {
         if (recurrence.weekDays && recurrence.weekDays.length > 0) {
           // Find the next applicable weekday
           const currentDayIndex = baseDateTime.getDay(); // 0 is Sunday in JS
-          const weekDayIndices = recurrence.weekDays.map(day => getWeekdayIndex(day));
+          
+          // Make sure weekDays are valid before mapping
+          const validWeekDays = recurrence.weekDays.filter(day => 
+            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].includes(day)
+          );
+          
+          // If no valid weekdays, default to simple weekly recurrence
+          if (validWeekDays.length === 0) {
+            nextDate.setDate(baseDateTime.getDate() + (7 * interval));
+            break;
+          }
+          
+          const weekDayIndices = validWeekDays.map(day => getWeekdayIndex(day));
+          
+          // Sort indices to ensure we find the proper next day
+          const sortedIndices = [...weekDayIndices].sort((a, b) => a - b);
           
           // Find the next weekday index that's greater than current
-          let nextDayIndex = weekDayIndices.find(index => index > currentDayIndex);
+          let nextDayIndex = sortedIndices.find(index => index > currentDayIndex);
           
           if (nextDayIndex !== undefined) {
             // Found a day later this week
@@ -56,9 +71,16 @@ export const RecurrenceService = {
             nextDate.setDate(baseDateTime.getDate() + daysToAdd);
           } else {
             // No days later this week, move to the first day next week
-            const firstDayNextWeek = Math.min(...weekDayIndices);
+            const firstDayNextWeek = sortedIndices[0]; // First day in sorted list
             const daysToAdd = 7 - currentDayIndex + firstDayNextWeek;
             nextDate.setDate(baseDateTime.getDate() + daysToAdd);
+          }
+          
+          // Apply the interval if needed (skip weeks)
+          if (interval > 1) {
+            // If this is not the first occurrence and we need to skip weeks
+            // We already calculated the correct day of week, now adjust the week
+            nextDate.setDate(nextDate.getDate() + (7 * (interval - 1)));
           }
         } else {
           // Simple weekly recurrence
@@ -68,17 +90,37 @@ export const RecurrenceService = {
 
       case 'Monthly':
         if (recurrence.monthDay) {
-          // Set to specific day of month
-          nextDate = new Date(baseDateTime.getFullYear(), baseDateTime.getMonth() + interval, recurrence.monthDay);
+          // Ensure the monthDay is valid (1-31)
+          const validMonthDay = Math.min(Math.max(1, recurrence.monthDay), 31);
+          
+          // Set to specific day of month in the future month
+          const targetMonth = baseDateTime.getMonth() + interval;
+          const targetYear = baseDateTime.getFullYear() + Math.floor(targetMonth / 12);
+          const normalizedMonth = targetMonth % 12;
+          
+          // Set the date to the specified day
+          nextDate = new Date(targetYear, normalizedMonth, validMonthDay);
           
           // If the day doesn't exist in the month (e.g., Feb 30th), use the last day
-          const lastDayOfMonth = new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate();
-          if (recurrence.monthDay > lastDayOfMonth) {
+          const lastDayOfMonth = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+          if (validMonthDay > lastDayOfMonth) {
             nextDate.setDate(lastDayOfMonth);
           }
         } else {
           // Simple monthly recurrence, same day each month
-          nextDate.setMonth(baseDateTime.getMonth() + interval);
+          const currentDay = baseDateTime.getDate();
+          const targetMonth = baseDateTime.getMonth() + interval;
+          const targetYear = baseDateTime.getFullYear() + Math.floor(targetMonth / 12);
+          const normalizedMonth = targetMonth % 12;
+          
+          // Set the date (handle end of month cases)
+          nextDate = new Date(targetYear, normalizedMonth, currentDay);
+          
+          // Check if we've gone past the end of the month
+          const lastDayOfTargetMonth = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+          if (currentDay > lastDayOfTargetMonth) {
+            nextDate.setDate(lastDayOfTargetMonth);
+          }
         }
         break;
 
