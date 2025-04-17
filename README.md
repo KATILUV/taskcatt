@@ -36,19 +36,37 @@ Task Cat is a playful task management application built with Expo and React Nati
 - Node.js (v14 or newer)
 - npm or Yarn
 - Expo CLI
+- Expo Go app on your mobile device (optional)
 
 ### Installation
 
-1. Clone the repository
+1. Clone the repository or download the project files
 2. Install dependencies:
    ```
    npm install
    ```
-3. Start the development server:
+   
+### Running Locally
+
+1. Start the Expo development server:
    ```
-   npm start
+   npx expo start
    ```
-4. Open the app in Expo Go on your mobile device or use an emulator
+2. You'll see a QR code in your terminal. Scan it with:
+   - iOS: Camera app, then tap the notification
+   - Android: Expo Go app's QR scanner
+   
+3. Alternative options:
+   - Press 'a' to open on Android emulator
+   - Press 'i' to open on iOS simulator
+   - Press 'w' to open in a web browser
+
+### Troubleshooting
+
+If you encounter any issues:
+- Clear cache with: `npx expo start --clear`
+- Make sure Expo Go is up to date
+- Check your device and computer are on the same network
 
 ## Usage
 
