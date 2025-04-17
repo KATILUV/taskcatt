@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { 
   StyleSheet, 
-  Text, 
   View, 
-  Button, 
   SafeAreaView, 
-  ActivityIndicator,
   TouchableOpacity,
   ScrollView,
   FlatList,
@@ -13,6 +10,18 @@ import {
   Dimensions,
   StatusBar
 } from 'react-native';
+import {
+  Text,
+  Surface,
+  Button,
+  ActivityIndicator,
+  Chip,
+  Badge,
+  Title,
+  Divider,
+  Appbar,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import type { RootStackParamList } from '../App';
@@ -400,9 +409,9 @@ export default function RoutineScreen({ navigation }: Props) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0066cc" />
-      </View>
+      <Surface style={styles.loadingContainer} elevation={0}>
+        <ActivityIndicator size="large" color={theme.colors.primary} animating={true} />
+      </Surface>
     );
   }
 
@@ -475,110 +484,104 @@ export default function RoutineScreen({ navigation }: Props) {
   return (
     <Animated.View style={{...styles.container, opacity: fadeAnim}}>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>My Tasks</Text>
-          <View style={styles.headerActions}>
-            <ThemeToggle size="small" style={{ marginRight: 8 }} />
-            <IconButton 
-              name="home" 
-              variant="primary" 
-              onPress={() => {
-                // Fade out animation when navigating away
-                Animated.timing(fadeAnim, {
-                  toValue: 0,
-                  duration: 200,
-                  useNativeDriver: true,
-                }).start(() => {
-                  navigation.navigate('Home');
-                });
-              }}
-            />
-          </View>
-        </View>
+        <Surface style={styles.header} elevation={4}>
+          <Appbar.Header style={styles.appbarHeader}>
+            <Title style={styles.title}>My Tasks</Title>
+            <View style={styles.headerActions}>
+              <ThemeToggle size="small" style={{ marginRight: 8 }} />
+              <IconButton 
+                name="home" 
+                variant="primary" 
+                onPress={() => {
+                  // Fade out animation when navigating away
+                  Animated.timing(fadeAnim, {
+                    toValue: 0,
+                    duration: 200,
+                    useNativeDriver: true,
+                  }).start(() => {
+                    navigation.navigate('Home');
+                  });
+                }}
+              />
+            </View>
+          </Appbar.Header>
+        </Surface>
         
-        <View style={styles.filtersSection}>
-          <Text style={styles.filterSectionTitle}>Categories</Text>
+        <Surface style={styles.filtersSection} elevation={1}>
+          <Title style={styles.filterSectionTitle}>Categories</Title>
           <View style={styles.filterContainer}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-              <TouchableOpacity
-                style={[
-                  styles.filterButton,
-                  selectedCategoryFilter === 'All' && styles.filterButtonActive
-                ]}
+              <Chip
+                mode={selectedCategoryFilter === 'All' ? 'flat' : 'outlined'}
+                selected={selectedCategoryFilter === 'All'}
                 onPress={() => setSelectedCategoryFilter('All')}
+                style={styles.chip}
               >
-                <Text style={[
-                  styles.filterButtonText,
-                  selectedCategoryFilter === 'All' && styles.filterButtonTextActive
-                ]}>All Categories</Text>
-              </TouchableOpacity>
+                All Categories
+              </Chip>
               
               {TASK_CATEGORIES.map(category => (
-                <TouchableOpacity
+                <Chip
                   key={category}
-                  style={[
-                    styles.filterButton,
-                    selectedCategoryFilter === category && styles.filterButtonActive,
-                    { borderColor: getCategoryColor(category) }
-                  ]}
+                  mode={selectedCategoryFilter === category ? 'flat' : 'outlined'}
+                  selected={selectedCategoryFilter === category}
                   onPress={() => setSelectedCategoryFilter(category)}
+                  style={[styles.chip, { borderColor: getCategoryColor(category) }]}
+                  avatar={
+                    <Badge 
+                      style={{ backgroundColor: getCategoryColor(category) }}
+                      size={8}
+                    />
+                  }
                 >
-                  <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(category) }]} />
-                  <Text style={[
-                    styles.filterButtonText,
-                    selectedCategoryFilter === category && styles.filterButtonTextActive
-                  ]}>{category}</Text>
-                </TouchableOpacity>
+                  {category}
+                </Chip>
               ))}
             </ScrollView>
           </View>
 
-          <Text style={styles.filterSectionTitle}>Priority</Text>
+          <Title style={styles.filterSectionTitle}>Priority</Title>
           <View style={styles.filterContainer}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-              <TouchableOpacity
-                style={[
-                  styles.filterButton,
-                  selectedPriorityFilter === 'All' && styles.filterButtonActive
-                ]}
+              <Chip
+                mode={selectedPriorityFilter === 'All' ? 'flat' : 'outlined'}
+                selected={selectedPriorityFilter === 'All'}
                 onPress={() => setSelectedPriorityFilter('All')}
+                style={styles.chip}
               >
-                <Text style={[
-                  styles.filterButtonText,
-                  selectedPriorityFilter === 'All' && styles.filterButtonTextActive
-                ]}>All Priorities</Text>
-              </TouchableOpacity>
+                All Priorities
+              </Chip>
               
               {TASK_PRIORITIES.map(priority => (
-                <TouchableOpacity
+                <Chip
                   key={priority}
-                  style={[
-                    styles.filterButton,
-                    selectedPriorityFilter === priority && styles.filterButtonActive,
-                    { borderColor: getPriorityColor(priority) }
-                  ]}
+                  mode={selectedPriorityFilter === priority ? 'flat' : 'outlined'}
+                  selected={selectedPriorityFilter === priority}
                   onPress={() => setSelectedPriorityFilter(priority)}
+                  style={[styles.chip, { borderColor: getPriorityColor(priority) }]}
+                  avatar={
+                    <Badge 
+                      style={{ backgroundColor: getPriorityColor(priority) }}
+                      size={8}
+                    />
+                  }
                 >
-                  <View style={[styles.priorityDot, { backgroundColor: getPriorityColor(priority) }]} />
-                  <Text style={[
-                    styles.filterButtonText,
-                    selectedPriorityFilter === priority && styles.filterButtonTextActive
-                  ]}>{priority}</Text>
-                </TouchableOpacity>
+                  {priority}
+                </Chip>
               ))}
             </ScrollView>
           </View>
-        </View>
+        </Surface>
         
         {filteredTasks.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
+          <Surface style={styles.emptyContainer} elevation={0}>
+            <Title style={styles.emptyText}>
               {tasks.length === 0 ? 'No tasks yet' : 'No tasks in this category'}
-            </Text>
+            </Title>
             <Text style={styles.emptySubtext}>
               {tasks.length === 0 ? 'Add a task to get started' : 'Try selecting a different category'}
             </Text>
-          </View>
+          </Surface>
         ) : (
           <DraggableFlatList
             ref={flatListRef}
@@ -714,22 +717,24 @@ const styles = createStyles((theme) => {
       backgroundColor: theme.colors.backgroundPrimary,
     },
     header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
+      backgroundColor: theme.colors.primary,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.backgroundSecondary,
-      backgroundColor: theme.colors.backgroundCard,
       height: theme.layout.headerHeight + (isTab ? 8 : 4),
-      ...theme.shadows.small,
+      ...theme.shadows.medium,
+    },
+    appbarHeader: {
+      backgroundColor: 'transparent',
+      elevation: 0,
+      height: theme.layout.headerHeight,
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
     title: {
       ...theme.typography.h2,
       fontFamily: theme.fonts.bold,
       fontWeight: '700',
-      color: theme.colors.primary,
+      color: 'white',
       letterSpacing: -0.25,
     },
     headerActions: {
@@ -790,6 +795,10 @@ const styles = createStyles((theme) => {
       marginTop: theme.spacing.md,
       marginBottom: theme.spacing.sm,
       letterSpacing: 0.15,
+    },
+    chip: {
+      marginHorizontal: theme.spacing.xs,
+      height: scale(isTab ? 40 : 36),
     },
     categoryDot: {
       width: scale(isTab ? 10 : 8),
