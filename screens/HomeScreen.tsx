@@ -250,25 +250,10 @@ export default function HomeScreen({ navigation }: Props) {
     ]).start();
   };
   
-  // Navigation with animation
+  // Simple navigation without animation
   const navigateToRoutine = () => {
-    // Trigger press out animation to reset card
-    handlePressOut();
-    
-    // Create fade-out animation before navigation
-    Animated.timing(taskCardOpacity, {
-      toValue: 0.5,
-      duration: 150,
-      useNativeDriver: true,
-    }).start(() => {
-      // Navigate to routine screen once the animation is complete
-      navigation.navigate('Routine');
-      
-      // Reset opacity back to 1 after navigation
-      setTimeout(() => {
-        taskCardOpacity.setValue(1);
-      }, 300);
-    });
+    // Navigate directly without animations
+    navigation.navigate('Routine');
   };
 
   return (
