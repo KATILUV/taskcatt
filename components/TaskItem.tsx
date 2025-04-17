@@ -96,7 +96,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
           onPress={() => onToggleComplete(task.id)}
         >
           {task.completed && (
-            <Text style={styles.checkmark}>✓</Text>
+            <Ionicons 
+              name="checkmark" 
+              size={scale(isTablet() ? 18 : 16)} 
+              color={theme.colors.white} 
+            />
           )}
         </TouchableOpacity>
         
@@ -110,12 +114,16 @@ const TaskItem: React.FC<TaskItemProps> = ({
           {task.title}
         </Text>
         
-        <IconButton
-          name="trash-outline"
-          variant="danger"
-          size="small"
+        <TouchableOpacity
+          style={styles.deleteButton}
           onPress={() => onDelete(task.id)}
-        />
+        >
+          <Ionicons 
+            name="trash-outline" 
+            size={scale(isTablet() ? 18 : 16)} 
+            color={theme.colors.error} 
+          />
+        </TouchableOpacity>
       </View>
       
       {/* Card Content */}
