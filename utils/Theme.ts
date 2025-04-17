@@ -1,5 +1,5 @@
 import { getResponsiveStyles } from './ResponsiveUtils';
-import { Appearance, ColorSchemeName } from 'react-native';
+import { Appearance, ColorSchemeName, TextStyle } from 'react-native';
 import { createContext, useState, useEffect, useContext } from 'react';
 
 // Common colors that don't change between themes
@@ -176,7 +176,7 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         letterSpacing: -0.5,
         color: colors.textPrimary,
         fontWeight: '800',
-      },
+      } as TextStyle,
       h2: {
         fontFamily: 'Inter-SemiBold',
         fontSize: 26,
@@ -184,7 +184,7 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         letterSpacing: -0.25,
         color: colors.textPrimary,
         fontWeight: '700',
-      },
+      } as TextStyle,
       h3: {
         fontFamily: 'Inter-SemiBold',
         fontSize: 22,
@@ -192,7 +192,7 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         letterSpacing: 0,
         color: colors.textPrimary,
         fontWeight: '600',
-      },
+      } as TextStyle,
       subtitle1: {
         fontFamily: 'Inter-Medium',
         fontSize: 18,
@@ -200,7 +200,7 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         letterSpacing: 0.15,
         color: colors.textPrimary,
         fontWeight: '600',
-      },
+      } as TextStyle,
       subtitle2: {
         fontFamily: 'Inter-Medium',
         fontSize: 16,
@@ -208,23 +208,23 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         letterSpacing: 0.1,
         color: colors.textPrimary,
         fontWeight: '500',
-      },
+      } as TextStyle,
       body1: {
         fontFamily: 'Inter',
         fontSize: 16,
         lineHeight: 24, // 1.5× line height ratio
         letterSpacing: 0.2,
         color: colors.textSecondary,
-        fontWeight: '400',
-      },
+        fontWeight: 'normal',
+      } as TextStyle,
       body2: {
         fontFamily: 'Inter',
         fontSize: 14,
         lineHeight: 22, // ~1.57× line height ratio
         letterSpacing: 0.25,
         color: colors.textSecondary,
-        fontWeight: '400',
-      },
+        fontWeight: 'normal',
+      } as TextStyle,
       button: {
         fontFamily: 'Inter-Medium',
         fontSize: 14,
@@ -233,15 +233,15 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         textTransform: 'uppercase',
         color: colors.textInverted,
         fontWeight: '600',
-      },
+      } as TextStyle,
       caption: {
         fontFamily: 'Inter',
         fontSize: 12,
         lineHeight: 18, // 1.5× line height ratio
         letterSpacing: 0.4,
         color: colors.textSecondary,
-        fontWeight: '400',
-      },
+        fontWeight: 'normal',
+      } as TextStyle,
       overline: {
         fontFamily: 'Inter-Medium',
         fontSize: 10,
@@ -250,7 +250,7 @@ export const createTheme = (colorScheme: ThemeType | ColorSchemeName = 'light') 
         textTransform: 'uppercase',
         color: colors.textSecondary,
         fontWeight: '500',
-      },
+      } as TextStyle,
     },
     
     // Extended styles
