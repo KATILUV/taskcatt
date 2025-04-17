@@ -131,21 +131,6 @@ export default function HomeScreen({ navigation }: Props) {
           }
         }, 300);
       }
-      
-      // No cleanup needed within this function - it's handled in the useEffect
-    } catch (error) {
-      console.error('Error loading task stats:', error);
-      // Set default values on error
-      setTaskCount(0);
-      setCompletedCount(0);
-      setProgressPercentage(0);
-      
-      const defaultCatStats: Record<string, number> = {};
-      TASK_CATEGORIES.forEach(cat => {
-        defaultCatStats[cat] = 0;
-      });
-      setCategoryStats(defaultCatStats);
-    }
     } catch (error) {
       console.error('Error loading task stats:', error);
       // Set default values on error
