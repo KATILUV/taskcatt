@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
 import { 
   Task, 
@@ -19,16 +19,19 @@ interface TaskItemProps {
   onToggleComplete: (id: string) => void;
 }
 
-const TaskItem: React.FC<TaskItemProps> = ({ 
+// Use memo to prevent unnecessary re-renders of task items
+const TaskItem = memo(({ 
   task, 
   drag, 
   isActive, 
   onDelete,
   onToggleComplete
-}) => {
+}: TaskItemProps) => {
   // Get theme from context
   const { theme } = useTheme();
-  const getCategoryColor = (category: TaskCategory): string => {
+  
+  // Memoize color functions to prevent recalculations on re-renders
+  const getCategoryColor = useCallback((category: TaskCategory): string => {
     switch (category) {
       case 'Health':
         return theme.colors.categoryHealth;
@@ -40,9 +43,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
       default:
         return theme.colors.categoryOther;
     }
-  };
+  }, [theme.colors]);
   
-  const getPriorityColor = (priority: TaskPriority): string => {
+  const getPriorityColor = useCallback((priority: TaskPriority): string => {
     switch (priority) {
       case 'High':
         return theme.colors.priorityHigh;
@@ -53,10 +56,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
       default:
         return theme.colors.secondary;
     }
-  };
+  }, [theme.colors]);
   
   // Format due date if it exists (using instanceDate for recurring tasks or reminder date)
-  const getDueDate = (): string | null => {
+  const getDueDate = useCallback((): string | null => {
     let dueDate: number | undefined;
     
     if (task.instanceDate) {
@@ -75,9 +78,21 @@ const TaskItem: React.FC<TaskItemProps> = ({
     }
     
     return null;
-  };
+  }, [task.instanceDate, task.reminder?.reminderDate]);
   
+  // Pre-calculate values outside of render for better performance
   const dueDate = getDueDate();
+  const categoryColor = task.category ? getCategoryColor(task.category) : '';
+  const priorityColor = task.priority ? getPriorityColor(task.priority) : '';
+  
+  // Memoize task interaction handlers
+  const handleToggleComplete = useCallback(() => {
+    onToggleComplete(task.id);
+  }, [task.id, onToggleComplete]);
+  
+  const handleDelete = useCallback(() => {
+    onDelete(task.id);
+  }, [task.id, onDelete]);
   
   return (
     <TouchableOpacity
@@ -93,7 +108,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <View style={styles.cardHeader}>
         <TouchableOpacity
           style={[styles.checkbox, task.completed && styles.checkedBox]}
-          onPress={() => onToggleComplete(task.id)}
+          onPress={handleToggleComplete}
         >
           {task.completed && (
             <Ionicons 
@@ -116,7 +131,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         
         <TouchableOpacity
           style={styles.deleteButton}
-          onPress={() => onDelete(task.id)}
+          onPress={handleDelete}
         >
           <Ionicons 
             name="trash-outline" 
@@ -132,15 +147,15 @@ const TaskItem: React.FC<TaskItemProps> = ({
           {task.priority && (
             <View style={[
               styles.priorityBadge, 
-              { backgroundColor: getPriorityColor(task.priority) + '20' }
+              { backgroundColor: priorityColor + '20' }
             ]}>
               <View style={[
                 styles.priorityIndicator, 
-                { backgroundColor: getPriorityColor(task.priority) }
+                { backgroundColor: priorityColor }
               ]} />
               <Text style={[
                 styles.priorityText,
-                { color: getPriorityColor(task.priority) }
+                { color: priorityColor }
               ]}>
                 {task.priority}
               </Text>
@@ -150,11 +165,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
           {task.category && (
             <View style={[
               styles.categoryBadge, 
-              { backgroundColor: getCategoryColor(task.category) + '15' }
+              { backgroundColor: categoryColor + '15' }
             ]}>
               <Text style={[
                 styles.categoryText,
-                { color: getCategoryColor(task.category) }
+                { color: categoryColor }
               ]}>
                 {task.category}
               </Text>
@@ -222,7 +237,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
       </View>
     </TouchableOpacity>
   );
-};
+});
 
 // Use createStyles from Theme utils to create responsive styles
 const styles = createStyles((theme) => {
@@ -281,7 +296,6 @@ const styles = createStyles((theme) => {
       backgroundColor: theme.colors.success,
       borderColor: theme.colors.success,
     },
-    // Removed unused checkmark style
     taskTitle: {
       flex: 1,
       ...(theme.typography.subtitle1 as TextStyle),
@@ -304,7 +318,6 @@ const styles = createStyles((theme) => {
       alignItems: 'center',
       backgroundColor: theme.colors.errorLight + '30',
     },
-    // Removed unused deleteButtonText style - using Ionicons instead
     badgeContainer: {
       flexDirection: 'row',
       alignItems: 'center',

@@ -3,13 +3,29 @@ import { Task } from '../models/Task';
 import { RecurrenceService } from './RecurrenceService';
 import { ReminderService } from './ReminderService';
 
+// Storage keys
 const TASKS_STORAGE_KEY = 'taskcat_tasks';
 const TASK_INSTANCES_KEY = 'taskcat_task_instances';
 const SETTINGS_KEY = 'taskcat_settings';
 
+// In-memory cache to reduce AsyncStorage reads
+const taskCache = {
+  parentTasks: null as Task[] | null,
+  instances: null as Task[] | null,
+  settings: null as Record<string, any> | null,
+  lastLoaded: {
+    parentTasks: 0,
+    instances: 0,
+    settings: 0
+  }
+};
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
+
 export const StorageService = {
   /**
-   * Save tasks to AsyncStorage
+   * Save tasks to AsyncStorage and update cache
    */
   saveTasks: async (tasks: Task[]): Promise<void> => {
     try {
@@ -18,6 +34,10 @@ export const StorageService = {
       
       const jsonValue = JSON.stringify(parentTasks);
       await AsyncStorage.setItem(TASKS_STORAGE_KEY, jsonValue);
+      
+      // Update cache
+      taskCache.parentTasks = [...parentTasks];
+      taskCache.lastLoaded.parentTasks = Date.now();
       
       // Generate and save instances separately
       await StorageService.generateAndSaveInstances(parentTasks);
@@ -28,26 +48,46 @@ export const StorageService = {
 
   /**
    * Load tasks from AsyncStorage with optional instance generation
+   * Uses caching for improved performance
    * @param includeInstances Whether to include task instances
    * @param fromDate Start date for instances
    * @param toDate End date for instances
+   * @param bypassCache Force reload from storage even if cache is valid
    */
   loadTasks: async (
     includeInstances: boolean = true,
     fromDate: number = Date.now(),
-    toDate: number = fromDate + 14 * 24 * 60 * 60 * 1000 // Default 2 weeks
+    toDate: number = fromDate + 14 * 24 * 60 * 60 * 1000, // Default 2 weeks
+    bypassCache: boolean = false
   ): Promise<Task[]> => {
     try {
-      // Load parent tasks with minimal processing
-      const jsonValue = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
-      const parentTasks: Task[] = jsonValue != null ? JSON.parse(jsonValue) : [];
+      let parentTasks: Task[] = [];
+      const now = Date.now();
+      
+      // Check if we can use cached parent tasks
+      if (
+        !bypassCache && 
+        taskCache.parentTasks !== null && 
+        now - taskCache.lastLoaded.parentTasks < CACHE_EXPIRATION
+      ) {
+        // Use cached parent tasks
+        parentTasks = [...taskCache.parentTasks];
+      } else {
+        // Load parent tasks from storage
+        const jsonValue = await AsyncStorage.getItem(TASKS_STORAGE_KEY);
+        parentTasks = jsonValue != null ? JSON.parse(jsonValue) : [];
+        
+        // Update cache
+        taskCache.parentTasks = [...parentTasks];
+        taskCache.lastLoaded.parentTasks = now;
+      }
       
       // Early return for efficiency when instances aren't needed
       if (!includeInstances) {
         return parentTasks;
       }
       
-      // Only load instances if there are recurring parent tasks
+      // Fast path: If no recurring tasks, don't bother with instances
       const hasRecurringTasks = parentTasks.some(task => 
         RecurrenceService.isRecurring(task)
       );
@@ -64,19 +104,23 @@ export const StorageService = {
         return parentTasks;
       }
       
-      // Determine current time once for filtering
-      const now = Date.now();
       const oneDayInMs = 24 * 60 * 60 * 1000;
       
-      // Combine parent tasks and instances, filtering out completed instances
-      return [...parentTasks, ...instances].filter(task => {
-        // If it's an instance with a parent, check if it's in the past
-        if (task.parentTaskId && task.instanceDate) {
-          // Keep incomplete future instances or instances from today
-          return !task.completed || task.instanceDate >= now - oneDayInMs;
+      // Create a combined array with optimal capacity
+      const result = [...parentTasks];
+      
+      // Only add instances that are relevant (not completed and not in the past)
+      for (const instance of instances) {
+        if (
+          instance.parentTaskId && 
+          instance.instanceDate && 
+          (!instance.completed || instance.instanceDate >= now - oneDayInMs)
+        ) {
+          result.push(instance);
         }
-        return true;
-      });
+      }
+      
+      return result;
     } catch (error) {
       console.error('Error loading tasks:', error);
       return [];
@@ -123,7 +167,7 @@ export const StorageService = {
   },
   
   /**
-   * Save task instances to storage
+   * Save task instances to storage and update cache
    */
   saveTaskInstances: async (instances: Task[]): Promise<void> => {
     try {
@@ -137,6 +181,10 @@ export const StorageService = {
       // If no existing instances, just save the new ones
       if (!existingJson) {
         await AsyncStorage.setItem(TASK_INSTANCES_KEY, JSON.stringify(instances));
+        
+        // Update cache
+        taskCache.instances = [...instances];
+        taskCache.lastLoaded.instances = Date.now();
         return;
       }
       
@@ -159,6 +207,10 @@ export const StorageService = {
       
       // Save back to storage
       await AsyncStorage.setItem(TASK_INSTANCES_KEY, JSON.stringify(mergedInstances));
+      
+      // Update cache
+      taskCache.instances = [...mergedInstances];
+      taskCache.lastLoaded.instances = Date.now();
     } catch (error) {
       console.error('Error saving task instances:', error);
     }
@@ -166,11 +218,17 @@ export const StorageService = {
   
   /**
    * Load task instances from storage or generate if needed
+   * Uses caching to improve performance
+   * @param parentTasks Parent tasks to generate instances for
+   * @param fromDate Start date for the instance range
+   * @param toDate End date for the instance range
+   * @param bypassCache Force reload from storage even if cache is valid
    */
   loadTaskInstances: async (
     parentTasks: Task[], 
     fromDate: number = Date.now(),
-    toDate: number = fromDate + 14 * 24 * 60 * 60 * 1000 // Default 2 weeks
+    toDate: number = fromDate + 14 * 24 * 60 * 60 * 1000, // Default 2 weeks
+    bypassCache: boolean = false
   ): Promise<Task[]> => {
     try {
       // Quick check if there are any recurring tasks at all
@@ -182,20 +240,52 @@ export const StorageService = {
         return []; // No recurring tasks, so no instances needed
       }
       
-      // Load existing instances
+      const now = Date.now();
+      
+      // Check if we can use cached instances
+      if (
+        !bypassCache && 
+        taskCache.instances !== null && 
+        now - taskCache.lastLoaded.instances < CACHE_EXPIRATION
+      ) {
+        // Filter cached instances by date range and parent IDs
+        return taskCache.instances.filter(task => 
+          task.parentTaskId && 
+          recurringParentIds.includes(task.parentTaskId) &&
+          task.instanceDate && 
+          task.instanceDate >= fromDate && 
+          task.instanceDate <= toDate
+        );
+      }
+      
+      // If cache invalid or bypassed, load from storage
       const existingJson = await AsyncStorage.getItem(TASK_INSTANCES_KEY);
       
       // Early return if no instances stored (we'll need to generate new ones)
       if (!existingJson) {
-        // Generate new instances for all recurring tasks directly
+        // Generate new instances for all recurring tasks directly with optimized approach
         const allNewInstances: Task[] = [];
         
-        for (const parent of parentTasks.filter(t => RecurrenceService.isRecurring(t))) {
+        // Pre-allocate expected array capacity based on parent count
+        const recurringParents = parentTasks.filter(t => RecurrenceService.isRecurring(t));
+        allNewInstances.length = recurringParents.length * 5; // Estimate 5 instances per parent
+        
+        let actualLength = 0;
+        
+        // Generate instances in batch
+        for (const parent of recurringParents) {
           const instances = RecurrenceService.generateInstances(parent, fromDate, toDate);
-          if (instances.length > 0) {
-            allNewInstances.push(...instances);
+          for (const instance of instances) {
+            allNewInstances[actualLength++] = instance;
           }
         }
+        
+        // Trim array to actual size
+        allNewInstances.length = actualLength;
+        
+        // Cache the new instances
+        taskCache.instances = [...allNewInstances];
+        taskCache.lastLoaded.instances = now;
         
         // Save and return the newly generated instances
         if (allNewInstances.length > 0) {
@@ -204,13 +294,21 @@ export const StorageService = {
         return allNewInstances;
       }
       
-      let existingInstances: Task[] = existingJson ? JSON.parse(existingJson) : [];
+      // Parse existing instances from storage
+      let existingInstances: Task[] = JSON.parse(existingJson);
+      
+      // Cache all instances for future use
+      taskCache.instances = [...existingInstances];
+      taskCache.lastLoaded.instances = now;
+      
+      // Use Set for fast lookups of parent IDs
+      const recurringParentSet = new Set(recurringParentIds);
       
       // Optimization: If there are lots of instances, filter by parent ID first before date filtering
       if (existingInstances.length > 100) {
         // First filter by parent ID (faster than date comparison)
         existingInstances = existingInstances.filter(task =>
-          task.parentTaskId && recurringParentIds.includes(task.parentTaskId)
+          task.parentTaskId && recurringParentSet.has(task.parentTaskId)
         );
       }
       
@@ -222,32 +320,38 @@ export const StorageService = {
       );
       
       // Find which parents already have instances in the time range - use Set for O(1) lookups
-      const existingParentIds = new Set(
-        existingInstances
-          .filter(task => task.parentTaskId)
-          .map(task => task.parentTaskId)
-      );
+      const existingParentSet = new Set<string>();
+      for (const task of existingInstances) {
+        if (task.parentTaskId) {
+          existingParentSet.add(task.parentTaskId);
+        }
+      }
       
       // Generate instances only for parents that don't have them yet
-      const parentsNeedingInstances = parentTasks.filter(task => 
-        RecurrenceService.isRecurring(task) && 
-        !existingParentIds.has(task.id)
-      );
+      const parentsNeedingInstances: Task[] = [];
+      for (const task of parentTasks) {
+        if (RecurrenceService.isRecurring(task) && !existingParentSet.has(task.id)) {
+          parentsNeedingInstances.push(task);
+        }
+      }
       
       if (parentsNeedingInstances.length > 0) {
-        // Calculate bulk instances all at once to optimize memory usage
+        // Calculate bulk instances with optimized memory allocation
         const newInstances: Task[] = [];
         
         for (const parent of parentsNeedingInstances) {
           const instances = RecurrenceService.generateInstances(parent, fromDate, toDate);
-          if (instances.length > 0) {
-            newInstances.push(...instances);
-          }
+          newInstances.push(...instances);
         }
         
         // Save the new instances only if we have any
         if (newInstances.length > 0) {
           await StorageService.saveTaskInstances(newInstances);
+          
+          // Update cache with new instances
+          taskCache.instances = [...(taskCache.instances || []), ...newInstances];
+          
+          // Add to result set
           existingInstances.push(...newInstances);
         }
       }
@@ -333,24 +437,48 @@ export const StorageService = {
   },
   
   /**
-   * Save user settings
+   * Save user settings and update cache
    */
   saveSettings: async (settings: Record<string, any>): Promise<void> => {
     try {
       const jsonValue = JSON.stringify(settings);
       await AsyncStorage.setItem(SETTINGS_KEY, jsonValue);
+      
+      // Update cache
+      taskCache.settings = { ...settings };
+      taskCache.lastLoaded.settings = Date.now();
     } catch (error) {
       console.error('Error saving settings:', error);
     }
   },
   
   /**
-   * Load user settings
+   * Load user settings with caching
+   * @param bypassCache Force reload from storage even if cache is valid
    */
-  loadSettings: async (): Promise<Record<string, any>> => {
+  loadSettings: async (bypassCache: boolean = false): Promise<Record<string, any>> => {
     try {
+      const now = Date.now();
+      
+      // Check if we can use cached settings
+      if (
+        !bypassCache && 
+        taskCache.settings !== null && 
+        now - taskCache.lastLoaded.settings < CACHE_EXPIRATION
+      ) {
+        // Use cached settings
+        return { ...taskCache.settings };
+      }
+      
+      // Load settings from storage
       const jsonValue = await AsyncStorage.getItem(SETTINGS_KEY);
-      return jsonValue != null ? JSON.parse(jsonValue) : {};
+      const settings = jsonValue != null ? JSON.parse(jsonValue) : {};
+      
+      // Update cache
+      taskCache.settings = { ...settings };
+      taskCache.lastLoaded.settings = now;
+      
+      return settings;
     } catch (error) {
       console.error('Error loading settings:', error);
       return {};

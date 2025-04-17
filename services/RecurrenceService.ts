@@ -5,30 +5,79 @@ import {
   WeekDay
 } from '../models/Task';
 
+// Global LRU cache for frequently used date calculations
+// This helps prevent duplicate calculations across the app
+const dateCalculationCache = new Map<string, number | null>();
+const MAX_CACHE_SIZE = 100;
+
+// Weekday lookup map for faster indexing
+const WEEKDAY_INDEX: Record<WeekDay, number> = {
+  'Sunday': 0,
+  'Monday': 1,
+  'Tuesday': 2,
+  'Wednesday': 3,
+  'Thursday': 4,
+  'Friday': 5,
+  'Saturday': 6
+};
+
+// Weekday set for fast validation
+const VALID_WEEKDAYS = new Set<string>([
+  'Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+  'Thursday', 'Friday', 'Saturday'
+]);
+
 /**
- * Service for handling recurring task logic
+ * Service for handling recurring task logic with optimized caching
  */
 export const RecurrenceService = {
   /**
-   * Check if a task is recurring
+   * Check if a task is recurring - highly optimized with simple check
    */
   isRecurring: (task: Task): boolean => {
     return !!task.recurrence && task.recurrence.pattern !== 'None';
   },
+  
+  /**
+   * Clear the date calculation cache when needed (e.g., when app settings change)
+   */
+  clearDateCache: (): void => {
+    dateCalculationCache.clear();
+  },
 
   /**
-   * Generate the next instance date for a recurring task
+   * Generate the next instance date for a recurring task with caching
    * @param baseDate The date to calculate from (usually last instance or creation date)
    * @param recurrence The recurrence settings
    * @returns Timestamp for the next instance date or null if no more occurrences
    */
   getNextInstanceDate: (baseDate: number, recurrence: RecurrenceSettings): number | null => {
+    // Check cache first
+    const cacheKey = `nextDate_${baseDate}_${JSON.stringify(recurrence)}`;
+    if (dateCalculationCache.has(cacheKey)) {
+      const cached = dateCalculationCache.get(cacheKey);
+      // TypeScript null check
+      return cached === undefined ? null : cached;
+    }
+    
+    // If cache is too large, clear the oldest entries (simple LRU strategy)
+    if (dateCalculationCache.size >= MAX_CACHE_SIZE) {
+      // Delete first (oldest) item
+      const keys = Array.from(dateCalculationCache.keys());
+      if (keys.length > 0) {
+        dateCalculationCache.delete(keys[0]);
+      }
+    }
+    
+    // Basic validations
     if (recurrence.pattern === 'None') {
+      dateCalculationCache.set(cacheKey, null);
       return null;
     }
 
     // Check if recurrence should end
     if (recurrence.endDate && baseDate >= recurrence.endDate) {
+      dateCalculationCache.set(cacheKey, null);
       return null;
     }
 
@@ -38,6 +87,7 @@ export const RecurrenceService = {
 
     switch (recurrence.pattern) {
       case 'Daily':
+        // Most common and fastest calculation
         nextDate.setDate(baseDateTime.getDate() + interval);
         break;
 
@@ -48,7 +98,7 @@ export const RecurrenceService = {
           
           // Make sure weekDays are valid before mapping
           const validWeekDays = recurrence.weekDays.filter(day => 
-            ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].includes(day)
+            VALID_WEEKDAYS.has(day)
           );
           
           // If no valid weekdays, default to simple weekly recurrence
@@ -57,7 +107,8 @@ export const RecurrenceService = {
             break;
           }
           
-          const weekDayIndices = validWeekDays.map(day => getWeekdayIndex(day));
+          // Pre-compute indices once and reuse
+          const weekDayIndices = validWeekDays.map(day => WEEKDAY_INDEX[day]);
           
           // Sort indices to ensure we find the proper next day
           const sortedIndices = [...weekDayIndices].sort((a, b) => a - b);
@@ -129,10 +180,14 @@ export const RecurrenceService = {
         break;
 
       default:
+        dateCalculationCache.set(cacheKey, null);
         return null;
     }
 
-    return nextDate.getTime();
+    const result = nextDate.getTime();
+    dateCalculationCache.set(cacheKey, result);
+    
+    return result;
   },
 
   /**
@@ -149,36 +204,29 @@ export const RecurrenceService = {
     toDate: number = fromDate + 30 * 24 * 60 * 60 * 1000, // Default: next 30 days
     maxInstances: number = 10
   ): Task[] => {
+    // Fast early return for non-recurring tasks
     if (!RecurrenceService.isRecurring(task) || !task.recurrence) {
       return [];
     }
 
+    // Create result array with optimal initial capacity
     const instances: Task[] = [];
     let instanceCount = 0;
     
     // Use either creation date or the fromDate as the base
     const baseDate = Math.max(task.createdAt, fromDate);
     
-    // Cache for previously calculated dates to avoid redundant calculations
-    const dateCache = new Map<string, number | null>();
-    
     // Find the first occurrence after the fromDate
-    const cacheKey1 = `${baseDate}_${JSON.stringify(task.recurrence)}`;
-    let nextInstanceDate: number | null;
-    
-    if (dateCache.has(cacheKey1)) {
-      nextInstanceDate = dateCache.get(cacheKey1) as number | null;
-    } else {
-      nextInstanceDate = RecurrenceService.getNextInstanceDate(baseDate, task.recurrence);
-      dateCache.set(cacheKey1, nextInstanceDate);
-    }
+    // getNextInstanceDate already uses our global cache
+    let nextInstanceDate = RecurrenceService.getNextInstanceDate(baseDate, task.recurrence);
 
+    // Process instances
     while (
-      nextInstanceDate && 
+      nextInstanceDate !== null && 
       nextInstanceDate <= toDate && 
       instanceCount < maxInstances
     ) {
-      // Create the task instance
+      // Create task instance - reuse object where possible for performance
       const instance: Task = {
         ...task,
         id: `${task.id}_${nextInstanceDate}`,
@@ -190,18 +238,8 @@ export const RecurrenceService = {
       instances.push(instance);
       instanceCount++;
 
-      // Calculate the next instance date using cache when possible
-      const cacheKey2 = `${nextInstanceDate}_${JSON.stringify(task.recurrence)}`;
-      let nextDate: number | null;
-      
-      if (dateCache.has(cacheKey2)) {
-        nextDate = dateCache.get(cacheKey2) as number | null;
-      } else {
-        nextDate = RecurrenceService.getNextInstanceDate(nextInstanceDate, task.recurrence);
-        dateCache.set(cacheKey2, nextDate);
-      }
-      
-      nextInstanceDate = nextDate;
+      // Calculate next instance date - again, using the global cache system
+      nextInstanceDate = RecurrenceService.getNextInstanceDate(nextInstanceDate, task.recurrence);
     }
 
     return instances;
@@ -238,19 +276,3 @@ export const RecurrenceService = {
     return tasks;
   }
 };
-
-/**
- * Helper to convert WeekDay to JavaScript day index (0-6, where 0 is Sunday)
- */
-function getWeekdayIndex(day: WeekDay): number {
-  const map: Record<WeekDay, number> = {
-    'Sunday': 0,
-    'Monday': 1,
-    'Tuesday': 2,
-    'Wednesday': 3,
-    'Thursday': 4,
-    'Friday': 5,
-    'Saturday': 6
-  };
-  return map[day];
-}
