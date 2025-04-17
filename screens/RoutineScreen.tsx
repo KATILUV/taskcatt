@@ -56,23 +56,54 @@ export default function RoutineScreen({ navigation }: Props) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const animatedItemValues = useRef<{[key: string]: Animated.Value}>({}).current;
 
-  // Load tasks from AsyncStorage on component mount
+  // Load tasks from AsyncStorage with optimized performance
   useEffect(() => {
+    // Track component mount state to prevent memory leaks
+    let isMounted = true;
+    
     const loadTasks = async () => {
       try {
-        const savedTasks = await StorageService.loadTasks();
-        setTasks(savedTasks);
+        // Use optimized loading with cache prioritization
+        // This will first use the memory cache if available for instant rendering
+        const savedTasks = await StorageService.loadTasks(true, undefined, undefined, false);
+        
+        // Update state only if component is still mounted (prevents memory leaks)
+        if (isMounted) {
+          setTasks(savedTasks);
+          
+          // Background refresh to ensure data freshness without blocking UI
+          setTimeout(() => {
+            if (isMounted) {
+              StorageService.loadTasks(true, undefined, undefined, true).then(freshTasks => {
+                if (isMounted && JSON.stringify(freshTasks) !== JSON.stringify(savedTasks)) {
+                  setTasks(freshTasks);
+                }
+              }).catch(err => console.error('Background refresh error:', err));
+            }
+          }, 300); // Small delay to prioritize UI rendering first
+        }
       } catch (error) {
         console.error('Error loading tasks:', error);
+        // Fallback to empty array instead of undefined state
+        if (isMounted) {
+          setTasks([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadTasks();
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+    };
   }, []);
   
-  // Screen transition animation
+  // Screen transition animation with optimized performance
   useEffect(() => {
     // When tasks load and loading is complete, fade in the screen
     if (!loading) {
@@ -83,42 +114,95 @@ export default function RoutineScreen({ navigation }: Props) {
         useNativeDriver: true,
       }).start();
       
-      // Set up staggered animations for each task item
-      const animations: Animated.CompositeAnimation[] = [];
+      // Performance optimization: Only animate visible items
+      // This is much more efficient for large lists
+      const MAX_ANIMATIONS = 15; // Only animate the first visible batch
+      const visibleTasks = tasks.slice(0, MAX_ANIMATIONS);
       
-      // Create an animated value for each task if it doesn't exist
-      tasks.forEach((task, index) => {
+      // Pre-allocate animations array
+      const animations: Animated.CompositeAnimation[] = [];
+      animations.length = visibleTasks.length;
+      
+      // Create and reuse animated values for better performance
+      visibleTasks.forEach((task, index) => {
+        // Create animated value if it doesn't exist yet
         if (!animatedItemValues[task.id]) {
           animatedItemValues[task.id] = new Animated.Value(0);
         }
         
-        // Add staggered animation for each task
-        animations.push(
-          Animated.timing(animatedItemValues[task.id], {
-            toValue: 1,
-            duration: 200,
-            delay: 100 + (index * 50), // Stagger the animations
-            useNativeDriver: true,
-          })
-        );
+        // Calculate optimized delay that feels smooth but keeps total animation time reasonable
+        // This prevents long delays with large lists
+        const optimizedDelay = Math.min(100 + (index * 30), 500);
+        
+        // Add animation to pre-allocated array
+        animations[index] = Animated.timing(animatedItemValues[task.id], {
+          toValue: 1,
+          duration: 200,
+          delay: optimizedDelay,
+          useNativeDriver: true,
+        });
       });
       
-      // Run all animations in parallel
+      // Run animations in parallel with a single call
       if (animations.length > 0) {
+        // Use sequence for the first few items, then parallel for the rest
+        // This gives a nice staggered effect without blocking the UI
         Animated.parallel(animations).start();
+        
+        // For off-screen items, just set them to visible without animation
+        if (tasks.length > MAX_ANIMATIONS) {
+          setTimeout(() => {
+            tasks.slice(MAX_ANIMATIONS).forEach(task => {
+              if (!animatedItemValues[task.id]) {
+                animatedItemValues[task.id] = new Animated.Value(1);
+              } else {
+                animatedItemValues[task.id].setValue(1);
+              }
+            });
+          }, 500); // Small delay to ensure visible animations have time to start
+        }
       }
     }
   }, [loading, tasks, fadeAnim, animatedItemValues]);
 
-  // Save tasks to AsyncStorage whenever they change
+  // Save tasks to AsyncStorage with debouncing for better performance
   useEffect(() => {
+    // Track if the component is mounted
+    let isMounted = true;
+    
+    // Debounce save operations to avoid frequent writes
+    // This significantly improves performance when tasks change rapidly
+    let saveTimeoutId: NodeJS.Timeout | null = null;
+    
     const saveTasks = async () => {
-      if (!loading) {
-        await StorageService.saveTasks(tasks);
+      if (!loading && tasks.length > 0) {
+        try {
+          await StorageService.saveTasks(tasks);
+        } catch (error) {
+          console.error('Error saving tasks:', error);
+        }
       }
     };
 
-    saveTasks();
+    // Clear any existing timeout to prevent duplicate saves
+    if (saveTimeoutId) {
+      clearTimeout(saveTimeoutId);
+    }
+    
+    // Debounce the save operation by 300ms to batch rapid changes
+    saveTimeoutId = setTimeout(() => {
+      if (isMounted) {
+        saveTasks();
+      }
+    }, 300);
+    
+    // Cleanup function to prevent memory leaks
+    return () => {
+      isMounted = false;
+      if (saveTimeoutId) {
+        clearTimeout(saveTimeoutId);
+      }
+    };
   }, [tasks, loading]);
 
   // Add a new task
