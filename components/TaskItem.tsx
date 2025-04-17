@@ -1,11 +1,10 @@
-import React, { memo, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, ViewStyle, TextStyle } from 'react-native';
+import React, { memo, useCallback, useRef, useEffect } from 'react';
+import { StyleSheet, View, TouchableOpacity, ViewStyle, TextStyle, Animated, Easing } from 'react-native';
 import { 
   Card, 
   Text, 
   Checkbox, 
   IconButton, 
-  Surface, 
   Chip,
   useTheme as usePaperTheme,
 } from 'react-native-paper';
@@ -103,127 +102,226 @@ const TaskItem = memo(({
     onDelete(task.id);
   }, [task.id, onDelete]);
   
+  // Animation values
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const checkboxScaleAnim = useRef(new Animated.Value(1)).current;
+  const checkmarkScaleAnim = useRef(new Animated.Value(task.completed ? 1 : 0)).current;
+  
+  // Toggle animation when completion status changes
+  useEffect(() => {
+    if (task.completed) {
+      // Scale up checkbox
+      Animated.sequence([
+        Animated.timing(checkboxScaleAnim, {
+          toValue: 1.3,
+          duration: 150,
+          useNativeDriver: true,
+          easing: Easing.bezier(0.175, 0.885, 0.32, 1.275), // Elastic bounce effect
+        }),
+        Animated.timing(checkboxScaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        })
+      ]).start();
+      
+      // Show checkmark with bounce effect
+      Animated.spring(checkmarkScaleAnim, {
+        toValue: 1,
+        friction: 4,
+        tension: 100,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Hide checkmark
+      Animated.timing(checkmarkScaleAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [task.completed, checkboxScaleAnim, checkmarkScaleAnim]);
+  
+  // Press animation handlers
+  const handlePressIn = useCallback(() => {
+    Animated.timing(scaleAnim, {
+      toValue: 0.98,
+      duration: 150,
+      useNativeDriver: true,
+      easing: Easing.out(Easing.cubic),
+    }).start();
+  }, [scaleAnim]);
+  
+  const handlePressOut = useCallback(() => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 4,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  }, [scaleAnim]);
+  
+  // Delete animation
+  const handleDeleteWithAnimation = useCallback(() => {
+    Animated.sequence([
+      // Subtle shake effect
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 0.98, duration: 100, useNativeDriver: true }),
+        Animated.timing(scaleAnim, { toValue: 1.01, duration: 100, useNativeDriver: true }),
+        Animated.timing(scaleAnim, { toValue: 0.98, duration: 100, useNativeDriver: true })
+      ]),
+      // Fade out
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+        easing: Easing.in(Easing.cubic),
+      })
+    ]).start(() => {
+      handleDelete();
+    });
+  }, [scaleAnim, opacityAnim, handleDelete]);
+  
   // Access Paper theme
   const paperTheme = usePaperTheme();
   
   return (
-    <Card
-      mode="elevated"
-      style={[
-        styles.taskCard,
-        isActive && styles.activeCard,
-        task.completed && styles.completedCard
-      ]}
-      onLongPress={drag}
+    <Animated.View
+      style={{
+        transform: [{ scale: scaleAnim }],
+        opacity: opacityAnim
+      }}
     >
-      <Card.Content style={styles.cardHeader}>
-        <Checkbox
-          status={task.completed ? 'checked' : 'unchecked'}
-          color={task.completed ? theme.colors.success : theme.colors.primary}
-          onPress={handleToggleComplete}
-        />
-        
-        <Text 
-          variant="titleMedium"
+      <TouchableOpacity
+        activeOpacity={0.99} // High value to let our custom animation handle the feedback
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onLongPress={drag}
+        delayLongPress={200}
+      >
+        <Card
+          mode="elevated"
           style={[
-            styles.taskTitle, 
-            task.completed && styles.completedText
+            styles.taskCard,
+            isActive && styles.activeCard,
+            task.completed && styles.completedCard
           ]}
-          numberOfLines={1}
         >
-          {task.title}
-        </Text>
-        
-        <IconButton
-          icon="trash-can-outline"
-          iconColor={theme.colors.error}
-          size={scaleFont(isTablet() ? 20 : 18)}
-          onPress={handleDelete}
-          style={styles.deleteButton}
-        />
-      </Card.Content>
-      
-      <Card.Content style={styles.cardContent}>
-        <View style={styles.badgeContainer}>
-          {task.priority && (
-            <Chip 
-              mode="outlined"
-              style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}
-              textStyle={{ color: priorityColor }}
-              icon={({ size }) => (
-                <View style={[
-                  styles.priorityIndicator, 
-                  { backgroundColor: priorityColor }
-                ]} />
+          <Card.Content style={styles.cardHeader}>
+            <Animated.View style={{
+              transform: [{ scale: checkboxScaleAnim }]
+            }}>
+              <Checkbox
+                status={task.completed ? 'checked' : 'unchecked'}
+                color={task.completed ? theme.colors.success : theme.colors.primary}
+                onPress={handleToggleComplete}
+              />
+            </Animated.View>
+            
+            <Text 
+              variant="titleMedium"
+              style={[
+                styles.taskTitle, 
+                task.completed && styles.completedText
+              ]}
+              numberOfLines={1}
+            >
+              {task.title}
+            </Text>
+            
+            <IconButton
+              icon="trash-can-outline"
+              iconColor={theme.colors.error}
+              size={scaleFont(isTablet() ? 20 : 18)}
+              onPress={handleDeleteWithAnimation}
+              style={styles.deleteButton}
+            />
+          </Card.Content>
+          
+          <Card.Content style={styles.cardContent}>
+            <View style={styles.badgeContainer}>
+              {task.priority && (
+                <Chip 
+                  mode="outlined"
+                  style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}
+                  textStyle={{ color: priorityColor }}
+                  icon={({ size }) => (
+                    <View style={[
+                      styles.priorityIndicator, 
+                      { backgroundColor: priorityColor }
+                    ]} />
+                  )}
+                >
+                  {task.priority}
+                </Chip>
               )}
-            >
-              {task.priority}
-            </Chip>
-          )}
+              
+              {task.category && (
+                <Chip
+                  mode="outlined"
+                  style={[styles.categoryBadge, { backgroundColor: categoryColor + '15' }]}
+                  textStyle={{ color: categoryColor }}
+                >
+                  {task.category}
+                </Chip>
+              )}
+            </View>
+          </Card.Content>
           
-          {task.category && (
-            <Chip
-              mode="outlined"
-              style={[styles.categoryBadge, { backgroundColor: categoryColor + '15' }]}
-              textStyle={{ color: categoryColor }}
-            >
-              {task.category}
-            </Chip>
-          )}
-        </View>
-      </Card.Content>
-      
-      <Card.Actions style={styles.cardFooter}>
-        {dueDate && (
-          <Chip
-            icon="calendar"
-            compact
-            style={styles.dueDateChip}
-            textStyle={styles.dueDateText}
-          >
-            Due: {dueDate}
-          </Chip>
-        )}
-        
-        <View style={styles.metaContainer}>
-          {RecurrenceService.isRecurring(task) && (
-            <Chip 
-              icon="sync-outline"
-              compact
-              style={styles.recurrenceContainer}
-              textStyle={styles.recurrenceText}
-            >
-              {task.recurrence?.pattern === 'Daily' ? 'Daily' : 
-               task.recurrence?.pattern === 'Weekly' ? 'Weekly' : 
-               task.recurrence?.pattern === 'Monthly' ? 'Monthly' : 
-               'Recurring'}
-            </Chip>
-          )}
-          
-          {task.reminder?.enabled && !dueDate && (
-            <Chip
-              icon="bell-outline"
-              compact
-              style={styles.reminderContainer}
-              textStyle={styles.reminderText}
-            >
-              Reminder
-            </Chip>
-          )}
-          
-          {task.completed && (
-            <Chip
-              icon="check-circle"
-              compact
-              style={styles.completedContainer}
-              textStyle={styles.completedLabel}
-            >
-              Completed
-            </Chip>
-          )}
-        </View>
-      </Card.Actions>
-    </Card>
+          <Card.Actions style={styles.cardFooter}>
+            {dueDate && (
+              <Chip
+                icon="calendar"
+                compact
+                style={styles.dueDateChip}
+                textStyle={styles.dueDateText}
+              >
+                Due: {dueDate}
+              </Chip>
+            )}
+            
+            <View style={styles.metaContainer}>
+              {RecurrenceService.isRecurring(task) && (
+                <Chip 
+                  icon="sync-outline"
+                  compact
+                  style={styles.recurrenceContainer}
+                  textStyle={styles.recurrenceText}
+                >
+                  {task.recurrence?.pattern === 'Daily' ? 'Daily' : 
+                   task.recurrence?.pattern === 'Weekly' ? 'Weekly' : 
+                   task.recurrence?.pattern === 'Monthly' ? 'Monthly' : 
+                   'Recurring'}
+                </Chip>
+              )}
+              
+              {task.reminder?.enabled && !dueDate && (
+                <Chip
+                  icon="bell-outline"
+                  compact
+                  style={styles.reminderContainer}
+                  textStyle={styles.reminderText}
+                >
+                  Reminder
+                </Chip>
+              )}
+              
+              {task.completed && (
+                <Chip
+                  icon="check-circle"
+                  compact
+                  style={styles.completedContainer}
+                  textStyle={styles.completedLabel}
+                >
+                  Completed
+                </Chip>
+              )}
+            </View>
+          </Card.Actions>
+        </Card>
+      </TouchableOpacity>
+    </Animated.View>
   );
 });
 

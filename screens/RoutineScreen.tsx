@@ -8,7 +8,8 @@ import {
   FlatList,
   Animated,
   Dimensions,
-  StatusBar
+  StatusBar,
+  RefreshControl
 } from 'react-native';
 import {
   Text,
@@ -60,6 +61,7 @@ export default function RoutineScreen({ navigation }: Props) {
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Get theme from context
   const { theme } = useTheme();
@@ -493,6 +495,20 @@ export default function RoutineScreen({ navigation }: Props) {
         return theme.colors.categoryOther;
     }
   }, [theme.colors]);
+  
+  // Pull-to-refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Force load from storage (bypass cache)
+      const freshTasks = await StorageService.loadTasks(true, undefined, undefined, true);
+      setTasks(freshTasks);
+    } catch (error) {
+      console.error('Error refreshing tasks:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   return (
     <Animated.View style={{...styles.container, opacity: fadeAnim}}>
@@ -618,11 +634,11 @@ export default function RoutineScreen({ navigation }: Props) {
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
             getItemLayout={getItemLayout}
-            maxToRenderPerBatch={8} // Reduced for smoother scrolling
-            windowSize={8} // Optimized window size
-            updateCellsBatchingPeriod={30} // Faster batching for smoother performance
-            initialNumToRender={10} // Optimal for most device screens
-            removeClippedSubviews={true}
+            maxToRenderPerBatch={5} // Further reduced for smoother scrolling
+            windowSize={5} // Optimized window size for better performance
+            updateCellsBatchingPeriod={25} // Faster batching for smoother performance
+            initialNumToRender={8} // Optimal number to render initially
+            removeClippedSubviews={true} // Important for memory optimization
             extraData={taskIds}
             maintainVisibleContentPosition={{ // Keep scroll position consistent
               minIndexForVisible: 0,
@@ -634,6 +650,20 @@ export default function RoutineScreen({ navigation }: Props) {
             onEndReachedThreshold={0.5}
             // Optimize scrolling performance
             scrollEventThrottle={16} // Targets 60fps
+            // For better performance
+            disableVirtualization={false} // Ensure virtualization is enabled
+            bounces={true} // Enable bouncing for better UX
+            bouncesZoom={true} // Smooth zoom bounce effect
+            // Add pull-to-refresh functionality
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[theme.colors.primary]}
+                tintColor={theme.colors.primary}
+                progressBackgroundColor={theme.colors.backgroundCard}
+              />
+            }
           />
         )}
         
