@@ -271,15 +271,15 @@ export default function HomeScreen({ navigation }: Props) {
   return (
     <Animated.View style={{ flex: 1, opacity: screenOpacity }}>
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
+        <Surface style={styles.header} elevation={2}>
           <View style={styles.headerContent}>
             <View>
-              <Text style={styles.headerTitle}>Task Cat</Text>
-              <Text style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
+              <Title style={styles.headerTitle}>Task Cat</Title>
+              <Text variant="bodyMedium" style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
             </View>
             <ThemeToggle size="medium" />
           </View>
-        </View>
+        </Surface>
 
         <ScrollView 
           style={styles.scrollView}
@@ -291,9 +291,9 @@ export default function HomeScreen({ navigation }: Props) {
             />
           }
         >
-          <View style={styles.progressSection}>
+          <Surface style={styles.progressSection} elevation={1}>
             <View style={styles.progressHeader}>
-              <Text style={styles.progressTitle}>Your Progress</Text>
+              <Title style={styles.progressTitle}>Your Progress</Title>
               <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
             </View>
             
@@ -306,24 +306,24 @@ export default function HomeScreen({ navigation }: Props) {
             <Text style={styles.progressMessage}>
               {getStatusMessage()}
             </Text>
-          </View>
+          </Surface>
 
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{taskCount}</Text>
-              <Text style={styles.statLabel}>Total Tasks</Text>
-            </View>
+          <Surface style={styles.statsContainer} elevation={1}>
+            <Surface style={styles.statCard} elevation={0}>
+              <Text variant="headlineSmall" style={styles.statNumber}>{taskCount}</Text>
+              <Text variant="labelMedium" style={styles.statLabel}>Total Tasks</Text>
+            </Surface>
             
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{completedCount}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
-            </View>
+            <Surface style={styles.statCard} elevation={0}>
+              <Text variant="headlineSmall" style={styles.statNumber}>{completedCount}</Text>
+              <Text variant="labelMedium" style={styles.statLabel}>Completed</Text>
+            </Surface>
             
-            <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{taskCount - completedCount}</Text>
-              <Text style={styles.statLabel}>Remaining</Text>
-            </View>
-          </View>
+            <Surface style={styles.statCard} elevation={0}>
+              <Text variant="headlineSmall" style={styles.statNumber}>{taskCount - completedCount}</Text>
+              <Text variant="labelMedium" style={styles.statLabel}>Remaining</Text>
+            </Surface>
+          </Surface>
 
           {/* Category Breakdown Section */}
           {taskCount > 0 && (
