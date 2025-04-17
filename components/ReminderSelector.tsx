@@ -268,136 +268,140 @@ export default function ReminderSelector({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 10,
-  },
-  label: {
-    fontSize: scaleFont(16),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-    marginBottom: 8,
-  },
-  selectorButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.gray,
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: theme.colors.white,
-  },
-  selectorText: {
-    fontSize: scaleFont(16),
-    color: theme.colors.textPrimary,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: theme.colors.white,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.lightGray,
-  },
-  modalTitle: {
-    fontSize: scaleFont(18),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-  },
-  closeButton: {
-    fontSize: scaleFont(16),
-    color: theme.colors.primary,
-  },
-  modalBody: {
-    padding: 16,
-    maxHeight: '70%',
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 16,
-  },
-  switchLabel: {
-    fontSize: scaleFont(16),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-  },
-  section: {
-    marginVertical: 16,
-  },
-  sectionTitle: {
-    fontSize: scaleFont(16),
-    fontWeight: 'bold',
-    color: theme.colors.textPrimary,
-    marginBottom: 8,
-  },
-  optionsContainer: {
-    marginVertical: 8,
-  },
-  optionButton: {
-    borderWidth: 1,
-    borderColor: theme.colors.gray,
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 4,
-    backgroundColor: theme.colors.white,
-  },
-  optionButtonSelected: {
-    backgroundColor: theme.colors.primaryLight,
-    borderColor: theme.colors.primary,
-  },
-  optionButtonText: {
-    fontSize: scaleFont(14),
-    color: theme.colors.textSecondary,
-  },
-  optionButtonTextSelected: {
-    color: theme.colors.primary,
-    fontWeight: 'bold',
-  },
-  helperText: {
-    fontSize: scaleFont(14),
-    color: theme.colors.textSecondary,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  modalFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.lightGray,
-  },
-  clearButton: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.lightGray,
-    minWidth: scale(100),
-    alignItems: 'center',
-  },
-  clearButtonText: {
-    fontSize: scaleFont(16),
-    color: theme.colors.textPrimary,
-  },
-  confirmButton: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: theme.colors.primary,
-    minWidth: scale(100),
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    fontSize: scaleFont(16),
-    color: theme.colors.white,
-    fontWeight: 'bold',
-  },
+const useStyles = createStyles((theme) => {
+  const isTab = isTablet();
+  
+  return StyleSheet.create({
+    container: {
+      marginVertical: 10,
+    },
+    label: {
+      fontSize: scaleFont(16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+    } as TextStyle,
+    selectorButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.gray,
+      borderRadius: 8,
+      padding: 12,
+      backgroundColor: theme.colors.white,
+    },
+    selectorText: {
+      fontSize: scaleFont(16),
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+      backgroundColor: theme.colors.white,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      maxHeight: '80%',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    modalTitle: {
+      fontSize: scaleFont(18),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    closeButton: {
+      fontSize: scaleFont(16),
+      color: theme.colors.primary,
+    } as TextStyle,
+    modalBody: {
+      padding: 16,
+      maxHeight: '70%',
+    },
+    switchContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginVertical: 16,
+    },
+    switchLabel: {
+      fontSize: scaleFont(16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    section: {
+      marginVertical: 16,
+    },
+    sectionTitle: {
+      fontSize: scaleFont(16),
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+    } as TextStyle,
+    optionsContainer: {
+      marginVertical: 8,
+    },
+    optionButton: {
+      borderWidth: 1,
+      borderColor: theme.colors.gray,
+      borderRadius: 8,
+      padding: 12,
+      marginVertical: 4,
+      backgroundColor: theme.colors.white,
+    },
+    optionButtonSelected: {
+      backgroundColor: theme.colors.primaryLight,
+      borderColor: theme.colors.primary,
+    },
+    optionButtonText: {
+      fontSize: scaleFont(14),
+      color: theme.colors.textSecondary,
+    } as TextStyle,
+    optionButtonTextSelected: {
+      color: theme.colors.primary,
+      fontWeight: 'bold',
+    } as TextStyle,
+    helperText: {
+      fontSize: scaleFont(14),
+      color: theme.colors.textSecondary,
+      marginTop: 16,
+      marginBottom: 8,
+    } as TextStyle,
+    modalFooter: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.lightGray,
+    },
+    clearButton: {
+      padding: 12,
+      borderRadius: 8,
+      backgroundColor: theme.colors.lightGray,
+      minWidth: scale(100),
+      alignItems: 'center',
+    },
+    clearButtonText: {
+      fontSize: scaleFont(16),
+      color: theme.colors.textPrimary,
+    } as TextStyle,
+    confirmButton: {
+      padding: 12,
+      borderRadius: 8,
+      backgroundColor: theme.colors.primary,
+      minWidth: scale(100),
+      alignItems: 'center',
+    },
+    confirmButtonText: {
+      fontSize: scaleFont(16),
+      color: theme.colors.white,
+      fontWeight: 'bold',
+    } as TextStyle,
+  });
 });
