@@ -109,15 +109,35 @@ export const StorageService = {
    */
   saveTaskInstances: async (instances: Task[]): Promise<void> => {
     try {
-      // Load existing instances
+      if (instances.length === 0) {
+        return; // Nothing to save
+      }
+      
+      // Load existing instances only if needed
       const existingJson = await AsyncStorage.getItem(TASK_INSTANCES_KEY);
-      const existingInstances: Task[] = existingJson ? JSON.parse(existingJson) : [];
       
-      // Merge instances, giving priority to new instances
-      const existingIds = new Set(existingInstances.map(t => t.id));
-      const newInstances = instances.filter(t => !existingIds.has(t.id));
+      // If no existing instances, just save the new ones
+      if (!existingJson) {
+        await AsyncStorage.setItem(TASK_INSTANCES_KEY, JSON.stringify(instances));
+        return;
+      }
       
-      const mergedInstances = [...existingInstances, ...newInstances];
+      // Otherwise, merge preserving existing instances that aren't being updated
+      const existingInstances: Task[] = JSON.parse(existingJson);
+      
+      // Create a map for faster lookups
+      const existingInstanceMap = new Map<string, Task>();
+      existingInstances.forEach(instance => {
+        existingInstanceMap.set(instance.id, instance);
+      });
+      
+      // Update existing instances or add new ones
+      instances.forEach(instance => {
+        existingInstanceMap.set(instance.id, instance);
+      });
+      
+      // Convert map back to array
+      const mergedInstances = Array.from(existingInstanceMap.values());
       
       // Save back to storage
       await AsyncStorage.setItem(TASK_INSTANCES_KEY, JSON.stringify(mergedInstances));

@@ -281,11 +281,7 @@ const styles = createStyles((theme) => {
       backgroundColor: theme.colors.success,
       borderColor: theme.colors.success,
     },
-    checkmark: {
-      color: theme.colors.white,
-      fontSize: scaleFont(isTab ? 18 : 16),
-      fontWeight: 'bold',
-    },
+    // Removed unused checkmark style
     taskTitle: {
       flex: 1,
       ...(theme.typography.subtitle1 as TextStyle),
@@ -308,11 +304,7 @@ const styles = createStyles((theme) => {
       alignItems: 'center',
       backgroundColor: theme.colors.errorLight + '30',
     },
-    deleteButtonText: {
-      fontSize: scaleFont(isTab ? 24 : 20),
-      color: theme.colors.error,
-      fontWeight: 'bold',
-    },
+    // Removed unused deleteButtonText style - using Ionicons instead
     badgeContainer: {
       flexDirection: 'row',
       alignItems: 'center',

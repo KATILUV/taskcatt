@@ -109,13 +109,37 @@ export const ReminderService = {
 
     // If it's a recurring task
     if (task.recurrence && task.recurrence.pattern !== 'None') {
-      // The logic for recurring reminders would go here
-      // This would need to calculate based on the recurrence pattern
-      // and the reminder time offset
+      // For recurring tasks, we need to find the next instance date and set the reminder for it
+      if (task.instanceDate) {
+        // This is already a task instance with a specific date
+        const instanceDate = new Date(task.instanceDate);
+        
+        // If there's a specific time set for the reminder, use it
+        if (task.reminder.time) {
+          const hours = Math.floor(task.reminder.time / (60 * 60 * 1000));
+          const minutes = Math.floor((task.reminder.time % (60 * 60 * 1000)) / (60 * 1000));
+          instanceDate.setHours(hours, minutes, 0, 0);
+        }
+        
+        // Only return if the date is in the future
+        if (instanceDate.getTime() > Date.now()) {
+          return instanceDate;
+        }
+      }
       
-      // For this example, we'll just use "now + 1 day" as a placeholder
+      // For parent recurring tasks (or if instance date is in the past),
+      // we would need to use the RecurrenceService to calculate the next instance
+      // For now, default to tomorrow
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      // If there's a specific time, set it
+      if (task.reminder.time) {
+        const hours = Math.floor(task.reminder.time / (60 * 60 * 1000));
+        const minutes = Math.floor((task.reminder.time % (60 * 60 * 1000)) / (60 * 1000));
+        tomorrow.setHours(hours, minutes, 0, 0);
+      }
+      
       return tomorrow;
     }
 

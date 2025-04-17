@@ -561,26 +561,6 @@ function safeReadFileSync(filePath) {
   }
 }
 
-// Route to display the code
-app.get('/', (req, res) => {
-  const fileTree = generateFileTree(__dirname);
-  const taskItemCode = safeReadFileSync(path.join(__dirname, 'components', 'TaskItem.tsx'));
-  const themeCode = safeReadFileSync(path.join(__dirname, 'utils', 'Theme.ts'));
-  
-  res.render('index', { 
-    fileTree, 
-    taskItemCode, 
-    themeCode
-  });
-});
-
-app.listen(port, '0.0.0.0', () => {
-  console.log(`Code viewer server running at http://localhost:${port}`);
-});
-
-// Write template to disk
-fs.writeFileSync(path.join(__dirname, 'views', 'index.ejs'), indexTemplate);
-
 // Helper function to generate file tree
 function generateFileTree(dir, prefix = '') {
   let tree = '';
@@ -619,13 +599,17 @@ app.get('/', (req, res) => {
   const homeScreenCode = safeReadFileSync(path.join(__dirname, 'screens', 'HomeScreen.tsx'));
   const routineScreenCode = safeReadFileSync(path.join(__dirname, 'screens', 'RoutineScreen.tsx'));
   const appJsonCode = safeReadFileSync(path.join(__dirname, 'app.json'));
+  const taskItemCode = safeReadFileSync(path.join(__dirname, 'components', 'TaskItem.tsx'));
+  const themeCode = safeReadFileSync(path.join(__dirname, 'utils', 'Theme.ts'));
   
   res.render('index', { 
     fileTree, 
     appCode, 
     homeScreenCode, 
     routineScreenCode, 
-    appJsonCode
+    appJsonCode,
+    taskItemCode,
+    themeCode
   });
 });
 
