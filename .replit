@@ -13,10 +13,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Expo App"
+args = "Task Cat App"
 
 [[workflows.workflow]]
-name = "Expo App"
+name = "Task Cat App"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -28,7 +28,7 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node start.js"
-waitForPort = 5000
+waitForPort = 8081
 
 [deployment]
 run = ["sh", "-c", "npm install && npx expo start --web --port 5000"]

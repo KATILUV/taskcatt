@@ -1,17 +1,19 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
-import { useTheme } from '../utils/Theme';
+import { View, StyleSheet, Dimensions } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withDelay,
+  runOnJS,
+} from 'react-native-reanimated';
 
 interface ConfettiPiece {
   key: number;
-  x: Animated.Value;
-  y: Animated.Value;
-  rotate: Animated.Value;
-  scale: Animated.Value;
-  opacity: Animated.Value;
   color: string;
   size: number;
-  shape: 'circle' | 'square' | 'triangle';
+  x: number;
+  y: number;
 }
 
 interface ConfettiProps {
@@ -21,162 +23,123 @@ interface ConfettiProps {
   onAnimationComplete?: () => void;
 }
 
-const Confetti: React.FC<ConfettiProps> = ({ 
-  count = 50, 
+const Confetti: React.FC<ConfettiProps> = ({
+  count = 30,
   duration = 2000,
-  colors: propColors,
-  onAnimationComplete
+  colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'],
+  onAnimationComplete,
 }) => {
-  const { theme } = useTheme();
-  const { width, height } = Dimensions.get('window');
-  
-  // Get colors from theme if not provided
-  const colors = propColors || [
-    theme.colors.primary,
-    theme.colors.secondary,
-    theme.colors.accent,
-    theme.colors.success,
-    theme.colors.categoryHealth,
-    theme.colors.categoryWork,
-    theme.colors.categoryPersonal,
-    theme.colors.priorityHigh,
-    theme.colors.priorityMedium,
-  ];
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const opacity = useSharedValue(1);
 
-  // Create confetti pieces with initial state
+  // Generate confetti pieces
   const confettiPieces = useRef<ConfettiPiece[]>([]);
   
   if (confettiPieces.current.length === 0) {
     for (let i = 0; i < count; i++) {
-      const shape = ['circle', 'square', 'triangle'][Math.floor(Math.random() * 3)] as 'circle' | 'square' | 'triangle';
       confettiPieces.current.push({
         key: i,
-        x: new Animated.Value(width / 2),
-        y: new Animated.Value(height / 3),
-        rotate: new Animated.Value(0),
-        scale: new Animated.Value(0),
-        opacity: new Animated.Value(1),
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: Math.random() * 10 + 5, // Random size between 5 and 15
-        shape,
+        size: Math.random() * 10 + 5,
+        x: Math.random() * screenWidth,
+        y: -20, // Start above the screen
       });
     }
   }
-  
+
+  // Animation control
   useEffect(() => {
-    // Start animation for each piece
-    const animations = confettiPieces.current.map((piece) => {
-      // Randomize animation paths and timings
-      const toX = Math.random() * width;
-      const toY = Math.random() * height;
-      const rotations = Math.random() * 10;
-      const scaleTo = Math.random() * 0.8 + 0.2; // Scale between 0.2 and 1
-      
-      return Animated.parallel([
-        Animated.timing(piece.x, {
-          toValue: toX,
-          duration,
-          easing: Easing.bezier(0.1, 0.25, 0.1, 1),
-          useNativeDriver: true,
-        }),
-        Animated.timing(piece.y, {
-          toValue: toY,
-          duration: duration + Math.random() * 1000,
-          easing: Easing.bezier(0.1, 0.25, 0.1, 1),
-          useNativeDriver: true,
-        }),
-        Animated.timing(piece.rotate, {
-          toValue: rotations,
-          duration,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.sequence([
-          Animated.timing(piece.scale, {
-            toValue: scaleTo,
-            duration: duration * 0.2,
-            easing: Easing.bezier(0.1, 0.25, 0.1, 1),
-            useNativeDriver: true,
-          }),
-          Animated.timing(piece.scale, {
-            toValue: 0,
-            duration: duration * 0.8,
-            easing: Easing.bezier(0.1, 0.25, 0.1, 1),
-            useNativeDriver: true,
-          }),
-        ]),
-        Animated.timing(piece.opacity, {
-          toValue: 0,
-          duration: duration,
-          easing: Easing.bezier(0, 0, 0, 1),
-          useNativeDriver: true,
-        }),
-      ]);
-    });
+    opacity.value = 1;
     
-    // Start all animations at once
-    Animated.stagger(20, animations).start(({ finished }) => {
-      if (finished && onAnimationComplete) {
-        onAnimationComplete();
-      }
-    });
-    
-    // Cleanup function
-    return () => {
-      animations.forEach((animation) => animation.stop());
+    // Fade out at the end of animation
+    const timeout = setTimeout(() => {
+      opacity.value = withTiming(0, { duration: 500 }, () => {
+        if (onAnimationComplete) {
+          runOnJS(onAnimationComplete)();
+        }
+      });
+    }, duration);
+
+    return () => clearTimeout(timeout);
+  }, [duration, opacity, onAnimationComplete]);
+
+  // Main container style with opacity animation
+  const containerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
     };
-  }, [width, height, duration, onAnimationComplete]);
-  
+  });
+
   return (
-    <View style={styles.container} pointerEvents="none">
-      {confettiPieces.current.map((piece) => {
-        // Create transform array with rotation
-        const rotate = piece.rotate.interpolate({
-          inputRange: [0, 1],
-          outputRange: ['0deg', '360deg'],
+    <Animated.View style={[styles.container, containerStyle]}>
+      {confettiPieces.current.map((piece, index) => {
+        // Animated values for each piece
+        const translateY = useSharedValue(0);
+        const translateX = useSharedValue(piece.x);
+        const rotate = useSharedValue(0);
+
+        // Start the animation with a random delay
+        useEffect(() => {
+          const delay = Math.random() * 500;
+          translateY.value = withDelay(
+            delay,
+            withTiming(screenHeight, { duration })
+          );
+          translateX.value = withDelay(
+            delay,
+            withTiming(
+              piece.x + (Math.random() * 200 - 100),
+              { duration }
+            )
+          );
+          rotate.value = withDelay(
+            delay,
+            withTiming(
+              Math.random() * 360 * (Math.random() > 0.5 ? 1 : -1),
+              { duration }
+            )
+          );
+        }, []);
+
+        // Piece style with position and rotation animations
+        const pieceStyle = useAnimatedStyle(() => {
+          return {
+            transform: [
+              { translateX: translateX.value },
+              { translateY: translateY.value },
+              { rotate: `${rotate.value}deg` },
+            ],
+          };
         });
-        
+
         return (
           <Animated.View
             key={piece.key}
             style={[
               styles.piece,
               {
-                backgroundColor: piece.shape === 'circle' ? piece.color : 'transparent',
                 width: piece.size,
                 height: piece.size,
-                borderRadius: piece.shape === 'circle' ? piece.size / 2 : 0,
-                borderWidth: piece.shape === 'triangle' ? piece.size : 0,
-                borderBottomWidth: piece.shape === 'triangle' ? piece.size * 1.2 : 0,
-                borderColor: piece.shape === 'triangle' ? 'transparent' : piece.color,
-                borderBottomColor: piece.shape === 'triangle' ? piece.color : 'transparent',
-                borderLeftColor: 'transparent',
-                borderRightColor: 'transparent',
-                transform: [
-                  { translateX: piece.x },
-                  { translateY: piece.y },
-                  { rotate },
-                  { scale: piece.scale },
-                ],
-                opacity: piece.opacity,
+                backgroundColor: piece.color,
+                borderRadius: Math.random() > 0.5 ? piece.size / 2 : 0,
               },
-              piece.shape === 'square' && { backgroundColor: piece.color },
+              pieceStyle,
             ]}
           />
         );
       })}
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFillObject,
-    zIndex: 1000,
     pointerEvents: 'none',
   },
   piece: {
     position: 'absolute',
+    top: 0,
   },
 });
 

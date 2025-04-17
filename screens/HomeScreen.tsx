@@ -1,810 +1,177 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  Image,
-  ScrollView,
-  RefreshControl,
-  Dimensions,
-  Animated,
-  StatusBar
-} from 'react-native';
-import {
-  Text,
-  Surface,
-  Button,
-  Card,
-  Title,
-  Paragraph,
-  useTheme as usePaperTheme
-} from 'react-native-paper';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../App';
-import { StorageService } from '../services/StorageService';
-import { 
-  TASK_CATEGORIES, 
-  TaskCategory, 
-  Task, 
-  TaskPriority, 
-  RecurrenceSettings, 
-  ReminderSettings 
-} from '../models/Task';
-import ProgressBar from '../components/ProgressBar';
-import { isTablet, scale, scaleFont, getResponsiveStyles } from '../utils/ResponsiveUtils';
-import { createStyles, useTheme } from '../utils/Theme';
-import { IconButton } from '../components/IconButton';
-import { ThemeToggle } from '../components/ThemeToggle';
-import BottomSheet from '../components/BottomSheet';
-import TaskDetail from '../components/TaskDetail';
-import FloatingActionButton from '../components/FloatingActionButton';
-import TaskInput from '../components/TaskInput';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/types';
+import { Task, TaskCategory, TaskPriority, RecurrenceSettings, ReminderSettings, TASK_CATEGORIES, TASK_PRIORITIES } from '../models/Task';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import EmptyState from '../components/EmptyState';
+import TaskItem from '../components/TaskItem';
 import Confetti from '../components/Confetti';
+import { StorageService } from '../services/StorageService';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+// Component props type
+type Props = {
+  navigation: StackNavigationProp<RootStackParamList, 'Home'>;
+};
 
 export default function HomeScreen({ navigation }: Props) {
-  const [taskCount, setTaskCount] = useState(0);
-  const [completedCount, setCompletedCount] = useState(0);
-  const [progressPercentage, setProgressPercentage] = useState(0);
-  const [categoryStats, setCategoryStats] = useState<Record<string, number>>({});
-  const [refreshing, setRefreshing] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [isDetailVisible, setIsDetailVisible] = useState(false);
-  const [isTaskInputVisible, setIsTaskInputVisible] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   
-  // Animation values
-  const taskCardScale = useRef(new Animated.Value(1)).current;
-  const taskCardOpacity = useRef(new Animated.Value(1)).current;
-  const screenOpacity = useRef(new Animated.Value(0)).current;
-
-  // Calculate progress percentage
-  const calculateProgress = useCallback((total: number, completed: number) => {
-    if (total === 0) return 0;
-    return Math.round((completed / total) * 100);
-  }, []);
-
-  // Load task statistics with optimized single-pass aggregation
-  const loadTaskStats = useCallback(async () => {
-    try {
-      // Track component mount state
-      let isMounted = true;
-      
-      // Use optimized loading with cache prioritization for better performance
-      const tasks = await StorageService.loadTasks(true, undefined, undefined, false);
-      
-      // Initialize data structures with pre-allocated capacity
-      let completedCount = 0;
-      const catStats: Record<string, number> = {};
-      
-      // Pre-allocate categories to avoid dynamic property access
-      TASK_CATEGORIES.forEach(cat => {
-        catStats[cat] = 0;
-      });
-      
-      // Single pass through tasks for multiple stats with optimized loop
-      const taskCount = tasks.length;
-      for (let i = 0; i < taskCount; i++) {
-        const task = tasks[i];
-        
-        // Optimize with bitwise operation for completed tasks
-        completedCount += task.completed ? 1 : 0;
-        
-        // Direct increment avoiding conditional checks
-        catStats[task.category]++;
-      }
-      
-      // Calculate progress once with optimization
-      const progress = calculateProgress(taskCount, completedCount);
-      
-      // Only update state if component is still mounted
-      if (isMounted) {
-        // Batch state updates for better performance
-        setTaskCount(taskCount);
-        setCompletedCount(completedCount);
-        setProgressPercentage(progress);
-        setCategoryStats(catStats);
-        
-        // Background refresh for data freshness without blocking UI
-        setTimeout(() => {
-          if (isMounted) {
-            StorageService.loadTasks(true, undefined, undefined, true).then(freshTasks => {
-              // Only recalculate if there's a difference
-              if (JSON.stringify(tasks) !== JSON.stringify(freshTasks)) {
-                let freshCompletedCount = 0;
-                const freshCatStats: Record<string, number> = {};
-                
-                // Reset category counts
-                TASK_CATEGORIES.forEach(cat => {
-                  freshCatStats[cat] = 0;
-                });
-                
-                // Recalculate stats with fresh data
-                const freshTaskCount = freshTasks.length;
-                for (let i = 0; i < freshTaskCount; i++) {
-                  const task = freshTasks[i];
-                  freshCompletedCount += task.completed ? 1 : 0;
-                  freshCatStats[task.category]++;
-                }
-                
-                const freshProgress = calculateProgress(freshTaskCount, freshCompletedCount);
-                
-                // Update state with fresh data
-                setTaskCount(freshTaskCount);
-                setCompletedCount(freshCompletedCount);
-                setProgressPercentage(freshProgress);
-                setCategoryStats(freshCatStats);
-              }
-            }).catch(err => console.error('Background refresh error:', err));
-          }
-        }, 300);
-      }
-    } catch (error) {
-      console.error('Error loading task stats:', error);
-      // Set default values on error
-      setTaskCount(0);
-      setCompletedCount(0);
-      setProgressPercentage(0);
-      
-      const defaultCatStats: Record<string, number> = {};
-      TASK_CATEGORIES.forEach(cat => {
-        defaultCatStats[cat] = 0;
-      });
-      setCategoryStats(defaultCatStats);
-    }
-  }, [calculateProgress]);
-
-  // Pull-to-refresh functionality
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadTaskStats();
-    setRefreshing(false);
-  }, [loadTaskStats]);
-
+  // Load tasks on component mount
   useEffect(() => {
-    // Initial load
-    loadTaskStats();
-    
-    // Fade in the screen when mounted
-    Animated.timing(screenOpacity, {
-      toValue: 1,
-      duration: 400,
-      useNativeDriver: true,
-    }).start();
-    
-    // Load task statistics whenever the screen comes into focus
-    const unsubscribe = navigation.addListener('focus', () => {
-      loadTaskStats();
-      
-      // Fade in the screen when it comes back into focus
-      screenOpacity.setValue(0);
-      Animated.timing(screenOpacity, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
-    });
-
-    return unsubscribe;
-  }, [navigation, loadTaskStats, screenOpacity]);
-
-  // Get the status message based on progress
-  const getStatusMessage = () => {
-    if (taskCount === 0) return "Add some tasks to get started!";
-    if (progressPercentage === 100) return "All tasks completed! Great job! 🎉";
-    if (progressPercentage >= 75) return "Almost there! Keep going!";
-    if (progressPercentage >= 50) return "Halfway there! You're making progress!";
-    if (progressPercentage >= 25) return "Good start! Keep it up!";
-    return "Just getting started. You can do it!";
+    loadTasks();
+  }, []);
+  
+  // Load tasks from storage
+  const loadTasks = async () => {
+    setLoading(true);
+    const loadedTasks = await StorageService.loadTasks();
+    setTasks(loadedTasks);
+    setLoading(false);
   };
   
-  // Get theme from context
-  const { theme } = useTheme();
-  
-  // Get color for a category - memoized for better performance
   const getCategoryColor = useCallback((category: TaskCategory): string => {
     switch (category) {
-      case 'Health':
-        return theme.colors.categoryHealth;
-      case 'Work':
-        return theme.colors.categoryWork;
-      case 'Personal':
-        return theme.colors.categoryPersonal;
-      case 'Other':
-      default:
-        return theme.colors.categoryOther;
+      case 'Health': return '#4CAF50'; // Green
+      case 'Work': return '#2196F3';   // Blue
+      case 'Personal': return '#FF9800'; // Orange
+      case 'Other': return '#9C27B0';  // Purple
+      default: return '#757575';      // Grey
     }
-  }, [theme.colors]);
+  }, []);
+
+  // Task management functions
+  const handleAddTask = useCallback(() => {
+    // Simple demo task - in a real app, you'd have a form
+    const categories = TASK_CATEGORIES;
+    const priorities = TASK_PRIORITIES;
+    
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: `Task ${tasks.length + 1}`,
+      completed: false,
+      createdAt: Date.now(),
+      category: categories[Math.floor(Math.random() * categories.length)],
+      priority: priorities[Math.floor(Math.random() * priorities.length)],
+    };
+    
+    StorageService.addTask(newTask)
+      .then(() => {
+        setTasks(prevTasks => [...prevTasks, newTask]);
+      });
+  }, [tasks.length]);
   
-  // Animation handlers for card press
-  const handlePressIn = () => {
-    Animated.parallel([
-      Animated.timing(taskCardScale, {
-        toValue: 0.96,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(taskCardOpacity, {
-        toValue: 0.9,
-        duration: 150,
-        useNativeDriver: true,
-      })
-    ]).start();
-  };
+  const handleDeleteTask = useCallback((id: string) => {
+    StorageService.deleteTask(id)
+      .then(() => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+      });
+  }, []);
   
-  const handlePressOut = () => {
-    Animated.parallel([
-      Animated.timing(taskCardScale, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(taskCardOpacity, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      })
-    ]).start();
-  };
-  
-  // Simple navigation without animation
-  const navigateToRoutine = () => {
-    // Navigate directly without animations
-    navigation.navigate('Routine');
-  };
+  const handleToggleComplete = useCallback((id: string) => {
+    const taskToUpdate = tasks.find(task => task.id === id);
+    
+    if (!taskToUpdate) return;
+    
+    const updatedTask: Task = {
+      ...taskToUpdate,
+      completed: !taskToUpdate.completed
+    };
+    
+    StorageService.updateTask(updatedTask)
+      .then(() => {
+        setTasks(prevTasks => 
+          prevTasks.map(task => task.id === id ? updatedTask : task)
+        );
+        
+        // Show confetti when task is completed
+        if (!taskToUpdate.completed) {
+          setShowConfetti(true);
+        }
+      });
+  }, [tasks]);
 
   return (
-    <Animated.View style={{ flex: 1, opacity: screenOpacity }}>
+    <View style={styles.container}>
       {showConfetti && (
-        <Confetti
-          count={75}
-          duration={2000}
+        <Confetti 
+          count={50} 
+          duration={3000}
           onAnimationComplete={() => setShowConfetti(false)}
         />
       )}
-      <SafeAreaView style={styles.container}>
-        <Surface style={styles.header} elevation={2}>
-          <View style={styles.headerContent}>
-            <View>
-              <Title style={styles.headerTitle}>Task Cat</Title>
-              <Text variant="bodyMedium" style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
-            </View>
-            <ThemeToggle size="medium" />
-          </View>
-        </Surface>
-
-        <ScrollView 
-          style={styles.scrollView}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={['#0066cc']}
-            />
-          }
-        >
-          <Surface style={styles.progressSection} elevation={1}>
-            <View style={styles.progressHeader}>
-              <Title style={styles.progressTitle}>Your Progress</Title>
-              <Text style={styles.progressPercentage}>{progressPercentage}%</Text>
-            </View>
-            
-            <ProgressBar 
-              progress={progressPercentage} 
-              height={16}
-              showPercentage={false}
-            />
-            
-            <Text style={styles.progressMessage}>
-              {getStatusMessage()}
-            </Text>
-          </Surface>
-
-          <Surface style={styles.statsContainer} elevation={1}>
-            <Surface style={styles.statCard} elevation={0}>
-              <Text style={styles.statNumber}>{taskCount}</Text>
-              <Text style={styles.statLabel}>Total Tasks</Text>
-            </Surface>
-            
-            <Surface style={styles.statCard} elevation={0}>
-              <Text style={styles.statNumber}>{completedCount}</Text>
-              <Text style={styles.statLabel}>Completed</Text>
-            </Surface>
-            
-            <Surface style={styles.statCard} elevation={0}>
-              <Text style={styles.statNumber}>{taskCount - completedCount}</Text>
-              <Text style={styles.statLabel}>Remaining</Text>
-            </Surface>
-          </Surface>
-
-          {/* Category Breakdown Section */}
-          {taskCount > 0 ? (
-            <Surface style={styles.categorySection} elevation={1}>
-              <View style={styles.sectionHeader}>
-                <Title style={styles.sectionTitle}>Category Breakdown</Title>
-              </View>
-              
-              {Object.keys(categoryStats).length > 0 ? (
-                <View style={styles.categoryList}>
-                  {TASK_CATEGORIES.map(category => (
-                    categoryStats[category] ? (
-                      <Surface key={category} style={styles.categoryItem} elevation={0}>
-                        <View style={styles.categoryHeader}>
-                          <View 
-                            style={[
-                              styles.categoryDot, 
-                              {backgroundColor: getCategoryColor(category)}
-                            ]} 
-                          />
-                          <Text style={styles.categoryName}>{category}</Text>
-                          <Text style={styles.categoryCount}>{categoryStats[category]}</Text>
-                        </View>
-                        <View style={styles.categoryBarContainer}>
-                          <View 
-                            style={[
-                              styles.categoryBar,
-                              {
-                                backgroundColor: getCategoryColor(category) + '40',
-                                width: `${(categoryStats[category] / taskCount) * 100}%`
-                              }
-                            ]}
-                          >
-                            <View 
-                              style={[
-                                styles.categoryBarFill,
-                                {backgroundColor: getCategoryColor(category)}
-                              ]}
-                            />
-                          </View>
-                        </View>
-                      </Surface>
-                    ) : null
-                  ))}
-                </View>
-              ) : (
-                <Text style={styles.noCategoriesText}>
-                  No categorized tasks yet
-                </Text>
-              )}
-            </Surface>
-          ) : (
-            <Surface style={styles.emptyStateContainer} elevation={1}>
-              <EmptyState
-                type="tasks"
-                title="No Tasks Yet"
-                message="Your task list is empty. Add your first task to get started and stay organized!"
-              />
-            </Surface>
-          )}
-          
-          <View style={styles.cardContainer}>
-            <TouchableOpacity 
-              activeOpacity={0.99} // Use high activeOpacity so we can control the animation
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              onPress={navigateToRoutine}
-            >
-              <Animated.View 
-                style={[
-                  {
-                    opacity: taskCardOpacity,
-                    transform: [{ scale: taskCardScale }]
-                  }
-                ]}
-              >
-                <Card style={styles.taskCard}>
-                  <Card.Content style={styles.cardContent}>
-                    <Title style={styles.cardTitle}>My Tasks</Title>
-                    <Paragraph style={styles.cardDescription}>
-                      Organize and track your daily tasks. Drag to reorder, mark as complete, and stay on top of your schedule.
-                    </Paragraph>
-                    
-                    <View style={styles.cardActions}>
-                      <Button 
-                        mode="contained"
-                        onPress={navigateToRoutine}
-                        style={styles.actionButton}
-                        labelStyle={styles.actionButtonText}
-                      >
-                        View Tasks
-                      </Button>
-                    </View>
-                  </Card.Content>
-                </Card>
-              </Animated.View>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-        
-        <Surface style={styles.footer} elevation={1}>
-          <Text style={styles.footerText}>Task Cat - Stay Organized</Text>
-        </Surface>
-        
-        {/* Floating Action Button */}
-        <FloatingActionButton
-          mainIcon="add"
-          position="bottomRight"
-          color={theme.colors.primary}
-          size="large"
-          actions={[
-            {
-              icon: "create-outline",
-              label: "New Task",
-              onPress: () => setIsTaskInputVisible(true),
-              color: theme.colors.success,
-            },
-            {
-              icon: "list-outline",
-              label: "View All Tasks",
-              onPress: navigateToRoutine,
-              color: theme.colors.primary,
-            },
-          ]}
+      
+      {tasks.length === 0 ? (
+        <EmptyState 
+          title="No Tasks Yet" 
+          message="Add your first task by using the + button below" 
+          type="tasks"
         />
-        
-        {/* Bottom Sheets */}
-        <BottomSheet
-          visible={isDetailVisible}
-          onClose={() => setIsDetailVisible(false)}
-          title="Task Details"
-          height={Dimensions.get('window').height * 0.8}
-        >
-          {selectedTask && (
-            <TaskDetail
-              task={selectedTask}
-              onTaskUpdate={async (updatedTask) => {
-                await StorageService.updateTask(updatedTask);
-                loadTaskStats();
-                setIsDetailVisible(false);
-              }}
-              onDelete={async (id) => {
-                await StorageService.deleteTask(id);
-                loadTaskStats();
-                setIsDetailVisible(false);
-              }}
-              onToggleComplete={async (id) => {
-                const tasks = await StorageService.loadTasks();
-                const taskIndex = tasks.findIndex(t => t.id === id);
-                if (taskIndex >= 0) {
-                  const updatedTask = {
-                    ...tasks[taskIndex],
-                    completed: !tasks[taskIndex].completed
-                  };
-                  
-                  // Show confetti if task is being marked as completed
-                  if (updatedTask.completed) {
-                    setShowConfetti(true);
-                    
-                    // Automatically hide confetti after animation duration
-                    setTimeout(() => {
-                      setShowConfetti(false);
-                    }, 2500); // slightly longer than confetti animation duration
-                  }
-                  
-                  await StorageService.updateTask(updatedTask);
-                  
-                  // Update selected task too if needed
-                  if (selectedTask && selectedTask.id === id) {
-                    setSelectedTask(updatedTask);
-                  }
-                  
-                  loadTaskStats();
-                }
-              }}
+      ) : (
+        <FlatList
+          data={tasks}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TaskItem
+              task={item}
+              onDelete={handleDeleteTask}
+              onToggleComplete={handleToggleComplete}
             />
           )}
-        </BottomSheet>
-        
-        <BottomSheet
-          visible={isTaskInputVisible}
-          onClose={() => setIsTaskInputVisible(false)}
-          title="Add New Task"
-        >
-          <TaskInput
-            onAddTask={async (
-              title: string, 
-              category: TaskCategory, 
-              priority: TaskPriority, 
-              recurrence?: RecurrenceSettings, 
-              reminder?: ReminderSettings
-            ) => {
-              // Create a new task
-              const newTask: Task = {
-                id: `task-${Date.now()}`,
-                title,
-                category,
-                priority,
-                completed: false,
-                createdAt: Date.now(),
-                recurrence,
-                reminder
-              };
-              
-              await StorageService.addTask(newTask);
-              loadTaskStats();
-              setIsTaskInputVisible(false);
-            }}
-          />
-        </BottomSheet>
-      </SafeAreaView>
-    </Animated.View>
+          contentContainerStyle={styles.listContent}
+        />
+      )}
+      
+      <TouchableOpacity style={styles.fab} onPress={handleAddTask}>
+        <MaterialCommunityIcons name="plus" size={24} color="white" />
+      </TouchableOpacity>
+    </View>
   );
 }
 
-// Use createStyles from Theme utils to create responsive styles
-const styles = createStyles((theme) => {
-  const isTab = isTablet();
-  
-  return StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.backgroundPrimary,
-    },
-    scrollView: {
-      flex: 1,
-    },
-    header: {
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.md,
-      backgroundColor: theme.colors.primary,
-      height: theme.layout.headerHeight + (isTab ? 8 : 4),
-      ...theme.shadows.medium,
-    },
-    headerContent: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    headerTitle: {
-      ...theme.typography.h1,
-      fontFamily: theme.fonts.bold,
-      fontWeight: '800',
-      color: theme.colors.white,
-      marginBottom: theme.spacing.xs,
-      letterSpacing: -0.5,
-    },
-    headerSubtitle: {
-      ...theme.typography.subtitle2,
-      fontFamily: theme.fonts.medium,
-      fontWeight: '500',
-      color: 'rgba(255, 255, 255, 0.9)',
-      letterSpacing: 0.2,
-    },
-    progressSection: {
-      backgroundColor: theme.colors.backgroundCard,
-      marginTop: theme.spacing.lg,
-      marginHorizontal: theme.spacing.md,
-      borderRadius: theme.layout.cardRadius * 1.5,
-      padding: theme.spacing.lg,
-      ...theme.shadows.medium,
-    },
-    progressHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: theme.spacing.md,
-      paddingHorizontal: theme.spacing.xs,
-    },
-    progressTitle: {
-      ...theme.typography.subtitle1,
-      color: theme.colors.textPrimary,
-      fontFamily: theme.fonts.semiBold,
-      fontWeight: '600',
-      letterSpacing: 0.15,
-    },
-    progressPercentage: {
-      ...theme.typography.subtitle2,
-      color: theme.colors.primary,
-      fontFamily: theme.fonts.bold,
-      fontWeight: '700',
-      letterSpacing: 0.1,
-    },
-    progressMessage: {
-      ...theme.typography.body2,
-      color: theme.colors.textSecondary,
-      marginTop: theme.spacing.md,
-      textAlign: 'center',
-      fontStyle: 'italic',
-      paddingHorizontal: theme.spacing.sm,
-      paddingVertical: theme.spacing.xs,
-      fontWeight: '400',
-      letterSpacing: 0.25,
-    },
-    statsContainer: {
-      backgroundColor: theme.colors.backgroundCard,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingHorizontal: theme.spacing.lg,
-      paddingVertical: theme.spacing.lg,
-      marginTop: theme.spacing.lg,
-      marginHorizontal: theme.spacing.md,
-      borderRadius: theme.layout.cardRadius * 1.5,
-      ...theme.shadows.medium,
-    },
-    statCard: {
-      flex: 1,
-      alignItems: 'center',
-      padding: theme.spacing.md,
-      backgroundColor: 'rgba(255, 255, 255, 0.5)',
-      borderRadius: theme.layout.cardRadius,
-      margin: theme.spacing.xs,
-    },
-    statNumber: {
-      ...theme.typography.h3,
-      color: theme.colors.primary,
-      marginBottom: theme.spacing.sm,
-      fontFamily: theme.fonts.bold,
-      fontWeight: '700',
-      letterSpacing: -0.25,
-    },
-    statLabel: {
-      ...theme.typography.caption,
-      color: theme.colors.textSecondary,
-      fontFamily: theme.fonts.medium,
-      fontWeight: '500',
-      letterSpacing: 0.4,
-    },
-    categorySection: {
-      backgroundColor: theme.colors.backgroundCard,
-      marginTop: theme.spacing.lg,
-      marginHorizontal: theme.spacing.md,
-      padding: theme.spacing.lg,
-      borderRadius: theme.layout.cardRadius * 1.5,
-      ...theme.shadows.medium,
-    },
-    sectionHeader: {
-      marginBottom: theme.spacing.md,
-      paddingHorizontal: theme.spacing.xs,
-    },
-    sectionTitle: {
-      ...theme.typography.subtitle1,
-      color: theme.colors.textPrimary,
-      fontFamily: theme.fonts.semiBold,
-      fontWeight: '600',
-      letterSpacing: 0.15,
-    },
-    categoryList: {
-      marginTop: theme.spacing.md,
-    },
-    categoryItem: {
-      marginBottom: theme.spacing.md,
-      backgroundColor: 'rgba(255, 255, 255, 0.5)',
-      borderRadius: theme.layout.cardRadius,
-      padding: theme.spacing.md,
-    },
-    categoryHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: theme.spacing.sm,
-    },
-    categoryDot: {
-      width: scale(isTab ? 12 : 10),
-      height: scale(isTab ? 12 : 10),
-      borderRadius: scale(isTab ? 6 : 5),
-      marginRight: theme.spacing.sm,
-    },
-    categoryName: {
-      ...theme.typography.body2,
-      fontFamily: theme.fonts.medium,
-      fontWeight: '500',
-      color: theme.colors.textPrimary,
-      flex: 1,
-      letterSpacing: 0.25,
-    },
-    categoryCount: {
-      ...theme.typography.caption,
-      fontFamily: theme.fonts.bold,
-      fontWeight: '700',
-      color: theme.colors.textSecondary,
-      marginLeft: theme.spacing.sm,
-      letterSpacing: 0.4,
-    },
-    categoryBarContainer: {
-      height: scale(isTab ? 10 : 8),
-      backgroundColor: theme.colors.backgroundSecondary,
-      borderRadius: scale(isTab ? 5 : 4),
-      overflow: 'hidden',
-      marginLeft: scale(isTab ? 20 : 18),
-    },
-    categoryBar: {
-      height: '100%',
-      borderRadius: scale(isTab ? 5 : 4),
-    },
-    categoryBarFill: {
-      width: '40%',
-      height: '100%',
-      borderRadius: scale(isTab ? 5 : 4),
-    },
-    noCategoriesText: {
-      ...theme.typography.body2,
-      color: theme.colors.textDisabled,
-      fontStyle: 'italic',
-      textAlign: 'center',
-      marginVertical: theme.spacing.md,
-    },
-    cardContainer: {
-      padding: theme.spacing.md,
-    },
-    taskCard: {
-      backgroundColor: theme.colors.backgroundCard,
-      marginVertical: theme.spacing.md,
-      marginHorizontal: theme.spacing.md,
-      borderRadius: theme.layout.cardRadius * 1.5,
-      ...theme.shadows.medium,
-      overflow: 'hidden',
-    },
-    cardContent: {
-      padding: theme.spacing.lg,
-    },
-    cardTitle: {
-      ...theme.typography.h2,
-      color: theme.colors.textPrimary,
-      marginBottom: theme.spacing.sm,
-    },
-    cardDescription: {
-      ...theme.typography.body1,
-      color: theme.colors.textSecondary,
-      marginBottom: theme.spacing.lg,
-      lineHeight: scaleFont(isTab ? 26 : 22),
-    },
-    cardActions: {
-      marginTop: theme.spacing.md,
-    },
-    actionButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.components.buttonRadius,
-      paddingVertical: theme.spacing.md,
-      paddingHorizontal: theme.spacing.lg,
-      height: theme.components.buttonHeight,
-      alignItems: 'center',
-      justifyContent: 'center',
-      ...theme.shadows.small,
-    },
-    actionButtonText: {
-      fontFamily: theme.fonts.medium,
-      fontSize: 14,
-      lineHeight: 18,
-      letterSpacing: 1.25,
-      color: theme.colors.white,
-      textTransform: 'uppercase' as 'uppercase',
-    },
-    cardFooter: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    cardAction: {
-      fontSize: scaleFont(isTab ? 18 : 16),
-      fontWeight: 'bold',
-      color: theme.colors.primary,
-    },
-    cardActionArrow: {
-      fontSize: scaleFont(isTab ? 20 : 18),
-      fontWeight: 'bold',
-      color: theme.colors.primary,
-      marginLeft: theme.spacing.sm,
-    },
-    footer: {
-      padding: theme.spacing.md,
-      alignItems: 'center',
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.backgroundSecondary,
-      marginTop: theme.spacing.sm,
-    },
-    footerText: {
-      ...theme.typography.caption,
-      fontFamily: theme.fonts.regular,
-      color: theme.colors.textDisabled,
-    },
-    emptyStateContainer: {
-      backgroundColor: theme.colors.backgroundCard,
-      marginTop: theme.spacing.lg,
-      marginHorizontal: theme.spacing.md,
-      padding: theme.spacing.lg,
-      borderRadius: theme.layout.cardRadius * 1.5,
-      ...theme.shadows.medium,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  listContent: {
+    paddingBottom: 80, // Space for FAB
+  },
+  taskItem: {
+    padding: 16,
+    marginVertical: 8,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  fab: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#6200EE',
+    borderRadius: 28,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  }
 });

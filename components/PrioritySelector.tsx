@@ -1,19 +1,7 @@
 import React from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  TextStyle
-} from 'react-native';
-import {
-  Text,
-  Chip,
-  SegmentedButtons,
-  useTheme as usePaperTheme,
-  TouchableRipple
-} from 'react-native-paper';
-import { TaskPriority } from '../models/Task';
-import { useTheme, createStyles } from '../utils/Theme';
-import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { TaskPriority, TASK_PRIORITIES } from '../models/Task';
 
 interface PrioritySelectorProps {
   selectedPriority: TaskPriority;
@@ -24,86 +12,91 @@ interface PrioritySelectorProps {
 export default function PrioritySelector({ 
   selectedPriority, 
   onSelectPriority,
-  showLabel = true 
+  showLabel = false
 }: PrioritySelectorProps) {
-  const { theme } = useTheme();
-  const styles = useStyles();
   
-  // Get color for a priority
   const getPriorityColor = (priority: TaskPriority): string => {
     switch (priority) {
-      case 'High':
-        return theme.colors.priorityHigh;
-      case 'Medium':
-        return theme.colors.priorityMedium;
-      case 'Low':
-        return theme.colors.priorityLow;
-      default:
-        return theme.colors.gray;
+      case 'High': return '#f44336';  // Red
+      case 'Medium': return '#FF9800'; // Orange
+      case 'Low': return '#4CAF50';    // Green
+      default: return '#757575';      // Grey
     }
   };
-
-  // Get Paper theme
-  const paperTheme = usePaperTheme();
-
-  // Handle priority selection
+  
+  const getPriorityIcon = (priority: TaskPriority): string => {
+    switch (priority) {
+      case 'High': return 'flag';
+      case 'Medium': return 'flag-outline';
+      case 'Low': return 'flag-variant-outline';
+      default: return 'flag-off-outline';
+    }
+  };
+  
+  const renderPriorityBadge = (priority: TaskPriority, isSelected: boolean) => {
+    return (
+      <TouchableOpacity
+        key={priority}
+        style={[
+          styles.priorityBadge,
+          { backgroundColor: getPriorityColor(priority) },
+          isSelected && styles.selectedBadge
+        ]}
+        onPress={() => handleSelectPriority(priority)}
+      >
+        <MaterialCommunityIcons 
+          name={getPriorityIcon(priority)} 
+          size={24} 
+          color="white" 
+        />
+        {showLabel && <Text style={styles.priorityLabel}>{priority}</Text>}
+      </TouchableOpacity>
+    );
+  };
+  
   const handleSelectPriority = (priority: TaskPriority) => {
     onSelectPriority(priority);
   };
-
-  // Create buttons for segmented control
-  const buttons = [
-    {
-      value: 'High',
-      label: 'High',
-      checkedColor: theme.colors.priorityHigh,
-      uncheckedColor: theme.colors.priorityHigh + '80',
-      style: { borderColor: theme.colors.priorityHigh }
-    },
-    {
-      value: 'Medium',
-      label: 'Medium',
-      checkedColor: theme.colors.priorityMedium,
-      uncheckedColor: theme.colors.priorityMedium + '80',
-      style: { borderColor: theme.colors.priorityMedium }
-    },
-    {
-      value: 'Low',
-      label: 'Low',
-      checkedColor: theme.colors.priorityLow,
-      uncheckedColor: theme.colors.priorityLow + '80',
-      style: { borderColor: theme.colors.priorityLow }
-    }
-  ];
-
+  
   return (
-    <View style={styles.container}>
-      {showLabel && <Text variant="bodyLarge" style={styles.label}>Priority:</Text>}
-      
-      <SegmentedButtons
-        value={selectedPriority}
-        onValueChange={value => handleSelectPriority(value as TaskPriority)}
-        buttons={buttons}
-        style={styles.segmentedButtons}
-        density="medium"
-      />
-    </View>
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.container}
+    >
+      {TASK_PRIORITIES.map(priority => 
+        renderPriorityBadge(priority, priority === selectedPriority)
+      )}
+    </ScrollView>
   );
 }
 
-const useStyles = createStyles((theme) => {
-  const isTab = isTablet();
-  
-  return StyleSheet.create({
-    container: {
-      marginVertical: theme.spacing.md,
-    },
-    label: {
-      marginBottom: theme.spacing.sm,
-      color: theme.colors.textPrimary,
-    } as TextStyle,
-    segmentedButtons: {
-      marginTop: theme.spacing.sm,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+  },
+  priorityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+    marginRight: 12,
+    borderRadius: 8,
+    minWidth: 44,
+  },
+  selectedBadge: {
+    borderWidth: 2,
+    borderColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  priorityLabel: {
+    color: 'white',
+    marginLeft: 8,
+    fontWeight: '500',
+  }
 });

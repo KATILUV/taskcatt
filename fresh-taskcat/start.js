@@ -4,7 +4,7 @@ const fs = require('fs');
 
 // Start the Expo server
 console.log('Starting Expo development server for Task Cat...');
-const expo = spawn('npx', ['expo', 'start', '--web'], {
+const expo = spawn('npx', ['expo', 'start', '--web', '--host', '0.0.0.0'], {
   cwd: __dirname,
   stdio: 'inherit',
   shell: true,
