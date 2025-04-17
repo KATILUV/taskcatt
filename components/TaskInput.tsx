@@ -8,7 +8,9 @@ import {
   KeyboardAvoidingView, 
   Platform,
   ScrollView,
-  Pressable
+  Pressable,
+  TextStyle,
+  ViewStyle
 } from 'react-native';
 import { 
   TaskCategory, 
@@ -139,7 +141,7 @@ const styles = createStyles((theme) => StyleSheet.create({
   container: {
     width: '100%',
     backgroundColor: theme.colors.white,
-  },
+  } as ViewStyle,
   categoryContainer: {
     paddingHorizontal: 16,
     paddingTop: 8,
@@ -174,7 +176,8 @@ const styles = createStyles((theme) => StyleSheet.create({
     fontSize: scaleFont(16),
     marginRight: 12,
     color: theme.colors.textPrimary,
-  },
+    fontFamily: theme.typography.body1.fontFamily,
+  } as TextStyle,
   addButton: {
     height: 44,
     width: 44,
@@ -203,7 +206,9 @@ const styles = createStyles((theme) => StyleSheet.create({
     color: theme.colors.primary,
     fontSize: scaleFont(14),
     fontWeight: '500',
-  },
+    fontFamily: theme.typography.button.fontFamily,
+    letterSpacing: theme.typography.button.letterSpacing,
+  } as TextStyle,
   advancedToggleContent: {
     flexDirection: 'row',
     alignItems: 'center',
