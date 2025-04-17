@@ -11,9 +11,16 @@ import {
   Inter_700Bold 
 } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
+import { 
+  Provider as PaperProvider, 
+  MD3DarkTheme,
+  MD3LightTheme,
+  configureFonts
+} from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './screens/HomeScreen';
 import RoutineScreen from './screens/RoutineScreen';
-import { defaultTheme, useTheme } from './utils/Theme';
+import { defaultTheme, useTheme, darkColors, lightColors } from './utils/Theme';
 import { ThemeProvider } from './utils/ThemeProvider';
 
 export type RootStackParamList = {
@@ -61,6 +68,43 @@ const FadeInView: React.FC<FadeInViewProps> = ({ children, style, duration = 500
   );
 };
 
+// Create Paper theme that integrates with our existing theme system
+const createPaperTheme = (isLightTheme: boolean) => {
+  const baseTheme = isLightTheme ? MD3LightTheme : MD3DarkTheme;
+  const colorScheme = isLightTheme ? lightColors : darkColors;
+  
+  // Configure fonts using Inter
+  const fontConfig = {
+    fontFamily: 'Inter',
+    headingFontFamily: 'Inter-SemiBold',
+  };
+  
+  return {
+    ...baseTheme,
+    fonts: configureFonts({config: fontConfig}),
+    colors: {
+      ...baseTheme.colors,
+      primary: colorScheme.primary,
+      accent: colorScheme.accent,
+      background: colorScheme.backgroundPrimary,
+      surface: colorScheme.backgroundCard,
+      text: colorScheme.textPrimary,
+      // Additional colors for consistent styling
+      error: colorScheme.danger,
+      onSurface: colorScheme.textPrimary,
+      backdrop: colorScheme.overlay,
+      notification: colorScheme.notification,
+      // Task Cat specific colors
+      categoryHealth: colorScheme.categoryHealth,
+      categoryWork: colorScheme.categoryWork,
+      categoryPersonal: colorScheme.categoryPersonal,
+      categoryOther: colorScheme.categoryOther,
+    },
+    // Customize the overall shape style
+    roundness: 12,
+  };
+};
+
 // Main Navigator component that uses theme from context
 const AppNavigator = () => {
   const { theme } = useTheme();
@@ -68,58 +112,63 @@ const AppNavigator = () => {
   // Set the status bar style based on theme
   const statusBarStyle = theme.themeType === 'dark' ? 'light' : 'dark';
   
+  // Create React Native Paper theme from our theme
+  const paperTheme = createPaperTheme(theme.themeType === 'light');
+  
   return (
-    <NavigationContainer>
-      <Stack.Navigator 
-        initialRouteName="Home"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: theme.colors.primary,
-          },
-          headerTintColor: theme.colors.white,
-          headerTitleStyle: {
-            fontFamily: 'Inter-SemiBold',
-          },
-          // Apply smooth animations to all screens by default
-          animation: 'fade',
-          gestureEnabled: true,
-          // Custom UI settings
-          contentStyle: {
-            backgroundColor: theme.colors.backgroundPrimary,
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen} 
-          options={{ 
-            title: 'Task Cat',
-            // Custom animation for home screen
+    <PaperProvider theme={paperTheme}>
+      <NavigationContainer>
+        <Stack.Navigator 
+          initialRouteName="Home"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: theme.colors.primary,
+            },
+            headerTintColor: theme.colors.white,
+            headerTitleStyle: {
+              fontFamily: 'Inter-SemiBold',
+            },
+            // Apply smooth animations to all screens by default
             animation: 'fade',
-            headerShown: true,
-            headerTransparent: false,
-            // Add subtle animation
+            gestureEnabled: true,
+            // Custom UI settings
             contentStyle: {
               backgroundColor: theme.colors.backgroundPrimary,
             },
           }}
-        />
-        <Stack.Screen 
-          name="Routine" 
-          component={RoutineScreen} 
-          options={{ 
-            title: 'My Routines',
-            // Custom animation
-            animation: 'slide_from_right',
-            // Subtle styling for better contrast
-            contentStyle: {
-              backgroundColor: theme.colors.backgroundPrimary,
-            }
-          }}
-        />
-      </Stack.Navigator>
-      <StatusBar style={statusBarStyle} />
-    </NavigationContainer>
+        >
+          <Stack.Screen 
+            name="Home" 
+            component={HomeScreen} 
+            options={{ 
+              title: 'Task Cat',
+              // Custom animation for home screen
+              animation: 'fade',
+              headerShown: true,
+              headerTransparent: false,
+              // Add subtle animation
+              contentStyle: {
+                backgroundColor: theme.colors.backgroundPrimary,
+              },
+            }}
+          />
+          <Stack.Screen 
+            name="Routine" 
+            component={RoutineScreen} 
+            options={{ 
+              title: 'My Routines',
+              // Custom animation
+              animation: 'slide_from_right',
+              // Subtle styling for better contrast
+              contentStyle: {
+                backgroundColor: theme.colors.backgroundPrimary,
+              }
+            }}
+          />
+        </Stack.Navigator>
+        <StatusBar style={statusBarStyle} />
+      </NavigationContainer>
+    </PaperProvider>
   );
 };
 
@@ -169,12 +218,14 @@ export default function App() {
   }
   
   return (
-    <ThemeProvider initialTheme="system">
-      <FadeInView style={{ flex: 1 }} duration={800}>
-        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-          <AppNavigator />
-        </View>
-      </FadeInView>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider initialTheme="system">
+        <FadeInView style={{ flex: 1 }} duration={800}>
+          <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+            <AppNavigator />
+          </View>
+        </FadeInView>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
