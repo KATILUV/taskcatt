@@ -310,18 +310,18 @@ export default function HomeScreen({ navigation }: Props) {
 
           <Surface style={styles.statsContainer} elevation={1}>
             <Surface style={styles.statCard} elevation={0}>
-              <Text variant="headlineSmall" style={styles.statNumber}>{taskCount}</Text>
-              <Text variant="labelMedium" style={styles.statLabel}>Total Tasks</Text>
+              <Text style={styles.statNumber}>{taskCount}</Text>
+              <Text style={styles.statLabel}>Total Tasks</Text>
             </Surface>
             
             <Surface style={styles.statCard} elevation={0}>
-              <Text variant="headlineSmall" style={styles.statNumber}>{completedCount}</Text>
-              <Text variant="labelMedium" style={styles.statLabel}>Completed</Text>
+              <Text style={styles.statNumber}>{completedCount}</Text>
+              <Text style={styles.statLabel}>Completed</Text>
             </Surface>
             
             <Surface style={styles.statCard} elevation={0}>
-              <Text variant="headlineSmall" style={styles.statNumber}>{taskCount - completedCount}</Text>
-              <Text variant="labelMedium" style={styles.statLabel}>Remaining</Text>
+              <Text style={styles.statNumber}>{taskCount - completedCount}</Text>
+              <Text style={styles.statLabel}>Remaining</Text>
             </Surface>
           </Surface>
 

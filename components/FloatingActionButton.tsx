@@ -11,6 +11,7 @@ import {
   Text, 
   Surface, 
   TouchableRipple,
+  Portal,
   useTheme as usePaperTheme 
 } from 'react-native-paper';
 import { useTheme } from '../utils/Theme';
@@ -151,20 +152,42 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   
   // Convert the Ionicons name to a string that FAB can use
   const getIconName = (ionIconName: string): string => {
-    // This is a simple mapping of common icons from Ionicons to Material Design icons
-    // In a production app, a more complete mapping would be needed
+    // This is a mapping of common icons from Ionicons to Material Design icons used by Paper
     const iconMap: Record<string, string> = {
       'add': 'plus',
+      'add-circle': 'plus-circle',
+      'add-circle-outline': 'plus-circle-outline',
       'checkmark': 'check',
+      'checkmark-circle': 'check-circle',
+      'checkmark-circle-outline': 'check-circle-outline',
       'close': 'close',
+      'close-circle': 'close-circle',
+      'close-circle-outline': 'close-circle-outline',
       'create': 'pencil',
+      'create-outline': 'pencil-outline',
       'trash': 'delete',
+      'trash-outline': 'delete-outline',
       'list': 'format-list-bulleted',
+      'list-outline': 'format-list-bulleted',
       'calendar': 'calendar',
+      'calendar-outline': 'calendar-outline',
       'person': 'account',
+      'person-outline': 'account-outline',
       'settings': 'cog',
+      'settings-outline': 'cog-outline',
       'search': 'magnify',
-      'home': 'home'
+      'home': 'home',
+      'home-outline': 'home-outline',
+      'star': 'star',
+      'star-outline': 'star-outline',
+      'heart': 'heart',
+      'heart-outline': 'heart-outline',
+      'alert': 'alert',
+      'alert-outline': 'alert-outline',
+      'help': 'help-circle',
+      'help-outline': 'help-circle-outline',
+      'information': 'information',
+      'information-outline': 'information-outline'
     };
     
     return iconMap[ionIconName] || 'plus'; // Default to plus if no mapping exists
@@ -183,106 +206,26 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   }));
   
   return (
-    <>
-      {/* Backdrop for when menu is open */}
-      {actions.length > 0 && (
-        <Animated.View 
-          style={[
-            styles.backdrop,
-            {
-              backgroundColor: theme.colors.black,
-              opacity: backdropAnimation,
-              display: isOpen ? 'flex' : 'none',
-            },
-          ]}
-          pointerEvents={isOpen ? 'auto' : 'none'}
-          onTouchStart={() => handlePress()}
-        />
-      )}
-      
+    <Portal>
       <View style={[styles.container, getPositionStyle()]}>
-        {/* Action Items Menu - Using Paper Surface for elevation */}
-        {actions.length > 0 && (
-          <Animated.View
-            style={[
-              styles.actionsContainer,
-              {
-                opacity: actionMenuAnimation,
-                transform: [
-                  {
-                    translateY: actionMenuAnimation.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [20, 0],
-                    }),
-                  },
-                ],
-                display: isOpen ? 'flex' : 'none',
-              },
+        {actions.length > 0 ? (
+          <FAB.Group
+            open={isOpen}
+            visible
+            icon={isOpen ? 'close' : getIconName(mainIcon)}
+            actions={fabActions}
+            onStateChange={({ open }) => setIsOpen(open)}
+            onPress={() => {
+              if (actions.length === 0 && onPress) {
+                onPress();
+              }
+            }}
+            fabStyle={[
+              styles.fab,
+              { backgroundColor: color || theme.colors.primary }
             ]}
-            pointerEvents={isOpen ? 'auto' : 'none'}
-          >
-            {actions.map((action, index) => (
-              <Surface
-                key={index}
-                style={[
-                  styles.actionButton,
-                  {
-                    backgroundColor: action.bgcolor || theme.colors.white,
-                    marginBottom: 12,
-                  },
-                ]}
-                elevation={3}
-              >
-                <TouchableRipple
-                  onPress={() => {
-                    setIsOpen(false);
-                    actionMenuAnimation.setValue(0);
-                    backdropAnimation.setValue(0);
-                    rotateAnimation.setValue(0);
-                    action.onPress();
-                  }}
-                  style={styles.touchableRipple}
-                  rippleColor={`${theme.colors.primary}20`}
-                >
-                  <View style={styles.actionContent}>
-                    <Surface
-                      style={[
-                        styles.actionIconContainer,
-                        {
-                          backgroundColor: action.color || theme.colors.primary,
-                        }
-                      ]}
-                      elevation={2}
-                    >
-                      <FAB
-                        icon={getIconName(action.icon)}
-                        size="small"
-                        style={{ backgroundColor: action.color || theme.colors.primary }}
-                        color={theme.colors.white}
-                        onPress={() => {}}
-                        customSize={22}
-                      />
-                    </Surface>
-                    <Text variant="labelLarge" style={{ color: theme.colors.textPrimary }}>
-                      {action.label}
-                    </Text>
-                  </View>
-                </TouchableRipple>
-              </Surface>
-            ))}
-          </Animated.View>
-        )}
-        
-        {/* Main FAB using Paper FAB */}
-        <Animated.View
-          style={{
-            transform: [
-              { scale: scaleAnimation },
-              { rotate },
-            ],
-          }}
-        >
-          {/* Use FAB from React Native Paper */}
+          />
+        ) : (
           <FAB
             icon={getIconName(mainIcon)}
             style={[
@@ -294,9 +237,9 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
             mode="elevated"
             customSize={sizeValues.button}
           />
-        </Animated.View>
+        )}
       </View>
-    </>
+    </Portal>
   );
 };
 
@@ -319,58 +262,7 @@ const styles = StyleSheet.create({
         elevation: 6,
       },
     }),
-  },
-  actionsContainer: {
-    position: 'absolute',
-    bottom: 70, // Position above the main FAB
-    flexDirection: 'column-reverse',
-    alignItems: 'flex-end',
-  },
-  actionButton: {
-    borderRadius: 8,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.22,
-        shadowRadius: 2.22,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  touchableRipple: {
-    width: '100%',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  actionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  actionLabel: {
-    fontSize: scaleFont(14),
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 998,
-  },
+  }
 });
 
 export default FloatingActionButton;
