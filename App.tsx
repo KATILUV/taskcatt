@@ -23,12 +23,6 @@ import RoutineScreen from './screens/RoutineScreen';
 import ErrorBoundary from './components/ErrorBoundary';
 import { defaultTheme, useTheme, darkColors, lightColors } from './utils/Theme';
 import { ThemeProvider } from './utils/ThemeProvider';
-import { 
-  materialNavigationTransition, 
-  catTransition, 
-  slideFromRight, 
-  fadeTransition 
-} from './utils/NavigationTransitions';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -126,38 +120,23 @@ const AppNavigator = () => {
             headerTitleStyle: {
               fontFamily: 'Inter-SemiBold',
             },
-            // Custom UI settings
             contentStyle: {
               backgroundColor: theme.colors.backgroundPrimary,
-            },
-            gestureEnabled: true,
-            animation: 'slide_from_right',
+            }
           }}
         >
           <Stack.Screen 
             name="Home" 
             component={HomeScreen}
             options={{ 
-              title: 'Task Cat',
-              headerShown: true,
-              headerTransparent: false,
-              // Add subtle animation
-              contentStyle: {
-                backgroundColor: theme.colors.backgroundPrimary,
-              },
-              animation: 'fade'
+              title: 'Task Cat'
             }}
           />
           <Stack.Screen 
             name="Routine" 
             component={RoutineScreen}
             options={{ 
-              title: 'My Routines',
-              // Subtle styling for better contrast
-              contentStyle: {
-                backgroundColor: theme.colors.backgroundPrimary,
-              },
-              animation: 'slide_from_right'
+              title: 'My Routines'
             }}
           />
         </Stack.Navigator>
