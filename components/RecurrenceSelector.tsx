@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
-  TouchableOpacity, 
-  Modal,
   ScrollView,
-  Switch,
-  TextInput,
   Platform,
   TextStyle
 } from 'react-native';
+import {
+  Text,
+  Button,
+  Portal,
+  Modal,
+  Surface,
+  TextInput,
+  Chip,
+  IconButton,
+  Divider,
+  TouchableRipple,
+  Title,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { 
   RecurrencePattern, 
   RecurrenceSettings, 
@@ -159,55 +168,72 @@ export default function RecurrenceSelector({
     setModalVisible(false);
   };
 
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
   return (
     <>
       <View style={styles.container}>
-        {showLabel && <Text style={styles.label}>Recurrence</Text>}
-        <TouchableOpacity
+        {showLabel && <Text variant="titleMedium" style={styles.label}>Recurrence</Text>}
+        <TouchableRipple
           style={styles.selectorButton}
           onPress={() => setModalVisible(true)}
+          rippleColor={`${theme.colors.primary}20`}
+          borderless
         >
-          <Text style={styles.selectorText}>
-            {getRecurrenceText(recurrence)}
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.selectorInner}>
+            <Text variant="bodyLarge" style={styles.selectorText}>
+              {getRecurrenceText(recurrence)}
+            </Text>
+            <IconButton
+              icon="chevron-down"
+              size={20}
+              iconColor={theme.colors.primary}
+            />
+          </View>
+        </TouchableRipple>
       </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={styles.modalContainer}
+        >
+          <Surface style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Set Recurrence</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.closeButton}>Cancel</Text>
-              </TouchableOpacity>
+              <Title style={styles.modalTitle}>Set Recurrence</Title>
+              <IconButton 
+                icon="close"
+                size={24}
+                onPress={() => setModalVisible(false)}
+              />
             </View>
+            <Divider />
 
             <ScrollView style={styles.modalBody}>
               {/* Pattern Selection */}
-              <Text style={styles.sectionTitle}>Recurrence Pattern</Text>
+              <Text variant="titleMedium" style={styles.sectionTitle}>Recurrence Pattern</Text>
               <View style={styles.patternsContainer}>
                 {RECURRENCE_PATTERNS.map((pattern) => (
-                  <TouchableOpacity
+                  <Chip
                     key={pattern}
+                    selected={tempRecurrence.pattern === pattern}
+                    mode={tempRecurrence.pattern === pattern ? "flat" : "outlined"}
                     style={[
-                      styles.patternButton,
-                      tempRecurrence.pattern === pattern && styles.patternButtonSelected
+                      styles.patternChip,
+                      tempRecurrence.pattern === pattern && styles.patternChipSelected
+                    ]}
+                    textStyle={[
+                      styles.patternChipText,
+                      tempRecurrence.pattern === pattern && styles.patternChipTextSelected
                     ]}
                     onPress={() => handlePatternChange(pattern)}
+                    showSelectedCheck={false}
+                    elevation={tempRecurrence.pattern === pattern ? 2 : 0}
                   >
-                    <Text style={[
-                      styles.patternButtonText,
-                      tempRecurrence.pattern === pattern && styles.patternButtonTextSelected
-                    ]}>
-                      {pattern}
-                    </Text>
-                  </TouchableOpacity>
+                    {pattern}
+                  </Chip>
                 ))}
               </View>
 
@@ -241,21 +267,19 @@ export default function RecurrenceSelector({
                   <Text style={styles.sectionTitle}>Repeat on</Text>
                   <View style={styles.weekDaysContainer}>
                     {WEEK_DAYS.map((day) => (
-                      <TouchableOpacity
+                      <Chip
                         key={day}
+                        selected={tempRecurrence.weekDays?.includes(day) || false}
+                        mode={tempRecurrence.weekDays?.includes(day) ? "flat" : "outlined"}
                         style={[
-                          styles.weekdayButton,
-                          tempRecurrence.weekDays?.includes(day) && styles.weekdayButtonSelected
+                          styles.weekdayChip,
+                          tempRecurrence.weekDays?.includes(day) && styles.weekdayChipSelected
                         ]}
                         onPress={() => handleWeekDayToggle(day)}
+                        showSelectedCheck={false}
                       >
-                        <Text style={[
-                          styles.weekdayButtonText,
-                          tempRecurrence.weekDays?.includes(day) && styles.weekdayButtonTextSelected
-                        ]}>
-                          {day.substring(0, 3)}
-                        </Text>
-                      </TouchableOpacity>
+                        {day.substring(0, 3)}
+                      </Chip>
                     ))}
                   </View>
                 </View>
@@ -290,23 +314,27 @@ export default function RecurrenceSelector({
             </ScrollView>
 
             <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={styles.clearButton}
+              <Button
+                mode="outlined"
                 onPress={handleClear}
+                style={styles.clearButton}
+                labelStyle={styles.clearButtonText}
               >
-                <Text style={styles.clearButtonText}>Clear</Text>
-              </TouchableOpacity>
+                Clear
+              </Button>
               
-              <TouchableOpacity
-                style={styles.confirmButton}
+              <Button
+                mode="contained"
                 onPress={handleConfirm}
+                style={styles.confirmButton}
+                labelStyle={styles.confirmButtonText}
               >
-                <Text style={styles.confirmButtonText}>Confirm</Text>
-              </TouchableOpacity>
+                Confirm
+              </Button>
             </View>
-          </View>
-        </View>
-      </Modal>
+          </Surface>
+        </Modal>
+      </Portal>
     </>
   );
 }
@@ -319,60 +347,47 @@ const useStyles = createStyles((theme) => {
       marginVertical: theme.spacing.md,
     },
     label: {
-      fontSize: scaleFont(16),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      color: theme.colors.textPrimary,
       marginBottom: theme.spacing.sm,
-      letterSpacing: 0.1,
+      color: theme.colors.textPrimary,
     } as TextStyle,
     selectorButton: {
       borderWidth: 1.5,
       borderColor: theme.colors.primary,
       borderRadius: 12,
-      padding: theme.spacing.md,
       backgroundColor: theme.colors.backgroundCard,
       ...theme.shadows.small,
     },
+    selectorInner: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: theme.spacing.md,
+    },
     selectorText: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
+      flex: 1,
       color: theme.colors.textPrimary,
       letterSpacing: 0.15,
     } as TextStyle,
     modalContainer: {
       flex: 1,
       justifyContent: 'flex-end',
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      margin: 0,
     },
     modalContent: {
       backgroundColor: theme.colors.backgroundCard,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       maxHeight: '85%',
-      ...theme.shadows.large,
+      elevation: 5,
     },
     modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: theme.spacing.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.backgroundSecondary,
     },
     modalTitle: {
-      fontSize: scaleFont(18),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
       color: theme.colors.textPrimary,
-      letterSpacing: 0.2,
-    } as TextStyle,
-    closeButton: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
-      color: theme.colors.primary,
     } as TextStyle,
     modalBody: {
       padding: theme.spacing.lg,
@@ -382,32 +397,19 @@ const useStyles = createStyles((theme) => {
       flexDirection: 'row',
       flexWrap: 'wrap',
       marginVertical: theme.spacing.md,
+      gap: theme.spacing.sm,
     },
-    patternButton: {
-      borderWidth: 1.5,
-      borderColor: theme.colors.gray,
-      borderRadius: 20,
-      paddingVertical: theme.spacing.sm,
-      paddingHorizontal: theme.spacing.md,
-      margin: 5,
-      backgroundColor: theme.colors.backgroundCard,
-      ...theme.shadows.small,
+    patternChip: {
+      margin: theme.spacing.xs,
     },
-    patternButtonSelected: {
+    patternChipSelected: {
       backgroundColor: theme.colors.primaryLight,
-      borderColor: theme.colors.primary,
     },
-    patternButtonText: {
-      fontSize: scaleFont(14),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
+    patternChipText: {
       color: theme.colors.textSecondary,
-      letterSpacing: 0.1,
     } as TextStyle,
-    patternButtonTextSelected: {
+    patternChipTextSelected: {
       color: theme.colors.primary,
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
     } as TextStyle,
     sectionTitle: {
       fontSize: scaleFont(16),

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { 
   StyleSheet, 
-  TextInput, 
   View, 
-  TouchableOpacity, 
-  Text, 
   KeyboardAvoidingView, 
   Platform,
   ScrollView,
@@ -12,6 +9,16 @@ import {
   TextStyle,
   ViewStyle
 } from 'react-native';
+import { 
+  TextInput, 
+  Text, 
+  Button, 
+  IconButton as PaperIconButton,
+  Card,
+  Divider,
+  Surface,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { 
   TaskCategory, 
   TaskPriority, 
@@ -67,73 +74,76 @@ const TaskInput: React.FC<TaskInputProps> = ({ onAddTask }) => {
     }
   };
 
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.categoryContainer}>
-        <CategorySelector 
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-        <View style={styles.spacing} />
-        <PrioritySelector
-          selectedPriority={selectedPriority}
-          onSelectPriority={setSelectedPriority}
-        />
-      </View>
-      
-      {showAdvanced && (
-        <ScrollView style={styles.advancedContainer}>
-          <RecurrenceSelector 
-            recurrence={recurrence}
-            onRecurrenceChange={setRecurrence}
+    <Card style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <Card.Content style={styles.categoryContainer}>
+          <CategorySelector 
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
           />
-          <ReminderSelector
-            reminderSettings={reminder}
-            onReminderChange={setReminder}
+          <View style={styles.spacing} />
+          <PrioritySelector
+            selectedPriority={selectedPriority}
+            onSelectPriority={setSelectedPriority}
           />
-        </ScrollView>
-      )}
-      
-      <View style={styles.inputContainer}>
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            placeholder="Add a new task..."
-            value={taskTitle}
-            onChangeText={setTaskTitle}
-            onSubmitEditing={handleAddTask}
-            returnKeyType="done"
-          />
-          <IconButton
-            name="add"
-            variant={taskTitle.trim() ? 'primary' : 'secondary'}
-            onPress={handleAddTask}
-            disabled={!taskTitle.trim()}
-            size="medium"
-          />
-        </View>
+        </Card.Content>
         
-        <Pressable 
-          style={styles.advancedToggle}
-          onPress={() => setShowAdvanced(!showAdvanced)}
-        >
-          <View style={styles.advancedToggleContent}>
-            <Ionicons 
-              name={showAdvanced ? "chevron-up" : "chevron-down"} 
-              size={16} 
-              color={theme.colors.primary} 
-              style={styles.advancedToggleIcon}
+        <Divider />
+        
+        {showAdvanced && (
+          <Surface style={styles.advancedSurface}>
+            <ScrollView style={styles.advancedContainer}>
+              <RecurrenceSelector 
+                recurrence={recurrence}
+                onRecurrenceChange={setRecurrence}
+              />
+              <ReminderSelector
+                reminderSettings={reminder}
+                onReminderChange={setReminder}
+              />
+            </ScrollView>
+          </Surface>
+        )}
+        
+        <Card.Content style={styles.inputContainer}>
+          <View style={styles.inputRow}>
+            <TextInput
+              mode="outlined"
+              style={styles.input}
+              placeholder="Add a new task..."
+              value={taskTitle}
+              onChangeText={setTaskTitle}
+              onSubmitEditing={handleAddTask}
+              returnKeyType="done"
+              right={
+                <TextInput.Icon 
+                  icon="plus" 
+                  disabled={!taskTitle.trim()}
+                  onPress={handleAddTask}
+                  color={taskTitle.trim() ? theme.colors.primary : theme.colors.gray}
+                />
+              }
             />
-            <Text style={styles.advancedToggleText}>
-              {showAdvanced ? 'Hide advanced options' : 'Show advanced options'}
-            </Text>
           </View>
-        </Pressable>
-      </View>
-    </KeyboardAvoidingView>
+          
+          <Button
+            mode="text"
+            onPress={() => setShowAdvanced(!showAdvanced)}
+            icon={showAdvanced ? "chevron-up" : "chevron-down"}
+            style={styles.advancedToggle}
+            labelStyle={styles.advancedToggleText}
+          >
+            {showAdvanced ? 'Hide advanced options' : 'Show advanced options'}
+          </Button>
+        </Card.Content>
+      </KeyboardAvoidingView>
+    </Card>
   );
 };
 

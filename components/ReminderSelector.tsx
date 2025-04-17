@@ -1,15 +1,26 @@
 import React, { useState } from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
-  TouchableOpacity, 
-  Modal,
   ScrollView,
-  Switch,
   Platform,
   TextStyle
 } from 'react-native';
+import {
+  Text,
+  Button,
+  Portal,
+  Modal,
+  Surface,
+  Switch,
+  RadioButton,
+  Divider,
+  TouchableRipple,
+  Card,
+  Title,
+  IconButton,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { ReminderSettings } from '../models/Task';
 import { useTheme, createStyles } from '../utils/Theme';
 import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
@@ -143,103 +154,154 @@ export default function ReminderSelector({
     return date.getTime();
   };
 
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
   return (
     <>
       <View style={styles.container}>
-        {showLabel && <Text style={styles.label}>Reminder</Text>}
-        <TouchableOpacity
+        {showLabel && <Text variant="titleMedium" style={styles.label}>Reminder</Text>}
+        <TouchableRipple
           style={styles.selectorButton}
           onPress={() => setModalVisible(true)}
+          rippleColor={`${theme.colors.primary}20`}
+          borderless
         >
-          <Text style={styles.selectorText}>
-            {getReminderText(reminderSettings)}
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.selectorInner}>
+            <Text variant="bodyLarge" style={styles.selectorText}>
+              {getReminderText(reminderSettings)}
+            </Text>
+            <IconButton
+              icon="clock-outline"
+              size={20}
+              iconColor={theme.colors.primary}
+            />
+          </View>
+        </TouchableRipple>
       </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={styles.modalContainer}
+        >
+          <Surface style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Set Reminder</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.closeButton}>Cancel</Text>
-              </TouchableOpacity>
+              <Title style={styles.modalTitle}>Set Reminder</Title>
+              <IconButton 
+                icon="close"
+                size={24}
+                onPress={() => setModalVisible(false)}
+              />
             </View>
+            <Divider />
 
             <ScrollView style={styles.modalBody}>
               {/* Enable/Disable Reminder */}
-              <View style={styles.switchContainer}>
-                <Text style={styles.switchLabel}>Enable Reminder</Text>
-                <Switch
-                  value={tempSettings.enabled}
-                  onValueChange={toggleEnabled}
-                  trackColor={{ false: theme.colors.lightGray, true: theme.colors.primaryLight }}
-                  thumbColor={tempSettings.enabled ? theme.colors.primary : theme.colors.gray}
-                />
-              </View>
+              <Card style={styles.switchContainer} mode="outlined">
+                <Card.Content style={styles.switchContent}>
+                  <Text variant="titleMedium" style={styles.switchLabel}>Enable Reminder</Text>
+                  <Switch
+                    value={tempSettings.enabled}
+                    onValueChange={toggleEnabled}
+                    color={theme.colors.primary}
+                  />
+                </Card.Content>
+              </Card>
 
               {tempSettings.enabled && (
                 <>
                   {/* Time Selection */}
                   <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Reminder Time</Text>
-                    <View style={styles.optionsContainer}>
-                      {timeOptions.map((option, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          style={[
-                            styles.optionButton,
-                            tempSettings.time === ((option.hours * 60 * 60 * 1000) + (option.minutes * 60 * 1000)) && 
-                              styles.optionButtonSelected
-                          ]}
-                          onPress={() => selectTime(option.hours, option.minutes)}
-                        >
-                          <Text style={[
-                            styles.optionButtonText,
-                            tempSettings.time === ((option.hours * 60 * 60 * 1000) + (option.minutes * 60 * 1000)) && 
-                              styles.optionButtonTextSelected
-                          ]}>
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
+                    <Text variant="titleMedium" style={styles.sectionTitle}>Reminder Time</Text>
+                    <RadioButton.Group 
+                      onValueChange={(value) => {
+                        const option = timeOptions.find(opt => opt.label === value);
+                        if (option) {
+                          selectTime(option.hours, option.minutes);
+                        }
+                      }}
+                      value={
+                        timeOptions.find(opt => 
+                          tempSettings.time === ((opt.hours * 60 * 60 * 1000) + (opt.minutes * 60 * 1000))
+                        )?.label || ''
+                      }
+                    >
+                      {timeOptions.map((option, index) => {
+                        const timeValue = (option.hours * 60 * 60 * 1000) + (option.minutes * 60 * 1000);
+                        const isSelected = tempSettings.time === timeValue;
+                        
+                        return (
+                          <TouchableRipple
+                            key={index}
+                            onPress={() => selectTime(option.hours, option.minutes)}
+                            style={styles.radioOption}
+                          >
+                            <View style={styles.radioRow}>
+                              <RadioButton 
+                                value={option.label} 
+                                color={theme.colors.primary}
+                                uncheckedColor={theme.colors.gray}
+                              />
+                              <Text variant="bodyMedium" style={[
+                                styles.radioLabel,
+                                isSelected && styles.radioLabelSelected
+                              ]}>
+                                {option.label}
+                              </Text>
+                            </View>
+                          </TouchableRipple>
+                        );
+                      })}
+                    </RadioButton.Group>
                   </View>
 
                   {/* Date Selection */}
                   <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Reminder Date</Text>
-                    <View style={styles.optionsContainer}>
+                    <Text variant="titleMedium" style={styles.sectionTitle}>Reminder Date</Text>
+                    <RadioButton.Group 
+                      onValueChange={(value) => {
+                        const option = dateOptions.find(opt => opt.label === value);
+                        if (option) {
+                          selectDate(createDateOption(option.days));
+                        }
+                      }}
+                      value={dateOptions.find(opt => {
+                        const dateValue = createDateOption(opt.days);
+                        return tempSettings.reminderDate === dateValue;
+                      })?.label || ''}
+                    >
                       {dateOptions.map((option, index) => {
                         const dateValue = createDateOption(option.days);
+                        const isSelected = tempSettings.reminderDate === dateValue;
+                        
                         return (
-                          <TouchableOpacity
+                          <TouchableRipple
                             key={index}
-                            style={[
-                              styles.optionButton,
-                              tempSettings.reminderDate === dateValue && styles.optionButtonSelected
-                            ]}
                             onPress={() => selectDate(dateValue)}
+                            style={styles.radioOption}
                           >
-                            <Text style={[
-                              styles.optionButtonText,
-                              tempSettings.reminderDate === dateValue && styles.optionButtonTextSelected
-                            ]}>
-                              {option.label} ({getDateString(dateValue)})
-                            </Text>
-                          </TouchableOpacity>
+                            <View style={styles.radioRow}>
+                              <RadioButton 
+                                value={option.label} 
+                                color={theme.colors.primary}
+                                uncheckedColor={theme.colors.gray}
+                              />
+                              <Text variant="bodyMedium" style={[
+                                styles.radioLabel,
+                                isSelected && styles.radioLabelSelected
+                              ]}>
+                                {option.label} ({getDateString(dateValue)})
+                              </Text>
+                            </View>
+                          </TouchableRipple>
                         );
                       })}
-                    </View>
+                    </RadioButton.Group>
                   </View>
 
-                  <Text style={styles.helperText}>
+                  <Text variant="bodySmall" style={styles.helperText}>
                     For recurring tasks, reminders will be scheduled based on each instance's date and the selected time.
                   </Text>
                 </>
@@ -247,23 +309,27 @@ export default function ReminderSelector({
             </ScrollView>
 
             <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={styles.clearButton}
+              <Button
+                mode="outlined"
                 onPress={handleClear}
+                style={styles.clearButton}
+                labelStyle={styles.clearButtonText}
               >
-                <Text style={styles.clearButtonText}>Clear</Text>
-              </TouchableOpacity>
+                Clear
+              </Button>
               
-              <TouchableOpacity
-                style={styles.confirmButton}
+              <Button
+                mode="contained"
                 onPress={handleConfirm}
+                style={styles.confirmButton}
+                labelStyle={styles.confirmButtonText}
               >
-                <Text style={styles.confirmButtonText}>Confirm</Text>
-              </TouchableOpacity>
+                Confirm
+              </Button>
             </View>
-          </View>
-        </View>
-      </Modal>
+          </Surface>
+        </Modal>
+      </Portal>
     </>
   );
 }
@@ -276,80 +342,82 @@ const useStyles = createStyles((theme) => {
       marginVertical: theme.spacing.md,
     },
     label: {
-      fontSize: scaleFont(16),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      color: theme.colors.textPrimary,
       marginBottom: theme.spacing.sm,
-      letterSpacing: 0.1,
+      color: theme.colors.textPrimary,
     } as TextStyle,
     selectorButton: {
       borderWidth: 1.5,
       borderColor: theme.colors.primary,
       borderRadius: 12,
-      padding: theme.spacing.md,
       backgroundColor: theme.colors.backgroundCard,
       ...theme.shadows.small,
     },
+    selectorInner: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: theme.spacing.md,
+    },
     selectorText: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
+      flex: 1,
       color: theme.colors.textPrimary,
       letterSpacing: 0.15,
     } as TextStyle,
     modalContainer: {
       flex: 1,
       justifyContent: 'flex-end',
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      margin: 0,
     },
     modalContent: {
       backgroundColor: theme.colors.backgroundCard,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       maxHeight: '85%',
-      ...theme.shadows.large,
+      elevation: 5,
     },
     modalHeader: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: theme.spacing.lg,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.backgroundSecondary,
     },
     modalTitle: {
-      fontSize: scaleFont(18),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
       color: theme.colors.textPrimary,
-      letterSpacing: 0.2,
-    } as TextStyle,
-    closeButton: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
-      color: theme.colors.primary,
     } as TextStyle,
     modalBody: {
       padding: theme.spacing.lg,
       maxHeight: '75%',
     },
     switchContainer: {
+      marginVertical: theme.spacing.md,
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+    switchContent: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginVertical: theme.spacing.md,
-      backgroundColor: theme.colors.backgroundSecondary,
-      padding: theme.spacing.md,
-      borderRadius: 12,
     },
     switchLabel: {
-      fontSize: scaleFont(16),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
       color: theme.colors.textPrimary,
-      letterSpacing: 0.15,
+    } as TextStyle,
+    radioOption: {
+      marginVertical: 4,
+      borderRadius: 8,
+    },
+    radioRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: theme.spacing.sm,
+    },
+    radioLabel: {
+      flex: 1,
+      marginLeft: theme.spacing.sm,
+      color: theme.colors.textSecondary,
+    } as TextStyle,
+    radioLabelSelected: {
+      color: theme.colors.primary,
+      fontWeight: '600',
     } as TextStyle,
     section: {
       marginVertical: theme.spacing.lg,

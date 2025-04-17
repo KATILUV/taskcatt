@@ -1,11 +1,16 @@
 import React from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
-  TouchableOpacity,
   TextStyle
 } from 'react-native';
+import {
+  Text,
+  Chip,
+  SegmentedButtons,
+  useTheme as usePaperTheme,
+  TouchableRipple
+} from 'react-native-paper';
 import { TaskPriority } from '../models/Task';
 import { useTheme, createStyles } from '../utils/Theme';
 import { scale, scaleFont, isTablet } from '../utils/ResponsiveUtils';
@@ -38,47 +43,50 @@ export default function PrioritySelector({
     }
   };
 
-  // Render a badge for a priority
-  const renderPriorityBadge = (priority: TaskPriority, isSelected: boolean) => {
-    const backgroundColor = isSelected 
-      ? getPriorityColor(priority) 
-      : 'transparent';
-    
-    const borderColor = getPriorityColor(priority);
-    
-    const textColor = isSelected
-      ? 'white'
-      : getPriorityColor(priority);
-    
-    return (
-      <TouchableOpacity
-        key={priority}
-        style={[
-          styles.badge,
-          { backgroundColor, borderColor }
-        ]}
-        onPress={() => handleSelectPriority(priority)}
-      >
-        <Text style={[styles.badgeText, { color: textColor }]}>
-          {priority}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
+  // Get Paper theme
+  const paperTheme = usePaperTheme();
 
   // Handle priority selection
   const handleSelectPriority = (priority: TaskPriority) => {
     onSelectPriority(priority);
   };
 
+  // Create buttons for segmented control
+  const buttons = [
+    {
+      value: 'High',
+      label: 'High',
+      checkedColor: theme.colors.priorityHigh,
+      uncheckedColor: theme.colors.priorityHigh + '80',
+      style: { borderColor: theme.colors.priorityHigh }
+    },
+    {
+      value: 'Medium',
+      label: 'Medium',
+      checkedColor: theme.colors.priorityMedium,
+      uncheckedColor: theme.colors.priorityMedium + '80',
+      style: { borderColor: theme.colors.priorityMedium }
+    },
+    {
+      value: 'Low',
+      label: 'Low',
+      checkedColor: theme.colors.priorityLow,
+      uncheckedColor: theme.colors.priorityLow + '80',
+      style: { borderColor: theme.colors.priorityLow }
+    }
+  ];
+
   return (
     <View style={styles.container}>
-      {showLabel && <Text style={styles.label}>Priority:</Text>}
-      <View style={styles.badgeContainer}>
-        {(['High', 'Medium', 'Low'] as TaskPriority[]).map(priority => 
-          renderPriorityBadge(priority, selectedPriority === priority)
-        )}
-      </View>
+      {showLabel && <Text variant="bodyLarge" style={styles.label}>Priority:</Text>}
+      
+      <SegmentedButtons
+        value={selectedPriority}
+        onValueChange={value => handleSelectPriority(value as TaskPriority)}
+        buttons={buttons}
+        style={styles.segmentedButtons}
+        density="medium"
+      />
     </View>
   );
 }
@@ -91,32 +99,11 @@ const useStyles = createStyles((theme) => {
       marginVertical: theme.spacing.md,
     },
     label: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
       marginBottom: theme.spacing.sm,
       color: theme.colors.textPrimary,
-      letterSpacing: 0.1,
     } as TextStyle,
-    badgeContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      alignItems: 'center',
+    segmentedButtons: {
+      marginTop: theme.spacing.sm,
     },
-    badge: {
-      paddingHorizontal: scale(14),
-      paddingVertical: scale(7),
-      borderRadius: scale(18),
-      marginRight: theme.spacing.sm,
-      marginBottom: theme.spacing.sm,
-      borderWidth: 2,
-      ...theme.shadows.small,
-    },
-    badgeText: {
-      fontSize: scaleFont(14),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      letterSpacing: 0.2,
-    } as TextStyle,
   });
 });

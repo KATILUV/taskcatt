@@ -1,14 +1,23 @@
 import React from 'react';
 import { 
   View, 
-  Text, 
   StyleSheet, 
-  TouchableOpacity,
-  Modal,
   FlatList,
   SafeAreaView,
   TextStyle
 } from 'react-native';
+import {
+  Text,
+  Chip,
+  Portal,
+  Modal,
+  Button,
+  Surface,
+  Title,
+  TouchableRipple,
+  Divider,
+  useTheme as usePaperTheme
+} from 'react-native-paper';
 import { TaskCategory, TASK_CATEGORIES } from '../models/Task';
 import { createStyles, useTheme } from '../utils/Theme';
 import { scaleFont, scale, isTablet } from '../utils/ResponsiveUtils';
@@ -42,21 +51,32 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
     }
   };
 
+  // Access Paper theme
+  const paperTheme = usePaperTheme();
+  
   const renderCategoryBadge = (category: TaskCategory, isSelected: boolean) => {
-    const backgroundColor = getCategoryColor(category);
+    const categoryColor = getCategoryColor(category);
     
     return (
-      <View style={[
-        styles.categoryBadge,
-        { backgroundColor: backgroundColor + (isSelected ? 'FF' : '40') }
-      ]}>
-        <Text style={[
+      <Chip
+        mode={isSelected ? "flat" : "outlined"}
+        selected={isSelected}
+        selectedColor={theme.colors.white}
+        style={[
+          styles.categoryChip,
+          { 
+            backgroundColor: isSelected ? categoryColor : `${categoryColor}30`,
+            borderColor: categoryColor
+          }
+        ]}
+        textStyle={[
           styles.categoryText,
           isSelected && styles.selectedCategoryText
-        ]}>
-          {category}
-        </Text>
-      </View>
+        ]}
+        elevation={isSelected ? 2 : 0}
+      >
+        {category}
+      </Chip>
     );
   };
 
@@ -71,45 +91,56 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 
   return (
     <View style={styles.container}>
-      {showLabel && <Text style={styles.label}>Category:</Text>}
+      {showLabel && (
+        <Text variant="bodyLarge" style={styles.label}>
+          Category:
+        </Text>
+      )}
       
-      <TouchableOpacity onPress={openCategoryModal} style={styles.selector}>
-        {renderCategoryBadge(selectedCategory, true)}
-      </TouchableOpacity>
+      <View style={styles.selector}>
+        <TouchableRipple onPress={openCategoryModal}>
+          {renderCategoryBadge(selectedCategory, true)}
+        </TouchableRipple>
+      </View>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select a Category</Text>
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          onDismiss={() => setModalVisible(false)}
+          contentContainerStyle={styles.modalContent}
+          style={styles.modalContainer}
+        >
+          <Surface style={styles.modalSurface}>
+            <Title style={styles.modalTitle}>Select a Category</Title>
+            <Divider style={styles.divider} />
             
             <FlatList
               data={TASK_CATEGORIES}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
-                <TouchableOpacity
+                <TouchableRipple
                   style={styles.categoryItem}
                   onPress={() => handleSelectCategory(item)}
                 >
-                  {renderCategoryBadge(item, item === selectedCategory)}
-                </TouchableOpacity>
+                  <View>
+                    {renderCategoryBadge(item, item === selectedCategory)}
+                  </View>
+                </TouchableRipple>
               )}
               contentContainerStyle={styles.categoriesList}
             />
             
-            <TouchableOpacity
-              style={styles.closeButton}
+            <Button
+              mode="outlined"
               onPress={() => setModalVisible(false)}
+              style={styles.closeButton}
+              labelStyle={styles.closeButtonText}
             >
-              <Text style={styles.closeButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
-      </Modal>
+              Cancel
+            </Button>
+          </Surface>
+        </Modal>
+      </Portal>
     </View>
   );
 };
@@ -124,29 +155,20 @@ const useStyles = createStyles((theme) => {
       marginVertical: scale(4),
     },
     label: {
-      fontSize: scaleFont(16),
-      fontWeight: '500',
-      fontFamily: theme.fonts.medium,
-      color: theme.colors.textPrimary,
       marginRight: theme.spacing.md,
-      letterSpacing: 0.1,
+      color: theme.colors.textPrimary,
     } as TextStyle,
     selector: {
       flexDirection: 'row',
       alignItems: 'center',
     },
-    categoryBadge: {
-      paddingHorizontal: scale(14),
-      paddingVertical: scale(7),
-      borderRadius: scale(18),
+    categoryChip: {
       marginRight: theme.spacing.sm,
-      ...theme.shadows.small,
+      height: scale(isTab ? 40 : 36),
     },
     categoryText: {
       fontSize: scaleFont(14),
-      fontWeight: '500',
       fontFamily: theme.fonts.medium,
-      color: theme.colors.white,
       letterSpacing: 0.2,
     } as TextStyle,
     selectedCategoryText: {
@@ -154,47 +176,44 @@ const useStyles = createStyles((theme) => {
       fontFamily: theme.fonts.semiBold,
     } as TextStyle,
     modalContainer: {
-      flex: 1,
       justifyContent: 'flex-end',
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      marginTop: 'auto',
     },
     modalContent: {
+      margin: 0,
+      justifyContent: 'flex-end',
+    },
+    modalSurface: {
       backgroundColor: theme.colors.backgroundCard,
       borderTopLeftRadius: scale(24),
       borderTopRightRadius: scale(24),
       padding: theme.spacing.xl,
-      ...theme.shadows.large,
+      elevation: 8,
+    },
+    divider: {
+      height: 1,
+      marginVertical: theme.spacing.md,
     },
     modalTitle: {
-      fontSize: scaleFont(20),
-      fontWeight: '600',
-      fontFamily: theme.fonts.semiBold,
-      marginBottom: theme.spacing.lg,
       textAlign: 'center',
-      color: theme.colors.textPrimary,
-      letterSpacing: 0.2,
+      marginBottom: theme.spacing.md,
     } as TextStyle,
     categoriesList: {
       paddingBottom: theme.spacing.lg,
     },
     categoryItem: {
-      paddingVertical: theme.spacing.md,
-      paddingHorizontal: theme.spacing.sm,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: 8,
+      overflow: 'hidden',
     },
     closeButton: {
-      backgroundColor: theme.colors.backgroundSecondary,
-      padding: theme.spacing.md,
-      borderRadius: scale(16),
-      alignItems: 'center',
-      marginTop: theme.spacing.md,
-      ...theme.shadows.small,
+      marginTop: theme.spacing.lg,
+      borderRadius: scale(8),
+      borderColor: theme.colors.primary,
     },
     closeButtonText: {
-      fontSize: scaleFont(16),
-      fontWeight: '600',
+      color: theme.colors.primary,
       fontFamily: theme.fonts.semiBold,
-      color: theme.colors.textPrimary,
-      letterSpacing: 0.2,
     } as TextStyle,
   });
 });
