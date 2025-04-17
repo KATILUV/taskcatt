@@ -28,7 +28,7 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "node start.js"
-waitForPort = 8081
+waitForPort = 5000
 
 [deployment]
 run = ["sh", "-c", "npm install && npx expo start --web --port 5000"]
