@@ -91,7 +91,9 @@ export default function RoutineScreen({ navigation }: Props) {
       });
       
       // Run all animations in parallel
-      Animated.parallel(animations).start();
+      if (animations.length > 0) {
+        Animated.parallel(animations).start();
+      }
     }
   }, [loading, tasks, fadeAnim, animatedItemValues]);
 
@@ -354,109 +356,110 @@ export default function RoutineScreen({ navigation }: Props) {
           />
         </View>
         
-      <View style={styles.filtersSection}>
-        <Text style={styles.filterSectionTitle}>Categories</Text>
-        <View style={styles.filterContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                selectedCategoryFilter === 'All' && styles.filterButtonActive
-              ]}
-              onPress={() => setSelectedCategoryFilter('All')}
-            >
-              <Text style={[
-                styles.filterButtonText,
-                selectedCategoryFilter === 'All' && styles.filterButtonTextActive
-              ]}>All Categories</Text>
-            </TouchableOpacity>
-            
-            {TASK_CATEGORIES.map(category => (
+        <View style={styles.filtersSection}>
+          <Text style={styles.filterSectionTitle}>Categories</Text>
+          <View style={styles.filterContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
               <TouchableOpacity
-                key={category}
                 style={[
                   styles.filterButton,
-                  selectedCategoryFilter === category && styles.filterButtonActive,
-                  { borderColor: getCategoryColor(category) }
+                  selectedCategoryFilter === 'All' && styles.filterButtonActive
                 ]}
-                onPress={() => setSelectedCategoryFilter(category)}
+                onPress={() => setSelectedCategoryFilter('All')}
               >
-                <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(category) }]} />
                 <Text style={[
                   styles.filterButtonText,
-                  selectedCategoryFilter === category && styles.filterButtonTextActive
-                ]}>{category}</Text>
+                  selectedCategoryFilter === 'All' && styles.filterButtonTextActive
+                ]}>All Categories</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+              
+              {TASK_CATEGORIES.map(category => (
+                <TouchableOpacity
+                  key={category}
+                  style={[
+                    styles.filterButton,
+                    selectedCategoryFilter === category && styles.filterButtonActive,
+                    { borderColor: getCategoryColor(category) }
+                  ]}
+                  onPress={() => setSelectedCategoryFilter(category)}
+                >
+                  <View style={[styles.categoryDot, { backgroundColor: getCategoryColor(category) }]} />
+                  <Text style={[
+                    styles.filterButtonText,
+                    selectedCategoryFilter === category && styles.filterButtonTextActive
+                  ]}>{category}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
 
-        <Text style={styles.filterSectionTitle}>Priority</Text>
-        <View style={styles.filterContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                selectedPriorityFilter === 'All' && styles.filterButtonActive
-              ]}
-              onPress={() => setSelectedPriorityFilter('All')}
-            >
-              <Text style={[
-                styles.filterButtonText,
-                selectedPriorityFilter === 'All' && styles.filterButtonTextActive
-              ]}>All Priorities</Text>
-            </TouchableOpacity>
-            
-            {TASK_PRIORITIES.map(priority => (
+          <Text style={styles.filterSectionTitle}>Priority</Text>
+          <View style={styles.filterContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
               <TouchableOpacity
-                key={priority}
                 style={[
                   styles.filterButton,
-                  selectedPriorityFilter === priority && styles.filterButtonActive,
-                  { borderColor: getPriorityColor(priority) }
+                  selectedPriorityFilter === 'All' && styles.filterButtonActive
                 ]}
-                onPress={() => setSelectedPriorityFilter(priority)}
+                onPress={() => setSelectedPriorityFilter('All')}
               >
-                <View style={[styles.priorityDot, { backgroundColor: getPriorityColor(priority) }]} />
                 <Text style={[
                   styles.filterButtonText,
-                  selectedPriorityFilter === priority && styles.filterButtonTextActive
-                ]}>{priority}</Text>
+                  selectedPriorityFilter === 'All' && styles.filterButtonTextActive
+                ]}>All Priorities</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+              
+              {TASK_PRIORITIES.map(priority => (
+                <TouchableOpacity
+                  key={priority}
+                  style={[
+                    styles.filterButton,
+                    selectedPriorityFilter === priority && styles.filterButtonActive,
+                    { borderColor: getPriorityColor(priority) }
+                  ]}
+                  onPress={() => setSelectedPriorityFilter(priority)}
+                >
+                  <View style={[styles.priorityDot, { backgroundColor: getPriorityColor(priority) }]} />
+                  <Text style={[
+                    styles.filterButtonText,
+                    selectedPriorityFilter === priority && styles.filterButtonTextActive
+                  ]}>{priority}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
-      </View>
-      
-      {filteredTasks.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            {tasks.length === 0 ? 'No tasks yet' : 'No tasks in this category'}
-          </Text>
-          <Text style={styles.emptySubtext}>
-            {tasks.length === 0 ? 'Add a task to get started' : 'Try selecting a different category'}
-          </Text>
-        </View>
-      ) : (
-        <DraggableFlatList
-          ref={flatListRef}
-          data={filteredTasks}
-          onDragEnd={handleDragEnd}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-          getItemLayout={getItemLayout}
-          maxToRenderPerBatch={10}
-          windowSize={10}
-          updateCellsBatchingPeriod={50}
-          initialNumToRender={15}
-          removeClippedSubviews={true}
-          extraData={taskIds}
-        />
-      )}
-      
-      <TaskInput onAddTask={handleAddTask} />
-    </SafeAreaView>
+        
+        {filteredTasks.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {tasks.length === 0 ? 'No tasks yet' : 'No tasks in this category'}
+            </Text>
+            <Text style={styles.emptySubtext}>
+              {tasks.length === 0 ? 'Add a task to get started' : 'Try selecting a different category'}
+            </Text>
+          </View>
+        ) : (
+          <DraggableFlatList
+            ref={flatListRef}
+            data={filteredTasks}
+            onDragEnd={handleDragEnd}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+            getItemLayout={getItemLayout}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            updateCellsBatchingPeriod={50}
+            initialNumToRender={15}
+            removeClippedSubviews={true}
+            extraData={taskIds}
+          />
+        )}
+        
+        <TaskInput onAddTask={handleAddTask} />
+      </SafeAreaView>
+    </Animated.View>
   );
 }
 

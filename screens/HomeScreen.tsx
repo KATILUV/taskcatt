@@ -31,6 +31,7 @@ export default function HomeScreen({ navigation }: Props) {
   // Animation values
   const taskCardScale = useRef(new Animated.Value(1)).current;
   const taskCardOpacity = useRef(new Animated.Value(1)).current;
+  const screenOpacity = useRef(new Animated.Value(0)).current;
 
   // Calculate progress percentage
   const calculateProgress = useCallback((total: number, completed: number) => {
@@ -72,13 +73,28 @@ export default function HomeScreen({ navigation }: Props) {
     // Initial load
     loadTaskStats();
     
+    // Fade in the screen when mounted
+    Animated.timing(screenOpacity, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+    
     // Load task statistics whenever the screen comes into focus
     const unsubscribe = navigation.addListener('focus', () => {
       loadTaskStats();
+      
+      // Fade in the screen when it comes back into focus
+      screenOpacity.setValue(0);
+      Animated.timing(screenOpacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
     });
 
     return unsubscribe;
-  }, [navigation, loadTaskStats]);
+  }, [navigation, loadTaskStats, screenOpacity]);
 
   // Get the status message based on progress
   const getStatusMessage = () => {
@@ -141,14 +157,25 @@ export default function HomeScreen({ navigation }: Props) {
     // Trigger press out animation to reset card
     handlePressOut();
     
-    // Short delay to let the animation complete for a smooth feeling
-    setTimeout(() => {
+    // Create fade-out animation before navigation
+    Animated.timing(taskCardOpacity, {
+      toValue: 0.5,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      // Navigate to routine screen once the animation is complete
       navigation.navigate('Routine');
-    }, 100);
+      
+      // Reset opacity back to 1 after navigation
+      setTimeout(() => {
+        taskCardOpacity.setValue(1);
+      }, 300);
+    });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <Animated.View style={{ flex: 1, opacity: screenOpacity }}>
+      <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Task Cat</Text>
         <Text style={styles.headerSubtitle}>Stay purr-fectly organized!</Text>
